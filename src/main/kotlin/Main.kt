@@ -31,6 +31,6 @@ suspend fun main() = coroutineScope {
         .collect { progress ->
             println("Progress: ${progress.processedLines}/ ${ progress.totalLines } | " + "Success: ${progress.successfulImports} | " + "Failed: ${progress.failedImports}")
         }
-    println(repo.findAllEntries(UserId(1)))
+    repo.findAllEntries(UserId(1)).forEachIndexed { index, entry -> println("Eintrag ${index+1}: $entry") }
     println("=== Demo Complete ===")
 }

@@ -9,9 +9,8 @@ enum class MoodLevel(val displayName: String, val range: IntRange, val emoji: St
 
     companion object {
         fun fromRating(rating: Int?): MoodLevel? {
-            if (rating == null) return null
-            if (rating !in 1..10) return null
-            return entries.first{rating in it.range}
+            require(rating in 1..10) { "Mood rating must be between 1 and 10" }
+            return entries.first { rating in it.range }
         }
     }
 }

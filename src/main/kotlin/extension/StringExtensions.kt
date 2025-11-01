@@ -21,12 +21,14 @@ fun String.sanitizeForCsv(): String =
 
 fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
     val parts = split(",")
-    return Entry(EntryId(parts[0].toLong()),
-        targetUserId,
-        parts[3],
-        parts[4],
-        parts[5].toIntOrNull(),
-        LocalDateTime.parse(parts[2]),
-        null,
-        emptySet())
+    return Entry(
+        id = EntryId(parts[0].toLong()),
+        userId = targetUserId,
+        title = parts[3],
+        content = parts[4],
+        moodRating = parts[5].toIntOrNull(),
+        createdAt = LocalDateTime.parse(parts[2]),
+        updatedAt = null,
+        tags = emptySet()
+    )
 }

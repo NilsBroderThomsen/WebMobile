@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @JvmInline
-value class UserId (val value: Long)
+value class UserId(val value: Long)
 
 data class User(
     val id: UserId,
