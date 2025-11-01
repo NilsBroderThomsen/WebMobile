@@ -3,6 +3,7 @@ package model
 import extension.normalizeTag
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.math.roundToInt
 
 @JvmInline
 value class EntryId (val value: Long)
@@ -43,4 +44,18 @@ data class Entry (
     fun addTag(tag: String) = copy(tags = tags + tag.normalizeTag())
 
     fun removeTag(tag: String) = copy(tags = tags - tag.normalizeTag())
+
+    fun similarity(other: Entry): Double {
+        if (tags == other.tags) return 1.0
+        if (tags.isEmpty() || other.tags.isEmpty()) return 0.0
+        val intersection = tags.intersect(other.tags).size
+        val union = tags.union(other.tags).size
+        return intersection / union.toDouble()
+    }
+}
+
+operator fun Entry.plus(other: Entry): Int {
+    val firstMood = requireNotNull(moodRating) { "Both entries must have a mood rating" }
+    val secondMood = requireNotNull(other.moodRating) { "Both entries must have a mood rating" }
+    return ((firstMood + secondMood) / 2.0).roundToInt()
 }
