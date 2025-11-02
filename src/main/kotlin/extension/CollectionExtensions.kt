@@ -1,6 +1,5 @@
-package org.example.extension
+package extension
 
-import extension.normalizeTag
 import model.Entry
 
 fun List<Entry>.entriesWithMood(): List<Entry> =
@@ -11,5 +10,7 @@ fun List<Entry>.averageMood(): Double {
     return if (ratings.isEmpty()) 0.0 else ratings.average()
 }
 
-fun List<Entry>.entriesWithTag(tag: String): List<Entry> =
-    this.filter { it.tags.contains(tag.normalizeTag()) }
+fun List<Entry>.entriesWithTag(tag: String): List<Entry> {
+    val normalized = tag.normalizeTag()
+    return filter { it.tags.contains(normalized) }
+}

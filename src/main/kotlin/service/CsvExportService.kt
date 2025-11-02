@@ -1,7 +1,7 @@
 package service
 
 import kotlinx.coroutines.runBlocking
-import org.example.extension.toCsvLine
+import extension.toCsvLine
 import model.UserId
 import repository.MoodTrackerRepository
 

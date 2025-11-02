@@ -2,7 +2,6 @@ package model
 
 import extension.isValidMoodRating
 import extension.normalizeTag
-import extension.requireValidMoodRating
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
@@ -21,13 +20,12 @@ data class Entry (
     val tags: Set<String> = emptySet()
 ) {
     init {
-        moodRating?.requireValidMoodRating()
         val normalized = tags.map { it.normalizeTag() }.filter { it.isNotBlank() }.toSet()
         require(tags == normalized) { "Tags must be normalized and non-blank" }
     }
 
     val wordCount: Int
-        get() = content.split(Regex("\\s")).count() { it.isNotBlank() }
+        get() = content.split(Regex("\\s")).count { it.isNotBlank() }
 
     val hasGoodMood: Boolean
         get() = moodRating?.let { it >= 7 } ?: false
@@ -45,12 +43,21 @@ data class Entry (
         Entry = copy(content = newContent, updatedAt = LocalDateTime.now())
 
     fun updateMood(newRating: Int): Entry {
-        return copy(moodRating = newRating.requireValidMoodRating(), updatedAt = LocalDateTime.now())
+        require(newRating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
+        return copy(moodRating = newRating, updatedAt = LocalDateTime.now())
     }
 
-    fun addTag(tag: String) = copy(tags = tags + tag.normalizeTag())
+    fun addTag(tag: String): Entry {
+        val normalized = tag.normalizeTag()
+        require(normalized.isNotBlank()) { "Tag must not be blank" }
+        return copy(tags = tags + normalized)
+    }
 
-    fun removeTag(tag: String) = copy(tags = tags - tag.normalizeTag())
+    fun removeTag(tag: String): Entry {
+        val normalized = tag.normalizeTag()
+        require(normalized.isNotBlank()) { "Tag must not be blank" }
+        return copy(tags = tags - normalized)
+    }
 
     fun similarity(other: Entry): Double {
         if (tags == other.tags) return 1.0

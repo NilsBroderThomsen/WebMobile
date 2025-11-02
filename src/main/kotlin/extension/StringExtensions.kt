@@ -17,7 +17,10 @@ fun String.normalizeTag(): String =
         .replace(Regex("\\s+"), " ")
 
 fun String.sanitizeForCsv(): String =
-    this.replace(",", "").replace("\n", " ").replace("\r", " ").trim()
+    this.replace(",", "")
+        .replace("\n", " ")
+        .replace("\r", " ")
+        .trim()
 
 fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
     val parts = split(",")

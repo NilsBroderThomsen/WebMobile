@@ -1,5 +1,7 @@
 package model
 
+import extension.isValidMoodRating
+
 enum class MoodLevel(val displayName: String, val range: IntRange, val emoji: String) {
     VERY_BAD("Sehr schlecht", 1..2, "😢"),
     BAD("Schlecht", 3..4, "😟"),
@@ -8,8 +10,8 @@ enum class MoodLevel(val displayName: String, val range: IntRange, val emoji: St
     VERY_GOOD("Sehr gut", 9..10, "😄");
 
     companion object {
-        fun fromRating(rating: Int?): MoodLevel? {
-            require(rating in 1..10) { "Mood rating must be between 1 and 10" }
+        fun fromRating(rating: Int): MoodLevel? {
+            require(rating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
             return entries.first { rating in it.range }
         }
     }

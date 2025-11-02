@@ -1,5 +1,6 @@
 package model
 
+import extension.isValidMoodRating
 import extension.normalizeTag
 import java.time.LocalDateTime
 
@@ -22,7 +23,7 @@ class EntryBuilder {
     fun withContent(content: String) = apply { this.content = content }
 
     fun withMood(rating: Int) = apply {
-        require(rating in 1..10) { "Mood rating must be between 1 and 10" }
+        require(rating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
         this.moodRating = rating
     }
 

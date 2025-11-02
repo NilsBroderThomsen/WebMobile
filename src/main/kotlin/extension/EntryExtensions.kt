@@ -1,6 +1,5 @@
-package org.example.extension
+package extension
 
-import extension.sanitizeForCsv
 import model.Entry
 fun Entry.toCsvLine(): String {
     return listOf(
