@@ -3,6 +3,7 @@ package extension
 import model.Entry
 import model.EntryId
 import model.UserId
+import model.EntryBuilder
 import java.time.LocalDateTime
 
 val String.isValidEmail: Boolean
@@ -23,15 +24,21 @@ fun String.sanitizeForCsv(): String =
         .trim()
 
 fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
-    val parts = split(",")
-    return Entry(
-        id = EntryId(parts[0].toLong()),
-        userId = targetUserId,
-        title = parts[3],
-        content = parts[4],
-        moodRating = parts[5].toIntOrNull(),
-        createdAt = LocalDateTime.parse(parts[2]),
-        updatedAt = null,
-        tags = emptySet()
-    )
+    val parts = split(",").map { it.trim() }
+    require(parts.size == 6) { "Invalid CSV format: expected 6 columns but found ${parts.size}" }
+
+    val idValue = EntryId(parts[0].toLong())
+    val createdAtValue = parts[2]
+    val title = parts[3]
+    val content = parts[4]
+    val moodRatingValue = parts[5].toIntOrNull()
+
+    return EntryBuilder()
+        .withId(idValue)
+        .forUser(targetUserId)
+        .createdAt(LocalDateTime.parse(createdAtValue))
+        .withTitle(title)
+        .withContent(content)
+        .apply { moodRatingValue?.let { withMood(it) } }
+        .build()
 }
