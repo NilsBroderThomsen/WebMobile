@@ -31,7 +31,12 @@ fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
     val createdAtValue = parts[2]
     val title = parts[3]
     val content = parts[4]
-    val moodRatingValue = parts[5].toIntOrNull()
+    val moodField = parts[5]
+    val moodRating = when {
+        moodField.isEmpty() -> null
+        else -> moodField.toIntOrNull()
+            ?: throw IllegalArgumentException("Mood rating must be a number")
+    }
 
     return EntryBuilder()
         .withId(idValue)
@@ -39,6 +44,6 @@ fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
         .createdAt(LocalDateTime.parse(createdAtValue))
         .withTitle(title)
         .withContent(content)
-        .apply { moodRatingValue?.let { withMood(it) } }
+        .apply { moodRating?.let { withMood(it) } }
         .build()
 }

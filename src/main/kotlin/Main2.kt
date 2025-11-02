@@ -29,8 +29,8 @@ suspend fun main() = coroutineScope {
 
     importService.importEntriesFlow(testCsvLines, UserId(1))
         .collect { progress ->
-            println("Progress: ${progress.processedLines}/ ${ progress.totalLines } | " + "Success: ${progress.successfulImports} | " + "Failed: ${progress.failedImports}")
+            println("Progress: ${progress.processedLines}/ ${progress.totalLines} | " + "Success: ${progress.successfulImports} | " + "Failed: ${progress.failedImports}")
         }
-    repo.findAllEntries(UserId(1)).forEachIndexed { index, entry -> println("Eintrag ${index+1}: $entry") }
+
     println("=== Demo Complete ===")
 }
