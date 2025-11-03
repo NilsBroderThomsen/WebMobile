@@ -1,6 +1,7 @@
 import extension.entryCard
 import extension.toEmoji
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
@@ -10,6 +11,10 @@ import io.ktor.server.http.content.staticResources
 import kotlinx.html.*
 import org.slf4j.event.Level
 import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.*
+import kotlinx.html.*
+import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respondRedirect
 import model.Entry
@@ -28,7 +33,7 @@ fun main() {
 }
 
 fun Application.configureRouting() {
-    install(ContentNegotation) {
+    install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
             isLenient = true
