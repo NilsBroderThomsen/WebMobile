@@ -28,6 +28,13 @@ fun main() {
 }
 
 fun Application.configureRouting() {
+    install(ContentNegotation) {
+        json(Json {
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+        })
+    }
     val repository = MoodTrackerRepository()
     repository.initializeWithTestData()
 
