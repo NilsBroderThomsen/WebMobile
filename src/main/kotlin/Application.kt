@@ -59,7 +59,7 @@ fun Application.configureRouting() {
                     }
                     section {
                         h2 {
-                            +
+
                         }
                         // TODO: Section für Formular
                         section {
