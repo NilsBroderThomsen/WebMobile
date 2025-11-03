@@ -1,5 +1,4 @@
-import extension.toEmoji
-import extension.toMoodLevel
+import extension.entryCard
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -43,6 +42,7 @@ private fun Route.getHome(repository: MoodTrackerRepository) {
     get("/") {
         val userId = UserId(1)
         val entries = repository.findAllEntries(userId)
+
         call.respondHtml {
             head {
                 title { +"MoodTracker - Home" }
@@ -50,17 +50,14 @@ private fun Route.getHome(repository: MoodTrackerRepository) {
             }
             body {
                 h1 { +"MoodTracker - Meine Einträge" }
-                ul {
-                    entries.forEach {
-                        li {
-                            a(href = "/entries/${it.id.value}") { +"Entry${it.id.value}: ${it.title}" }
-                            +" — ${it.content.take(100)} — "
-                            +"${it.moodRating?.toMoodLevel()?.emoji ?: ""}${it.moodRating ?: "Keine Bewertung!"} — "
-                            +"${it.createdAt.toLocalDate()} — "
-                            a(href = "/entries/${it.id.value}/delete") { +"[löschen]" }
-                        }
+                section{
+                    if (entries.isNotEmpty()) {
+                        ul { entries.forEach { entryCard(it) } }
+                    } else {
+                        p { +"Noch keine Einträge vorhanden" }
                     }
                 }
+
                 section {
                     h2 { +"Neuer Eintrag" }
                     form(action = "/entries", method = FormMethod.post) {
@@ -114,7 +111,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
                     p {
                     }
                 }
-                return@post
+                //return@post
             }
             // Entry erstellen...
         }
