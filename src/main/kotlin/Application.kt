@@ -31,8 +31,8 @@ fun Application.configureRouting() {
 
     routing {
         getHome(repository)
-        postCreateEntry(repository)
         getEntryDetails(repository)
+        postCreateEntry(repository)
         postDeleteEntry(repository)
         staticResources("/static", "static")
     }
