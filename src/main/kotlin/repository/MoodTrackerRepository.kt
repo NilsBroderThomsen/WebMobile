@@ -12,6 +12,11 @@ class MoodTrackerRepository {
     private val users = mutableListOf<User>()
     private val entries = mutableListOf<Entry>()
 
+    suspend fun findEntryById(entryId: EntryId): Entry? {
+        delay(50) // Simuliert Datenbankzugriff
+        return entries.firstOrNull { it.id == entryId }
+    }
+
     suspend fun findAllEntries(userId: UserId): List<Entry> {
         delay(100) // Simuliert Datenbankzugriff
         return entries.filter { it.userId == userId }
@@ -21,6 +26,11 @@ class MoodTrackerRepository {
         delay(80) // Simuliert Datenbankzugriff
         entries.add(entry)
         return entry
+    }
+
+    suspend fun deleteEntry(entryId: EntryId): Boolean {
+        delay(70) // Simuliert Datenbankzugriff
+        return entries.removeIf { it.id == entryId }
     }
 
     fun initializeWithTestData() {
