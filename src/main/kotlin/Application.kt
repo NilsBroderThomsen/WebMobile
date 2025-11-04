@@ -1,6 +1,7 @@
 import dto.CreateEntryRequest
 import dto.ErrorResponse
 import extension.entryCard
+import extension.isValidMoodRating
 import extension.toDto
 import extension.toEmoji
 import io.ktor.http.HttpStatusCode
@@ -279,18 +280,46 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
                 ErrorResponse("Bad Request", "Invalid userId")
             )
         val request = call.receive<CreateEntryRequest>()
+        val errors = mutableListOf<String>()
 
-        // TODO: Validiere title und content (nicht leer)
-        // TODO: Validiere moodRating (1-10 oder null)
-        // TODO: Bei Validierungsfehler: respond mit HttpStatusCode.BadRequest und ErrorResponse
-        // TODO: Entry erstellen mit:
-        // - id = EntryId(System.currentTimeMillis())
-        // - userId = UserId(userId)
-        // - createdAt = LocalDateTime.now()
-        // - updatedAt = null
-        // - tags = emptySet()
-        // TODO: Entry zum Repository hinzufügen (repository.addEntry)
-        // TODO: Response mit HttpStatusCode.Created und entry.toDto(
+        if (request.title.isBlank()) {
+            errors += "Title must not be blank."
+        }
+
+        if (request.content.isBlank()) {
+            errors += "Content must not be blank."
+        }
+
+        val moodRating = request.moodRating
+        if (moodRating != null && !moodRating.isValidMoodRating()) {
+            errors += "Mood rating must be a number between 1 and 10 or Blank."
+        }
+
+        if (errors.isNotEmpty()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = errors.joinToString(" ")
+                )
+            )
+            return@post
+        }
+
+        val entry = Entry(
+            id = EntryId(System.currentTimeMillis()),
+            userId = UserId(userId),
+            title = request.title,
+            content = request.content,
+            moodRating = moodRating,
+            createdAt = LocalDateTime.now(),
+            updatedAt = null,
+            tags = emptySet()
+        )
+
+        val savedEntry = repository.addEntry(entry)
+
+        call.respond(HttpStatusCode.Created, savedEntry.toDto())
     }
 }
 
