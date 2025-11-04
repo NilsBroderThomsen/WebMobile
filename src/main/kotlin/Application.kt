@@ -18,8 +18,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
-import io.ktor.server.routing.*
-import kotlinx.html.*
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respondRedirect
@@ -51,8 +49,9 @@ fun Application.configureRouting() {
 
     routing {
         getHome(repository)
-        getEntryDetails(repository)
         getUserEntriesApi(repository)
+        getEntryDetails(repository)
+        getEntryDetailsApi(repository)
         postCreateEntry(repository)
         postDeleteEntry(repository)
         staticResources("/static", "static")
@@ -195,12 +194,31 @@ private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
 
 private fun Route.getEntryDetailsApi(repository: MoodTrackerRepository) {
     get("/api/entries/{id}") {
-        // TODO: Parameter "id" auslesen und zu Long konvertieren
-        // TODO: Wenn invalid: BadRequest Response
-        // TODO: Entry aus Repository holen (repository.findEntryById)
-        // TODO: Wenn null: NotFound Response mit ErrorResponse
-        // TODO: Response mit OK und entry.toDto()
-        TODO("GET /api/entries/{id} implementieren")
+        val id = call.parameters["id"]?.toLongOrNull()
+        if (id == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid entry id"
+                )
+            )
+            return@get
+        }
+
+        val entry = repository.findEntryById(EntryId(id))
+        if (entry == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = "Not Found",
+                    message = "Entry with id $id not found"
+                )
+            )
+            return@get
+        }
+
+        call.respond(HttpStatusCode.OK, entry.toDto())
     }
 }
 
