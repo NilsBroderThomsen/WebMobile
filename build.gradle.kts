@@ -22,7 +22,7 @@ dependencies {
     // Content Negotiation & Serialization (NEU!)
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization json:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
     // CSV (NEU!)
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")

@@ -1,4 +1,7 @@
+import dto.CreateEntryRequest
+import dto.ErrorResponse
 import extension.entryCard
+import extension.toDto
 import extension.toEmoji
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -10,8 +13,10 @@ import io.ktor.server.html.*
 import io.ktor.server.http.content.staticResources
 import kotlinx.html.*
 import org.slf4j.event.Level
+import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.receive
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.serialization.json.Json
@@ -46,6 +51,7 @@ fun Application.configureRouting() {
     routing {
         getHome(repository)
         getEntryDetails(repository)
+        getUserEntriesApi(repository)
         postCreateEntry(repository)
         postDeleteEntry(repository)
         staticResources("/static", "static")
@@ -106,6 +112,94 @@ private fun Route.getHome(repository: MoodTrackerRepository) {
                 }
             }
         }
+    }
+}
+
+private fun Route.getUserEntriesApi(repository: MoodTrackerRepository) {
+    get("/api/users/{userId}/entries") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
+
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid userId"
+                )
+            )
+            return@get
+        }
+
+        val entries = repository.findAllEntries(UserId(userId))
+        val dtos = entries.map { it.toDto() }
+        call.respond(HttpStatusCode.OK, dtos)
+    }
+}
+
+private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
+    get("/entries/{id}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        if (id == null) {
+            call.respondHtml(HttpStatusCode.BadRequest) {
+                body {
+                    h1 {
+                        +"Ungültige ID"
+                    }
+                    a(
+                        href
+                        = "/"
+                    ) { +"Zurück" }
+                }
+            }
+            return@get
+        }
+        val entry = repository.findEntryById(EntryId(id))
+        if (entry == null) {
+            call.respondHtml(HttpStatusCode.NotFound) {
+                body {
+                    h1 {
+                        +"Eintrag nicht gefunden"
+                    }
+                    a(href = "/") { +"Zurück" }
+                }
+            }
+            return@get
+        }
+        call.respondHtml {
+            head {
+                title { +"MoodTracker - ${entry.title}" }
+                link(rel = "stylesheet", href = "/static/styles.css", type = "text/css")
+            }
+            body {
+                h1 { +entry.title }
+                p { +"Erstellt am: ${entry.createdAt.toLocalDate()}" }
+                if (entry.moodRating != null) {
+                    p { +"Stimmung: ${entry.moodRating}/10 ${entry.moodRating.toEmoji()}" }
+                } else {
+                    p { +"Keine Stimmung angegeben" }
+                }
+                section {
+                    h2 { +"Inhalt" }
+                    p { +entry.content }
+                }
+                form(action = "/entries/${entry.id.value}/delete", method = FormMethod.post) {
+                    button(type = ButtonType.submit) { +"Löschen" }
+                }
+                br
+                a(href = "/") { +"Zurück zur Übersicht" }
+            }
+        }
+    }
+}
+
+private fun Route.getEntryDetailsApi(repository: MoodTrackerRepository) {
+    get("/api/entries/{id}") {
+        // TODO: Parameter "id" auslesen und zu Long konvertieren
+        // TODO: Wenn invalid: BadRequest Response
+        // TODO: Entry aus Repository holen (repository.findEntryById)
+        // TODO: Wenn null: NotFound Response mit ErrorResponse
+        // TODO: Response mit OK und entry.toDto()
+        TODO("GET /api/entries/{id} implementieren")
     }
 }
 
@@ -177,59 +271,26 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
-    get("/entries/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        if (id == null) {
-            call.respondHtml(HttpStatusCode.BadRequest) {
-                body {
-                    h1 {
-                        +"Ungültige ID"
-                    }
-                    a(
-                        href
-                        = "/"
-                    ) { +"Zurück" }
-                }
-            }
-            return@get
-        }
-        val entry = repository.findEntryById(EntryId(id))
-        if (entry == null) {
-            call.respondHtml(HttpStatusCode.NotFound) {
-                body {
-                    h1 {
-                        +"Eintrag nicht gefunden"
-                    }
-                    a(href = "/") { +"Zurück" }
-                }
-            }
-            return@get
-        }
-        call.respondHtml {
-            head {
-                title { +"MoodTracker - ${entry.title}" }
-                link(rel = "stylesheet", href = "/static/styles.css", type = "text/css")
-            }
-            body {
-                h1 { +entry.title }
-                p { +"Erstellt am: ${entry.createdAt.toLocalDate()}" }
-                if (entry.moodRating != null) {
-                    p { +"Stimmung: ${entry.moodRating}/10 ${entry.moodRating.toEmoji()}" }
-                } else {
-                    p { +"Keine Stimmung angegeben" }
-                }
-                section {
-                    h2 { +"Inhalt" }
-                    p { +entry.content }
-                }
-                form(action = "/entries/${entry.id.value}/delete", method = FormMethod.post) {
-                    button(type = ButtonType.submit) { +"Löschen" }
-                }
-                br
-                a(href = "/") { +"Zurück zur Übersicht" }
-            }
-        }
+private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
+    post("/api/users/{userId}/entries") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Bad Request", "Invalid userId")
+            )
+        val request = call.receive<CreateEntryRequest>()
+
+        // TODO: Validiere title und content (nicht leer)
+        // TODO: Validiere moodRating (1-10 oder null)
+        // TODO: Bei Validierungsfehler: respond mit HttpStatusCode.BadRequest und ErrorResponse
+        // TODO: Entry erstellen mit:
+        // - id = EntryId(System.currentTimeMillis())
+        // - userId = UserId(userId)
+        // - createdAt = LocalDateTime.now()
+        // - updatedAt = null
+        // - tags = emptySet()
+        // TODO: Entry zum Repository hinzufügen (repository.addEntry)
+        // TODO: Response mit HttpStatusCode.Created und entry.toDto(
     }
 }
 
@@ -258,5 +319,16 @@ private fun Route.postDeleteEntry(repository: MoodTrackerRepository) {
         }
 
         call.respondRedirect("/")
+    }
+}
+
+private fun Route.deleteEntry(repository: MoodTrackerRepository) {
+    delete("/api/entries/{id}") {
+        // TODO: Parameter "id" auslesen
+        // TODO: Validierung
+        // TODO: Entry löschen (repository.deleteEntry)
+        // TODO: Wenn nicht gefunden: NotFound Response
+        // TODO: Wenn erfolgreich: OK mit SuccessResponse
+        TODO("DELETE /api/entries/{id} implementieren")
     }
 }
