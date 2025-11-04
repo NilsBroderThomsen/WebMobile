@@ -1,5 +1,6 @@
 import dto.CreateEntryRequest
 import dto.ErrorResponse
+import dto.SuccessResponse
 import extension.entryCard
 import extension.isValidMoodRating
 import extension.toDto
@@ -49,12 +50,19 @@ fun Application.configureRouting() {
 
     routing {
         getHome(repository)
-        getUserEntriesApi(repository)
         getEntryDetails(repository)
-        getEntryDetailsApi(repository)
         postCreateEntry(repository)
         postDeleteEntry(repository)
         staticResources("/static", "static")
+
+        getUserEntriesApi(repository)
+        getEntryDetailsApi(repository)
+        postCreateEntryApi(repository)
+        deleteEntryApi(repository)
+        exportJsonApi(repository)
+        exportCsvApi(repository)
+        importJsonApi(repository)
+        importCsvApi(repository)
     }
 }
 
@@ -115,27 +123,6 @@ private fun Route.getHome(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.getUserEntriesApi(repository: MoodTrackerRepository) {
-    get("/api/users/{userId}/entries") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
-                )
-            )
-            return@get
-        }
-
-        val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDto() }
-        call.respond(HttpStatusCode.OK, dtos)
-    }
-}
-
 private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
     get("/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
@@ -189,36 +176,6 @@ private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
                 a(href = "/") { +"Zurück zur Übersicht" }
             }
         }
-    }
-}
-
-private fun Route.getEntryDetailsApi(repository: MoodTrackerRepository) {
-    get("/api/entries/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        if (id == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid entry id"
-                )
-            )
-            return@get
-        }
-
-        val entry = repository.findEntryById(EntryId(id))
-        if (entry == null) {
-            call.respond(
-                HttpStatusCode.NotFound,
-                ErrorResponse(
-                    error = "Not Found",
-                    message = "Entry with id $id not found"
-                )
-            )
-            return@get
-        }
-
-        call.respond(HttpStatusCode.OK, entry.toDto())
     }
 }
 
@@ -290,6 +247,85 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
     }
 }
 
+private fun Route.postDeleteEntry(repository: MoodTrackerRepository) {
+    post("/entries/{id}/delete") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        if (id == null) {
+            call.respondHtml(HttpStatusCode.BadRequest) {
+                body {
+                    h1 { +"Ungültige ID" }
+                    a(href = "/") { +"Zurück" }
+                }
+            }
+            return@post
+        }
+
+        val deleted = repository.deleteEntry(EntryId(id))
+        if (!deleted) {
+            call.respondHtml(HttpStatusCode.NotFound) {
+                body {
+                    h1 { +"Eintrag nicht gefunden" }
+                    a(href = "/") { +"Zurück" }
+                }
+            }
+            return@post
+        }
+
+        call.respondRedirect("/")
+    }
+}
+
+private fun Route.getUserEntriesApi(repository: MoodTrackerRepository) {
+    get("/api/users/{userId}/entries") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
+
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid userId"
+                )
+            )
+            return@get
+        }
+
+        val entries = repository.findAllEntries(UserId(userId))
+        val dtos = entries.map { it.toDto() }
+        call.respond(HttpStatusCode.OK, dtos)
+    }
+}
+
+private fun Route.getEntryDetailsApi(repository: MoodTrackerRepository) {
+    get("/api/entries/{id}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+        if (id == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid entry id"
+                )
+            )
+            return@get
+        }
+
+        val entry = repository.findEntryById(EntryId(id))
+        if (entry == null) {
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = "Not Found",
+                    message = "Entry with id $id not found"
+                )
+            )
+            return@get
+        }
+
+        call.respond(HttpStatusCode.OK, entry.toDto())
+    }
+}
+
 private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
     post("/api/users/{userId}/entries") {
         val userId = call.parameters["userId"]?.toLongOrNull()
@@ -341,41 +377,78 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.postDeleteEntry(repository: MoodTrackerRepository) {
-    post("/entries/{id}/delete") {
+private fun Route.deleteEntryApi(repository: MoodTrackerRepository) {
+    delete("/api/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
         if (id == null) {
-            call.respondHtml(HttpStatusCode.BadRequest) {
-                body {
-                    h1 { +"Ungültige ID" }
-                    a(href = "/") { +"Zurück" }
-                }
-            }
-            return@post
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid entry id"
+                )
+            )
+            return@delete
         }
 
         val deleted = repository.deleteEntry(EntryId(id))
         if (!deleted) {
-            call.respondHtml(HttpStatusCode.NotFound) {
-                body {
-                    h1 { +"Eintrag nicht gefunden" }
-                    a(href = "/") { +"Zurück" }
-                }
-            }
-            return@post
+            call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = "Not Found",
+                    message = "Entry with id $id not found"
+                )
+            )
+            return@delete
         }
 
-        call.respondRedirect("/")
+        call.respond(
+            HttpStatusCode.OK,
+            SuccessResponse(message = "Entry deleted successfully")
+        )
     }
 }
 
-private fun Route.deleteEntry(repository: MoodTrackerRepository) {
-    delete("/api/entries/{id}") {
-        // TODO: Parameter "id" auslesen
-        // TODO: Validierung
-        // TODO: Entry löschen (repository.deleteEntry)
-        // TODO: Wenn nicht gefunden: NotFound Response
-        // TODO: Wenn erfolgreich: OK mit SuccessResponse
-        TODO("DELETE /api/entries/{id} implementieren")
+private fun Route.exportJsonApi(repository: MoodTrackerRepository) {
+    get("/api/users/{userId}/export/json") {
+        // TODO: userId Parameter validieren
+        // TODO: ExportService erstellen
+        // TODO: exportToJson aufrufen
+        // TODO: respondText mit ContentType.Application.Json
+        TODO("Export JSON endpoint implementieren")
+    }
+}
+
+private fun Route.exportCsvApi(repository: MoodTrackerRepository) {
+    get("/api/users/{userId}/export/csv") {
+        // TODO: userId Parameter validieren
+        // TODO: ExportService erstellen
+        // TODO: exportToCsv aufrufen
+        // TODO: respondText mit ContentType.Text.CSV
+        // TODO: Content-Disposition Header setzen: "attachment; filename=\"...\""
+        TODO("Export CSV endpoint implementieren")
+    }
+}
+
+private fun Route.importJsonApi(repository: MoodTrackerRepository) {
+    post("/api/users/{userId}/import/json") {
+        // TODO: userId validieren
+        // TODO: JSON Daten empfangen mit call.receiveText()
+        // TODO: ImportService erstellen
+        // TODO: importFromJson aufrufen
+        // TODO: Response mit OK oder PartialContent (wenn failed > 0)
+        TODO("Import JSON endpoint implementieren")
+    }
+}
+
+private fun Route.importCsvApi(repository: MoodTrackerRepository) {
+    post("/api/users/{userId}/import/csv") {
+        // TODO: userId validieren
+        // TODO: CSV Daten empfangen mit call.receiveText()
+        // TODO: ImportService erstellen
+        // TODO: importFromCsv aufrufen
+        // TODO: Response mit OK oder PartialContent
+        TODO("Import CSV endpoint implementieren")
     }
 }
