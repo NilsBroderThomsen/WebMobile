@@ -1,27 +1,45 @@
 package service
 
+import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
+import dto.ExportData
+import extension.toExportDto
+import kotlinx.serialization.json.Json
 import model.UserId
 import repository.MoodTrackerRepository
+import java.time.LocalDateTime
 
 class ExportService(private val repository: MoodTrackerRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {
-        // TODO: Entries aus Repository holen
-        // TODO: ExportData Objekt erstellen mit:
-        //  - exportDate = LocalDateTime.now().toString()
-        //  - userId = userId.value
-        //  - totalEntries = entries.size
-        //  - entries = entries.map { it.toExportDto() }
-        // TODO: Json Instance erstellen mit Config (prettyPrint, encodeDefaults)
-        // TODO: ExportData zu JSON String serialisieren
-        TODO("ExportService.exportToJson implementieren")
+        val entries = repository.findAllEntries(userId)
+        val exportData = ExportData(
+            exportDate = LocalDateTime.now().toString(),
+            userId = userId.value,
+            totalEntries = entries.size,
+            entries = entries.map { it.toExportDto() }
+        )
+
+        val json = Json {
+            this.prettyPrint = prettyPrint
+            encodeDefaults = true
+        }
+
+        return json.encodeToString(exportData)
     }
 
     suspend fun exportToCsv(userId: UserId): String {
-        // TODO: Entries aus Repository holen
-        // TODO: CSV mit csvWriter().writeAllAsString() erstellen
-        // Header: listOf("ID", "Title", "Content", "MoodRating", "CreatedAt", "UpdatedAt")
-        // Rows: entries.map { entry -> listOf(...) }
-        // WICHTIG: content.replace("\n", " ") für CSV
-        TODO("ExportService.exportToCsv implementieren")
+        val entries = repository.findAllEntries(userId)
+        val header = listOf("ID", "Title", "Content", "MoodRating", "CreatedAt", "UpdatedAt")
+        val rows = entries.map { entry ->
+            listOf(
+                entry.id.value.toString(),
+                entry.title,
+                entry.content.replace("\n", " "),
+                entry.moodRating?.toString() ?: "",
+                entry.createdAt.toString(),
+                entry.updatedAt?.toString() ?: ""
+            )
+        }
+
+        return csvWriter().writeAllAsString(listOf(header) + rows)
     }
 }

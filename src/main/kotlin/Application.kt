@@ -5,6 +5,9 @@ import extension.entryCard
 import extension.isValidMoodRating
 import extension.toDto
 import extension.toEmoji
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.*
@@ -21,11 +24,15 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveParameters
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
 import model.Entry
 import model.EntryId
 import model.UserId
 import repository.MoodTrackerRepository
+import service.ExportService
+import service.ImportService
 import java.time.LocalDateTime
 
 fun main() {
@@ -59,6 +66,7 @@ fun Application.configureRouting() {
         getEntryDetailsApi(repository)
         postCreateEntryApi(repository)
         deleteEntryApi(repository)
+
         exportJsonApi(repository)
         exportCsvApi(repository)
         importJsonApi(repository)
@@ -78,7 +86,7 @@ private fun Route.getHome(repository: MoodTrackerRepository) {
             }
             body {
                 h1 { +"MoodTracker - Meine Einträge" }
-                section{
+                section {
                     if (entries.isNotEmpty()) {
                         ul { entries.forEach { entryCard(it) } }
                     } else {
@@ -205,10 +213,12 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
                     errors += "Stimmung muss eine Zahl sein."
                     null
                 }
+
                 !in 1..10 -> {
                     errors += "Stimmung muss zwischen 1 und 10 liegen."
                     null
                 }
+
                 else -> rating
             }
         }
@@ -411,44 +421,96 @@ private fun Route.deleteEntryApi(repository: MoodTrackerRepository) {
 }
 
 private fun Route.exportJsonApi(repository: MoodTrackerRepository) {
+    val exportService = ExportService(repository)
     get("/api/users/{userId}/export/json") {
-        // TODO: userId Parameter validieren
-        // TODO: ExportService erstellen
-        // TODO: exportToJson aufrufen
-        // TODO: respondText mit ContentType.Application.Json
-        TODO("Export JSON endpoint implementieren")
+        val userId = call.parameters["userId"]?.toLongOrNull()
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid userId"
+                )
+            )
+            return@get
+        }
+
+        val exportJson = exportService.exportToJson(UserId(userId))
+        call.respondText(
+            exportJson,
+            ContentType.Application.Json
+        )
     }
 }
 
 private fun Route.exportCsvApi(repository: MoodTrackerRepository) {
+    val exportService = ExportService(repository)
     get("/api/users/{userId}/export/csv") {
-        // TODO: userId Parameter validieren
-        // TODO: ExportService erstellen
-        // TODO: exportToCsv aufrufen
-        // TODO: respondText mit ContentType.Text.CSV
-        // TODO: Content-Disposition Header setzen: "attachment; filename=\"...\""
-        TODO("Export CSV endpoint implementieren")
+        val userId = call.parameters["userId"]?.toLongOrNull()
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid userId"
+                )
+            )
+            return@get
+        }
+
+        val exportCsv = exportService.exportToCsv(UserId(userId))
+        val filename = "moodtracker-entries-$userId.csv"
+        call.response.headers.append(
+            HttpHeaders.ContentDisposition,
+            ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, filename).toString()
+        )
+        call.respondText(
+            exportCsv,
+            ContentType.Text.CSV
+        )
     }
 }
 
 private fun Route.importJsonApi(repository: MoodTrackerRepository) {
     post("/api/users/{userId}/import/json") {
-        // TODO: userId validieren
-        // TODO: JSON Daten empfangen mit call.receiveText()
-        // TODO: ImportService erstellen
-        // TODO: importFromJson aufrufen
-        // TODO: Response mit OK oder PartialContent (wenn failed > 0)
-        TODO("Import JSON endpoint implementieren")
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Bad Request", "Invalid userId")
+            )
+
+        val jsonPayload = call.receiveText()
+        val importService = ImportService(repository)
+        val result = importService.importFromJson(jsonPayload, UserId(userId))
+
+        val status = if (result.failed > 0) {
+            HttpStatusCode.PartialContent
+        } else {
+            HttpStatusCode.OK
+        }
+
+        call.respond(status, result)
     }
 }
 
 private fun Route.importCsvApi(repository: MoodTrackerRepository) {
     post("/api/users/{userId}/import/csv") {
-        // TODO: userId validieren
-        // TODO: CSV Daten empfangen mit call.receiveText()
-        // TODO: ImportService erstellen
-        // TODO: importFromCsv aufrufen
-        // TODO: Response mit OK oder PartialContent
-        TODO("Import CSV endpoint implementieren")
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Bad Request", "Invalid userId")
+            )
+
+        val csvPayload = call.receiveText()
+        val importService = ImportService(repository)
+        val result = importService.importFromCsv(csvPayload, UserId(userId))
+
+        val status = if (result.failed > 0) {
+            HttpStatusCode.PartialContent
+        } else {
+            HttpStatusCode.OK
+        }
+
+        call.respond(status, result)
     }
 }
