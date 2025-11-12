@@ -1,5 +1,6 @@
 import dto.CreateEntryRequest
 import dto.ErrorResponse
+import dto.UpdateEntryRequest
 import dto.SuccessResponse
 import extension.entryCard
 import extension.isValidMoodRating
@@ -65,6 +66,7 @@ fun Application.configureRouting() {
         getUserEntriesApi(repository)
         getEntryDetailsApi(repository)
         postCreateEntryApi(repository)
+        putUpdateEntryApi(repository)
         deleteEntryApi(repository)
 
         exportJsonApi(repository)
@@ -417,6 +419,73 @@ private fun Route.deleteEntryApi(repository: MoodTrackerRepository) {
             HttpStatusCode.OK,
             SuccessResponse(message = "Entry deleted successfully")
         )
+    }
+}
+
+private fun Route.putUpdateEntryApi(repository: MoodTrackerRepository) {
+    put("/api/entries/{id}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@put call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid entry id"
+                )
+            )
+
+        val existingEntry = repository.findEntryById(EntryId(id))
+            ?: return@put call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = "Not Found",
+                    message = "Entry with id $id not found"
+                )
+            )
+
+        val request = call.receive<UpdateEntryRequest>()
+        val errors = mutableListOf<String>()
+
+        if (request.title.isBlank()) {
+            errors += "Title must not be blank."
+        }
+
+        if (request.content.isBlank()) {
+            errors += "Content must not be blank."
+        }
+
+        val moodRating = request.moodRating
+        if (moodRating != null && !moodRating.isValidMoodRating()) {
+            errors += "Mood rating must be a number between 1 and 10 or Blank."
+        }
+
+        if (errors.isNotEmpty()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = errors.joinToString(" ")
+                )
+            )
+            return@put
+        }
+
+        val updatedEntry = existingEntry.copy(
+            title = request.title,
+            content = request.content,
+            moodRating = moodRating,
+            updatedAt = LocalDateTime.now()
+        )
+
+        val savedEntry = repository.updateEntry(updatedEntry)
+            ?: return@put call.respond(
+                HttpStatusCode.InternalServerError,
+                ErrorResponse(
+                    error = "Internal Server Error",
+                    message = "Failed to update entry"
+                )
+            )
+
+        call.respond(HttpStatusCode.OK, savedEntry.toDto())
     }
 }
 
