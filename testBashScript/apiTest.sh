@@ -24,7 +24,7 @@ curl -X POST http://localhost:8080/api/users/1/entries \
 echo -e "\n----------------------\n"
 
 echo "== Update entry =="
-curl -X PUT http://localhost:8080/api/entries/1 \
+curl -X PUT http://localhost:8080/api/entries/2 \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Aktualisierter Titel",
