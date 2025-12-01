@@ -1,15 +1,14 @@
-package repository
+package database
 
-import kotlin.time.Clock  // Wichtig: kotlin.time.Clock, NICHT kotlinx.datetime.Clock!
-import kotlinx.datetime.TimeZone
-import org.jetbrains.exposed.sql.transactions.transaction
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
+import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.time.ExperimentalTime
 
-@OptIn(kotlin.time.ExperimentalTime::class)
-class MoodTrackerDatabaseRepository {
+@OptIn(ExperimentalTime::class)
+class oodTrackerDatabaseRepository {
     // User Operations
     fun createUser(user: User): User = transaction {
         // TODO: UserDAO.new { } Block erstellen
