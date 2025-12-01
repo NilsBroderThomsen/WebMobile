@@ -7,10 +7,10 @@ import kotlinx.serialization.json.Json
 import model.EntryBuilder
 import model.EntryId
 import model.UserId
-import repository.MoodTrackerRepository
+import database.MoodTrackerDatabaseRepository
 import java.time.LocalDateTime
 
-class ImportService(private val repository: MoodTrackerRepository) {
+class ImportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun importFromJson(jsonData: String, userId: UserId): ImportResult {
         val json = Json { ignoreUnknownKeys = true }
         return try {
@@ -62,7 +62,7 @@ class ImportService(private val repository: MoodTrackerRepository) {
                         ?.let { builder.updatedAt(LocalDateTime.parse(it)) }
 
                     val entry = builder.build()
-                    repository.addEntry(entry)
+                    repository.createEntry(entry)
                     successful++
                     existingTitles += titleKey
                 } catch (e: Exception) {
@@ -140,7 +140,7 @@ class ImportService(private val repository: MoodTrackerRepository) {
                     updatedAt?.let { builder.updatedAt(LocalDateTime.parse(it)) }
 
                     val entry = builder.build()
-                    repository.addEntry(entry)
+                    repository.createEntry(entry)
                     successful++
                     existingTitles += titleKey
                 } catch (e: Exception) {
