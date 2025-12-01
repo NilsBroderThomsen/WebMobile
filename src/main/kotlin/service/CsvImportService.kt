@@ -5,7 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import model.UserId
-import repository.MoodTrackerRepository
+import database.MoodTrackerDatabaseRepository
 
 data class ImportProgress(
     val totalLines: Int,
@@ -19,7 +19,7 @@ data class ImportProgress(
                 processedLines else 0.0
 }
 
-class CsvImportService(private val repository: MoodTrackerRepository) {
+class CsvImportService(private val repository: MoodTrackerDatabaseRepository) {
     fun importEntriesFlow(lines: List<String>, targetUserId: UserId): Flow<ImportProgress> = flow {
         val dataLines = lines.drop(1).filter { it.isNotBlank() }
         val total = dataLines.size
@@ -32,7 +32,7 @@ class CsvImportService(private val repository: MoodTrackerRepository) {
             processed++
             try {
                 val entry = line.parseEntryFromCsv(targetUserId)
-                repository.addEntry(entry)
+                repository.createEntry(entry)
                 success++
             } catch (_: Exception ) {
                 fail++

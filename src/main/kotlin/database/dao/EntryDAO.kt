@@ -1,0 +1,61 @@
+package database.dao
+
+import database.tables.EntriesTable
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import model.Entry
+import model.EntryId
+import model.UserId
+import org.jetbrains.exposed.dao.LongEntity
+import org.jetbrains.exposed.dao.LongEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
+import java.time.LocalDateTime
+import kotlin.time.ExperimentalTime
+
+@OptIn(ExperimentalTime::class)
+class EntryDAO(id: EntityID<Long>) : LongEntity(id) {
+    companion object : LongEntityClass<EntryDAO>(EntriesTable)
+
+    var user by UserDAO referencedOn EntriesTable.userId
+    var title by EntriesTable.title
+    var content by EntriesTable.content
+    var moodRating by EntriesTable.moodRating
+    var createdAt by EntriesTable.createdAt
+    var updatedAt by EntriesTable.updatedAt
+
+    fun toModel(): Entry {
+        val createdDateTime = createdAt.toLocalDateTime(TimeZone.UTC)
+        val javaCreatedAt = LocalDateTime.of(
+            createdDateTime.year,
+            createdDateTime.monthNumber,
+            createdDateTime.dayOfMonth,
+            createdDateTime.hour,
+            createdDateTime.minute,
+            createdDateTime.second,
+            createdDateTime.nanosecond
+        )
+
+        val javaUpdatedAt = updatedAt?.toLocalDateTime(TimeZone.UTC)?.let { update ->
+            LocalDateTime.of(
+                update.year,
+                update.monthNumber,
+                update.dayOfMonth,
+                update.hour,
+                update.minute,
+                update.second,
+                update.nanosecond
+            )
+        }
+
+        return Entry(
+            id = EntryId(id.value),
+            userId = UserId(user.id.value),
+            title = title,
+            content = content,
+            moodRating = moodRating,
+            createdAt = javaCreatedAt,
+            updatedAt = javaUpdatedAt,
+            tags = emptySet()
+        )
+    }
+}

@@ -5,10 +5,10 @@ import dto.ExportData
 import extension.toExportDto
 import kotlinx.serialization.json.Json
 import model.UserId
-import repository.MoodTrackerRepository
+import database.MoodTrackerDatabaseRepository
 import java.time.LocalDateTime
 
-class ExportService(private val repository: MoodTrackerRepository) {
+class ExportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {
         val entries = repository.findAllEntries(userId)
         val exportData = ExportData(
