@@ -1,21 +1,19 @@
 package extension
 
-import dto.EntryDto
+import dto.EntryDTO
 import dto.EntryExportDto
-import dto.UserDto
+import dto.UserDTO
 import model.Entry
 import model.User
 
-fun Entry.toDto(): EntryDto = EntryDto(
+fun Entry.toDTO(): EntryDTO = EntryDTO(
     id = this.id.value,
     userId = this.userId.value,
     title = this.title,
     content = this.content,
     moodRating = this.moodRating,
-    createdAt = this.createdAt,
-    updatedAt = this.updatedAt,
-    wordCount = this.wordCount,
-    moodLevel = this.moodRating?.toMoodLevel()?.name
+    createdAt = this.createdAt.toString(),
+    updatedAt = this.updatedAt?.toString()
 )
 
 fun Entry.toExportDto(): EntryExportDto = EntryExportDto(
@@ -27,10 +25,10 @@ fun Entry.toExportDto(): EntryExportDto = EntryExportDto(
     updatedAt = this.updatedAt?.toString()
 )
 
-fun User.toDto(): UserDto = UserDto(
+fun User.toDTO(): UserDTO = UserDTO(
     id = this.id.value,
     username = this.username,
     email = this.email,
-    registrationDate = this.registrationDate,
+    registrationDate = this.registrationDate.toString(),
     isActive = this.isActive
 )

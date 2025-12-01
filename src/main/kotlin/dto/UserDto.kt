@@ -1,15 +1,12 @@
 package dto
 
-import kotlinx.serialization.*
-import serialization.LocalDateSerializer
-import java.time.LocalDate
+import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserDto(
+data class UserDTO(
     val id: Long,
     val username: String,
     val email: String,
-    @Serializable(with = LocalDateSerializer::class)
-    val registrationDate: LocalDate,
+    val registrationDate: String,
     val isActive: Boolean
 )

@@ -1,62 +1,55 @@
 package repository
 
-import kotlinx.coroutines.delay
-import java.time.LocalDate
+import database.MoodTrackerDatabaseRepository
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MoodTrackerRepository {
-    private val users = mutableListOf<User>()
-    private val entries = mutableListOf<Entry>()
+    private val databaseRepository = MoodTrackerDatabaseRepository()
 
-    suspend fun findEntryById(entryId: EntryId): Entry? {
-        delay(50) // Simuliert Datenbankzugriff
-        return entries.firstOrNull { it.id == entryId }
+    suspend fun findEntryById(entryId: EntryId): Entry? = databaseRepository.findEntryById(entryId)
+
+    suspend fun findAllEntries(userId: UserId): List<Entry> = databaseRepository.findAllEntries(userId)
+
+    suspend fun addEntry(entry: Entry): Entry = databaseRepository.createEntry(entry)
+
+    suspend fun deleteEntry(entryId: EntryId): Boolean = databaseRepository.deleteEntry(entryId)
+
+    suspend fun updateEntry(entry: Entry): Entry? = try {
+        databaseRepository.updateEntry(entry)
+    } catch (ex: IllegalArgumentException) {
+        null
     }
 
-    suspend fun findAllEntries(userId: UserId): List<Entry> {
-        delay(100) // Simuliert Datenbankzugriff
-        return entries.filter { it.userId == userId }
-    }
+    suspend fun findUserById(userId: UserId): User? = databaseRepository.findUserById(userId)
 
-    suspend fun addEntry(entry: Entry): Entry {
-        delay(80) // Simuliert Datenbankzugriff
-        entries.add(entry)
-        return entry
-    }
+    suspend fun findUserByEmail(email: String): User? = databaseRepository.findUserByEmail(email)
 
-    suspend fun deleteEntry(entryId: EntryId): Boolean {
-        delay(70) // Simuliert Datenbankzugriff
-        return entries.removeIf { it.id == entryId }
-    }
-
-    suspend fun updateEntry(entry: Entry): Entry? {
-        delay(80) // Simuliert Datenbankzugriff
-        val index = entries.indexOfFirst { it.id == entry.id }
-        if (index == -1) {
-            return null
-        }
-        entries[index] = entry
-        return entries[index]
-    }
+    suspend fun createUser(user: User): User = databaseRepository.createUser(user)
 
     fun initializeWithTestData() {
-        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", LocalDate.now())
-        users.add(user)
+        val existingUser = databaseRepository.findUserByEmail("nils@sample.com")
+        val user = existingUser ?: databaseRepository.createUser(
+            User(UserId(0), "Nils", "nils@sample.com", "dbhasjl", LocalDate.now())
+        )
+
+        if (databaseRepository.findAllEntries(user.id).isNotEmpty()) {
+            return
+        }
 
         val now = LocalDateTime.now()
 
         fun e(
-            id: Long,
             title: String,
             content: String,
             mood: Int?,
             daysAgo: Long
         ) = Entry(
-            id = EntryId(id),
+            id = EntryId(0),
             userId = user.id,
             title = title,
             content = content,
@@ -66,15 +59,15 @@ class MoodTrackerRepository {
             tags = emptySet()
         )
 
-        entries += listOf(
-            e(1, "Happy Day", "Great day,,, at work!", 8, 7),
-            e(2, "Tired", "Long night.", 4, 6),
-            e(3, "Excited", "New project started!", 9, 5),
-            e(4, "Neutral Day", "Nothing special.", null, 4),  // ohne moodRating
-            e(5, "Focused", "Deep work session, few distractions.", 7, 3),
-            e(6, "Stressed", "Deadlines piling up.", 3, 2),
-            e(7, "Okay-ish", "Average day, nothing big.", 5, 1),
-            e(8, "Great Weather", "Walked outside and relaxed.", 8, 0)
-        )
+        listOf(
+            e("Happy Day", "Great day,,, at work!", 8, 7),
+            e("Tired", "Long night.", 4, 6),
+            e("Excited", "New project started!", 9, 5),
+            e("Neutral Day", "Nothing special.", null, 4),
+            e("Focused", "Deep work session, few distractions.", 7, 3),
+            e("Stressed", "Deadlines piling up.", 3, 2),
+            e("Okay-ish", "Average day, nothing big.", 5, 1),
+            e("Great Weather", "Walked outside and relaxed.", 8, 0)
+        ).forEach { databaseRepository.createEntry(it) }
     }
 }

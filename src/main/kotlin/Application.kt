@@ -2,9 +2,10 @@ import dto.CreateEntryRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
 import dto.UpdateEntryRequest
+import database.DatabaseFactory
 import extension.entryCard
 import extension.isValidMoodRating
-import extension.toDto
+import extension.toDTO
 import extension.toEmoji
 import io.ktor.http.ContentDisposition
 import io.ktor.http.ContentType
@@ -42,8 +43,13 @@ fun main() {
         install(CallLogging) {
             level = Level.INFO
         }
+        configureDatabases()
         configureRouting()
     }.start(wait = true)
+}
+
+fun Application.configureDatabases() {
+    DatabaseFactory.init()
 }
 
 fun Application.configureRouting() {
@@ -304,7 +310,7 @@ private fun Route.getUserEntriesApi(repository: MoodTrackerRepository) {
         }
 
         val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDto() }
+        val dtos = entries.map { it.toDTO() }
         call.respond(HttpStatusCode.OK, dtos)
     }
 }
@@ -335,7 +341,7 @@ private fun Route.getEntryDetailsApi(repository: MoodTrackerRepository) {
             return@get
         }
 
-        call.respond(HttpStatusCode.OK, entry.toDto())
+        call.respond(HttpStatusCode.OK, entry.toDTO())
     }
 }
 
@@ -388,7 +394,7 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
 
         val savedEntry = repository.addEntry(entry)
 
-        call.respond(HttpStatusCode.Created, savedEntry.toDto())
+        call.respond(HttpStatusCode.Created, savedEntry.toDTO())
     }
 }
 
@@ -490,7 +496,7 @@ private fun Route.putUpdateEntryApi(repository: MoodTrackerRepository) {
                 )
             )
 
-        call.respond(HttpStatusCode.OK, savedEntry.toDto())
+        call.respond(HttpStatusCode.OK, savedEntry.toDTO())
     }
 }
 
