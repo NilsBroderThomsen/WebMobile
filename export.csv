@@ -1,0 +1,9 @@
+ID,Title,Content,MoodRating,CreatedAt,UpdatedAt
+1,Happy Day,"Great day,,, at work!",8,2025-11-24T12:30:59.918243700,
+2,Tired,Long night.,4,2025-11-25T12:30:59.918243700,
+3,Excited,New project started!,9,2025-11-26T12:30:59.918243700,
+4,Neutral Day,Nothing special.,,2025-11-27T12:30:59.918243700,
+5,Focused,"Deep work session, few distractions.",7,2025-11-28T12:30:59.918243700,
+6,Stressed,Deadlines piling up.,3,2025-11-29T12:30:59.918243700,
+7,Okay-ish,"Average day, nothing big.",5,2025-11-30T12:30:59.918243700,
+8,Great Weather,Walked outside and relaxed.,8,2025-12-01T12:30:59.918243700,
