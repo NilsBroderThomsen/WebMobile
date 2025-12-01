@@ -6,7 +6,6 @@ import extension.entryCard
 import extension.isValidMoodRating
 import extension.toDto
 import extension.toEmoji
-import io.ktor.serialization.ContentTransformationException
 import io.ktor.http.ContentDisposition
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -23,6 +22,7 @@ import org.slf4j.event.Level
 import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveParameters
