@@ -1,14 +1,14 @@
 import database.DatabaseFactory
 import database.MoodTrackerDatabaseRepository
+import extension.entryCard
+import extension.isValidMoodRating
+import extension.toEmoji
+import extension.toDto
 import dto.CreateEntryRequest
 import dto.CreateUserRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
 import dto.UpdateEntryRequest
-import dto.toDTO
-import extension.entryCard
-import extension.isValidMoodRating
-import extension.toEmoji
 import io.ktor.http.ContentDisposition
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -112,7 +112,7 @@ fun Application.configureRouting() {
                     )
                 )
 
-                call.respond(HttpStatusCode.Created, createdUser.toDTO())
+                call.respond(HttpStatusCode.Created, createdUser.toDto())
             }
 
             get("/{id}") {
@@ -134,7 +134,7 @@ fun Application.configureRouting() {
                         )
                     )
 
-                call.respond(HttpStatusCode.OK, user.toDTO())
+                call.respond(HttpStatusCode.OK, user.toDto())
             }
         }
 
@@ -378,7 +378,7 @@ private fun Route.getUserEntriesApi(repository: MoodTrackerDatabaseRepository) {
         }
 
         val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDTO() }
+        val dtos = entries.map { it.toDto() }
         call.respond(HttpStatusCode.OK, dtos)
     }
 }
@@ -409,7 +409,7 @@ private fun Route.getEntryDetailsApi(repository: MoodTrackerDatabaseRepository) 
             return@get
         }
 
-        call.respond(HttpStatusCode.OK, entry.toDTO())
+        call.respond(HttpStatusCode.OK, entry.toDto())
     }
 }
 
@@ -462,7 +462,7 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerDatabaseRepository) 
 
         val savedEntry = repository.createEntry(entry)
 
-        call.respond(HttpStatusCode.Created, savedEntry.toDTO())
+        call.respond(HttpStatusCode.Created, savedEntry.toDto())
     }
 }
 
@@ -557,7 +557,7 @@ private fun Route.putUpdateEntryApi(repository: MoodTrackerDatabaseRepository) {
 
         val savedEntry = repository.updateEntry(updatedEntry)
 
-        call.respond(HttpStatusCode.OK, savedEntry.toDTO())
+        call.respond(HttpStatusCode.OK, savedEntry.toDto())
     }
 }
 
