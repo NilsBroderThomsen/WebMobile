@@ -1,4 +1,21 @@
 package dto
 
-class UserDTO {
-}
+import kotlinx.serialization.Serializable
+import model.User
+
+@Serializable
+data class UserDTO(
+    val id: Long,
+    val username: String,
+    val email: String,
+    val registrationDate: String,
+    val isActive: Boolean
+)
+
+fun User.toDTO(): UserDTO = UserDTO(
+    id = id.value,
+    username = username,
+    email = email,
+    registrationDate = registrationDate.toString(),
+    isActive = isActive
+)
