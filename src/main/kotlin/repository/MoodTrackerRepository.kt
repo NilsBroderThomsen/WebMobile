@@ -33,6 +33,16 @@ class MoodTrackerRepository {
         return entries.removeIf { it.id == entryId }
     }
 
+    suspend fun updateEntry(entry: Entry): Entry? {
+        delay(80) // Simuliert Datenbankzugriff
+        val index = entries.indexOfFirst { it.id == entry.id }
+        if (index == -1) {
+            return null
+        }
+        entries[index] = entry
+        return entries[index]
+    }
+
     fun initializeWithTestData() {
         val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", LocalDate.now())
         users.add(user)

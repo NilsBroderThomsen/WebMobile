@@ -1,6 +1,7 @@
 import dto.CreateEntryRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
+import dto.UpdateEntryRequest
 import extension.entryCard
 import extension.isValidMoodRating
 import extension.toDto
@@ -21,6 +22,7 @@ import org.slf4j.event.Level
 import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveParameters
@@ -65,6 +67,7 @@ fun Application.configureRouting() {
         getUserEntriesApi(repository)
         getEntryDetailsApi(repository)
         postCreateEntryApi(repository)
+        putUpdateEntryApi(repository)
         deleteEntryApi(repository)
 
         exportJsonApi(repository)
@@ -343,21 +346,23 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Bad Request", "Invalid userId")
             )
-        val request = call.receive<CreateEntryRequest>()
-        val errors = mutableListOf<String>()
-
-        if (request.title.isBlank()) {
-            errors += "Title must not be blank."
+        val request = try {
+            call.receive<CreateEntryRequest>()
+        } catch (ex: ContentTransformationException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Request body is not valid JSON"
+                )
+            )
+            return@post
         }
 
-        if (request.content.isBlank()) {
-            errors += "Content must not be blank."
-        }
-
+        val title = request.title.trim()
+        val content = request.content.trim()
         val moodRating = request.moodRating
-        if (moodRating != null && !moodRating.isValidMoodRating()) {
-            errors += "Mood rating must be a number between 1 and 10 or Blank."
-        }
+        val errors = validateEntryPayload(title, content, moodRating)
 
         if (errors.isNotEmpty()) {
             call.respond(
@@ -373,8 +378,8 @@ private fun Route.postCreateEntryApi(repository: MoodTrackerRepository) {
         val entry = Entry(
             id = EntryId(System.currentTimeMillis()),
             userId = UserId(userId),
-            title = request.title,
-            content = request.content,
+            title = title,
+            content = content,
             moodRating = moodRating,
             createdAt = LocalDateTime.now(),
             updatedAt = null,
@@ -418,6 +423,97 @@ private fun Route.deleteEntryApi(repository: MoodTrackerRepository) {
             SuccessResponse(message = "Entry deleted successfully")
         )
     }
+}
+
+private fun Route.putUpdateEntryApi(repository: MoodTrackerRepository) {
+    put("/api/entries/{id}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@put call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid entry id"
+                )
+            )
+
+        val existingEntry = repository.findEntryById(EntryId(id))
+            ?: return@put call.respond(
+                HttpStatusCode.NotFound,
+                ErrorResponse(
+                    error = "Not Found",
+                    message = "Entry with id $id not found"
+                )
+            )
+
+        val request = try {
+            call.receive<UpdateEntryRequest>()
+        } catch (ex: ContentTransformationException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Request body is not valid JSON"
+                )
+            )
+            return@put
+        }
+
+        val title = request.title.trim()
+        val content = request.content.trim()
+        val moodRating = request.moodRating
+        val errors = validateEntryPayload(title, content, moodRating)
+
+        if (errors.isNotEmpty()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = errors.joinToString(" ")
+                )
+            )
+            return@put
+        }
+
+        val updatedEntry = existingEntry.copy(
+            title = title,
+            content = content,
+            moodRating = moodRating,
+            updatedAt = LocalDateTime.now()
+        )
+
+        val savedEntry = repository.updateEntry(updatedEntry)
+            ?: return@put call.respond(
+                HttpStatusCode.InternalServerError,
+                ErrorResponse(
+                    error = "Internal Server Error",
+                    message = "Failed to update entry"
+                )
+            )
+
+        call.respond(HttpStatusCode.OK, savedEntry.toDto())
+    }
+}
+
+private fun validateEntryPayload(
+    title: String,
+    content: String,
+    moodRating: Int?
+): List<String> {
+    val errors = mutableListOf<String>()
+
+    if (title.isBlank()) {
+        errors += "Title must not be blank."
+    }
+
+    if (content.isBlank()) {
+        errors += "Content must not be blank."
+    }
+
+    if (moodRating != null && !moodRating.isValidMoodRating()) {
+        errors += "Mood rating must be a number between 1 and 10 or Blank."
+    }
+
+    return errors
 }
 
 private fun Route.exportJsonApi(repository: MoodTrackerRepository) {
