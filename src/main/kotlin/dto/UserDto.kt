@@ -1,13 +1,21 @@
 package dto
 
-import kotlinx.serialization.*
-import serialization.LocalDateSerializer
-import java.time.LocalDate
+import kotlinx.serialization.Serializable
+import model.User
 
-// TODO: UserDTO data class erstellen
-// @Serializable
-// Felder: id (Long), username, email, registrationDate (String), isActive
-// WICHTIG: KEIN passwordHash aus Sicherheitsgründen!
-// TODO: Extension function User.toDTO() implementieren
-// fun User.toDTO(): UserDTO = ...
-// registrationDate mit .toString() konvertieren
+@Serializable
+data class UserDTO(
+    val id: Long,
+    val username: String,
+    val email: String,
+    val registrationDate: String,
+    val isActive: Boolean
+)
+
+fun User.toDTO(): UserDTO = UserDTO(
+    id = id.value,
+    username = username,
+    email = email,
+    registrationDate = registrationDate.toString(),
+    isActive = isActive
+)

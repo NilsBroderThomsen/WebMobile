@@ -6,10 +6,10 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 @OptIn(kotlin.time.ExperimentalTime::class)
 object UsersTable : LongIdTable("users") {
-    // TODO: username Spalte (varchar, 100 Zeichen, uniqueIndex)
-    // TODO: email Spalte (varchar, 200 Zeichen, uniqueIndex)
-    // TODO: passwordHash Spalte (varchar, 255 Zeichen)
-    // TODO: registrationDate Spalte (date - gibt kotlinx.datetime.LocalDate zurück)
-    // TODO: isActive Spalte (bool, default = true)
-    // TODO: createdAt Spalte (timestamp - gibt kotlinx.datetime.Instant zurück!)
+    val username = varchar("username", 100).uniqueIndex()
+    val email = varchar("email", 200).uniqueIndex()
+    val passwordHash = varchar("password_hash", 255)
+    val registrationDate = date("registration_date")
+    val isActive = bool("is_active").default(true)
+    val createdAt = timestamp("created_at")
 }

@@ -1,9 +1,15 @@
+import database.DatabaseFactory
 import database.MoodTrackerDatabaseRepository
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.*
 
 fun Application.configureDatabases() {
-    // TODO: DatabaseFactory.init() aufrufen
+    DatabaseFactory.init()
 }
 
 fun main() {
@@ -12,6 +18,12 @@ fun main() {
         configureRouting()
         configureSerialization()
     }.start(wait = true)
+}
+
+fun Application.configureSerialization() {
+    install(ContentNegotiation) {
+        json()
+    }
 }
 
 fun Application.configureRouting() {

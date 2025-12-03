@@ -1,7 +1,4 @@
 package model
-
-import extension.isValidMoodRating
-import extension.normalizeTag
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.math.roundToInt
@@ -73,3 +70,7 @@ operator fun Entry.plus(other: Entry): Int {
     val secondMood = requireNotNull(other.moodRating) { "Both entries must have a mood rating" }
     return ((firstMood + secondMood) / 2.0).roundToInt()
 }
+
+fun Int.isValidMoodRating(): Boolean = this in 1..10
+
+fun String.normalizeTag(): String = trim().lowercase()
