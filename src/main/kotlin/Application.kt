@@ -33,7 +33,7 @@ fun Application.configureRouting() {
             post {
                 // TODO: CreateUserRequest empfangen
                 // TODO: User erstellen mit repository.createUser()
-                // TODO: DTO zurückgeben (toDTO() Methode)
+                // TODO: DTO zurückgeben (toEntryDTO() oder toUserDTO() Methode)
             }
             get("/{id}") {
                 // TODO: ID aus Parameter lesen

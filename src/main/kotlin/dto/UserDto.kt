@@ -12,7 +12,7 @@ data class UserDTO(
     val isActive: Boolean
 )
 
-fun User.toDTO(): UserDTO = UserDTO(
+fun User.toUserDTO(): UserDTO = UserDTO(
     id = id.value,
     username = username,
     email = email,

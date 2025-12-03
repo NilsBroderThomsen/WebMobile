@@ -14,7 +14,7 @@ data class EntryDTO(
     val updatedAt: String?
 )
 
-fun Entry.toDTO(): EntryDTO = EntryDTO(
+fun Entry.toEntryDTO(): EntryDTO = EntryDTO(
     id = id.value,
     userId = userId.value,
     title = title,
