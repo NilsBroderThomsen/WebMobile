@@ -4,18 +4,9 @@ import kotlinx.serialization.*
 import serialization.LocalDateTimeSerializer
 import java.time.LocalDateTime
 
-// DTO für Entry in API-Responses
-@Serializable
-data class EntryDto(
-    val id: Long,
-    val userId: Long,
-    val title: String,
-    val content: String,
-    val moodRating: Int?,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    val createdAt: LocalDateTime,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    val updatedAt: LocalDateTime?,
-    val wordCount: Int,
-    val moodLevel: String?
-)
+// TODO: EntryDTO data class erstellen
+// @Serializable
+// Felder: id (Long), userId (Long), title, content, moodRating (Int?), createdAt (String), updatedAt (String?)
+// TODO: Extension function Entry.toDTO() implementieren
+// fun Entry.toDTO(): EntryDTO = ...
+// Timestamps mit .toString() konvertieren

@@ -21,7 +21,7 @@ dependencies {
 
     // SQLite JDBC Treiber
     implementation("org.xerial:sqlite-jdbc:3.47.1.0")
-    
+
     // Ktor Server
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

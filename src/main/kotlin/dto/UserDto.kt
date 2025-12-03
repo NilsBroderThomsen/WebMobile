@@ -4,12 +4,10 @@ import kotlinx.serialization.*
 import serialization.LocalDateSerializer
 import java.time.LocalDate
 
-@Serializable
-data class UserDto(
-    val id: Long,
-    val username: String,
-    val email: String,
-    @Serializable(with = LocalDateSerializer::class)
-    val registrationDate: LocalDate,
-    val isActive: Boolean
-)
+// TODO: UserDTO data class erstellen
+// @Serializable
+// Felder: id (Long), username, email, registrationDate (String), isActive
+// WICHTIG: KEIN passwordHash aus Sicherheitsgründen!
+// TODO: Extension function User.toDTO() implementieren
+// fun User.toDTO(): UserDTO = ...
+// registrationDate mit .toString() konvertieren
