@@ -13,25 +13,26 @@ repositories {
 }
 
 dependencies {
-    // Ktor Server
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    // Kotlin
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
-    // Content Negotiation & Serialization (NEU!)
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    // kotlinx.datetime
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+
+    // Ktor Server (aus Woche 3-4)
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+
+    // Ktor Client (Woche 4)
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+
+    // Serialization
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-
-    // CSV (NEU!)
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")
-
-    // Aus vorherigen Wochen
-    implementation("ch.qos.logback:logback-classic:1.5.11")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
     testImplementation(kotlin("test"))
 }
 
@@ -39,5 +40,9 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
+
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    }
 }
