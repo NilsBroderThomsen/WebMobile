@@ -1,10 +1,8 @@
 package dto
 
+import kotlin.time.Instant
 import kotlinx.serialization.*
-import serialization.LocalDateTimeSerializer
-import java.time.LocalDateTime
 
-// DTO für Entry in API-Responses
 @Serializable
 data class EntryDto(
     val id: Long,
@@ -12,10 +10,7 @@ data class EntryDto(
     val title: String,
     val content: String,
     val moodRating: Int?,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    val createdAt: LocalDateTime,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    val updatedAt: LocalDateTime?,
-    val wordCount: Int,
-    val moodLevel: String?
+    val createdAt: Instant,
+    val updatedAt: Instant?,
+    val tags: Set<String>
 )

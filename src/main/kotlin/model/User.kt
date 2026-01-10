@@ -1,7 +1,7 @@
 package model
 
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
+import kotlinx.datetime.*
+import kotlin.time.Clock
 
 @JvmInline
 value class UserId(val value: Long)
@@ -15,7 +15,10 @@ data class User(
     val isActive: Boolean = true
 ) {
     val accountAge: Long
-        get() = ChronoUnit.DAYS.between(registrationDate, LocalDate.now())
+        get() {
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            return (today.toEpochDays() - registrationDate.toEpochDays()).toLong()
+        }
 
     val isNewUser: Boolean
         get() = accountAge < 7
