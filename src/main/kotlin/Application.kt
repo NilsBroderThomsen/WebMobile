@@ -31,6 +31,7 @@ import repository.MoodTrackerRepository
 import service.ExportService
 import service.ImportService
 import java.time.LocalDateTime
+import kotlin.time.Clock
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -159,7 +160,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt = LocalDateTime.now(),
+            createdAt = Clock.System.now(),
             updatedAt = null,
             tags = emptySet()
         )

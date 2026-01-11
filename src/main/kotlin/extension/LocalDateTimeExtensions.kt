@@ -1,13 +1,30 @@
 package extension
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.*
+import kotlin.time.Instant
 
-private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-private val DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+fun Instant.toDateString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val localDateTime = this.toLocalDateTime(timeZone)
 
-fun LocalDateTime.toDateString(): String =
-    this.toLocalDate().format(DATE_FORMAT)
+    val day = localDateTime.date.dayOfMonth
+    val month = localDateTime.date.monthNumber
+    val year = localDateTime.date.year
 
-fun LocalDateTime.toDateTimeString(): String =
-    this.format(DATETIME_FORMAT)
+    return "%02d.%02d.%04d".format(day, month, year)
+}
+
+
+fun Instant.toDateTimeString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val localDateTime = this.toLocalDateTime(timeZone)
+
+    val date = localDateTime.date
+    val time = localDateTime.time
+
+    return "%02d.%02d.%04d %02d:%02d".format(
+        date.dayOfMonth,
+        date.monthNumber,
+        date.year,
+        time.hour,
+        time.minute
+    )
+}
