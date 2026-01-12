@@ -6,13 +6,14 @@ import kotlin.time.Instant
 fun Instant.toDateString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     val localDateTime = this.toLocalDateTime(timeZone)
 
-    val day = localDateTime.date.dayOfMonth
-    val month = localDateTime.date.monthNumber
-    val year = localDateTime.date.year
+    val date = localDateTime.date
 
-    return "%02d.%02d.%04d".format(day, month, year)
+    return "%02d.%02d.%04d".format(
+        date.dayOfMonth,
+        date.monthNumber,
+        date.year
+    )
 }
-
 
 fun Instant.toDateTimeString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     val localDateTime = this.toLocalDateTime(timeZone)
