@@ -10,5 +10,4 @@ object UsersTable : LongIdTable("users") {
     val passwordHash = varchar("password_hash", 255)
     val registrationDate = date("registration_date")
     val isActive = bool("is_active").default(true)
-    val createdAt = timestamp("created_at")
 }

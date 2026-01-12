@@ -11,6 +11,6 @@ object EntriesTable : LongIdTable("entries") {
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at").nullable()
     init {
-        index(true, userId, createdAt)
+        index(isUnique = false, userId, createdAt)
     }
 }
