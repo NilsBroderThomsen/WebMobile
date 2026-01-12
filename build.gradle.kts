@@ -26,6 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+    implementation("ch.qos.logback:logback-classic:1.5.11")
 
     // Ktor Client (Woche 4)
     implementation("io.ktor:ktor-client-core:$ktorVersion")

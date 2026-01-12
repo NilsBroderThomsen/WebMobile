@@ -1,6 +1,79 @@
 {
-    "exportDate": "2025-11-05T13:49:34.144849600",
+    "exportDate": "2026-01-12T14:56:23.465978100Z",
     "userId": 1,
-    "totalEntries": 0,
-    "entries": []
+    "totalEntries": 9,
+    "entries": [
+        {
+            "id": 2,
+            "title": "Tired",
+            "content": "Long night.",
+            "moodRating": 4,
+            "createdAt": "2026-01-06T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 3,
+            "title": "Excited",
+            "content": "New project started!",
+            "moodRating": 9,
+            "createdAt": "2026-01-07T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 4,
+            "title": "Neutral Day",
+            "content": "Nothing special.",
+            "moodRating": null,
+            "createdAt": "2026-01-08T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 5,
+            "title": "Focused",
+            "content": "Deep work session, few distractions.",
+            "moodRating": 7,
+            "createdAt": "2026-01-09T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 6,
+            "title": "Stressed",
+            "content": "Deadlines piling up.",
+            "moodRating": 3,
+            "createdAt": "2026-01-10T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 7,
+            "title": "Okay-ish",
+            "content": "Average day, nothing big.",
+            "moodRating": 5,
+            "createdAt": "2026-01-11T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 8,
+            "title": "Great Weather",
+            "content": "Walked outside and relaxed.",
+            "moodRating": 8,
+            "createdAt": "2026-01-12T14:56:04.030739800Z",
+            "updatedAt": null
+        },
+        {
+            "id": 1768229770939,
+            "title": "API Test 1",
+            "content": "Das ist ein Testeintrag",
+            "moodRating": 5,
+            "createdAt": "2026-01-12T14:56:10.939755600Z",
+            "updatedAt": null
+        },
+        {
+            "id": 1768229771124,
+            "title": "Ohne Stimmung",
+            "content": "Kein MoodRating gesetzt",
+            "moodRating": null,
+            "createdAt": "2026-01-12T14:56:11.124782500Z",
+            "updatedAt": null
+        }
+    ]
 }

@@ -1,1 +1,10 @@
 ID,Title,Content,MoodRating,CreatedAt,UpdatedAt
+2,Tired,Long night.,4,2026-01-06T14:56:04.030739800Z,
+3,Excited,New project started!,9,2026-01-07T14:56:04.030739800Z,
+4,Neutral Day,Nothing special.,,2026-01-08T14:56:04.030739800Z,
+5,Focused,"Deep work session, few distractions.",7,2026-01-09T14:56:04.030739800Z,
+6,Stressed,Deadlines piling up.,3,2026-01-10T14:56:04.030739800Z,
+7,Okay-ish,"Average day, nothing big.",5,2026-01-11T14:56:04.030739800Z,
+8,Great Weather,Walked outside and relaxed.,8,2026-01-12T14:56:04.030739800Z,
+1768229770939,API Test 1,Das ist ein Testeintrag,5,2026-01-12T14:56:10.939755600Z,
+1768229771124,Ohne Stimmung,Kein MoodRating gesetzt,,2026-01-12T14:56:11.124782500Z,

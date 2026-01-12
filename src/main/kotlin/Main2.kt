@@ -23,8 +23,8 @@ suspend fun main() = coroutineScope {
     println("2. CSV-Import mit Flow (Progress-Updates):")
     val testCsvLines = listOf(
         "id,userId,createdAt,title,content,moodRating",
-        "100,1,2024-01-20T10:00:00,Imported Entry,Test content here,7",
-        "101,1,2024-01-21T11:00:00,Another One,More content,6"
+        "100,1,2024-01-20T10:00:00Z,Imported Entry,Test content here,7",
+        "101,1,2024-01-21T11:00:00Z,Another One,More content,6"
     )
 
     importService.importEntriesFlow(testCsvLines, UserId(1))
