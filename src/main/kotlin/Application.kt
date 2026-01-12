@@ -4,6 +4,12 @@ import dto.SuccessResponse
 import dto.UpdateEntryRequest
 import extension.isValidMoodRating
 import extension.toDto
+import model.Entry
+import model.EntryId
+import model.UserId
+import repository.MoodTrackerRepository
+import service.ExportService
+import service.ImportService
 import io.ktor.http.ContentDisposition
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -13,9 +19,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import io.ktor.server.html.*
-import kotlinx.html.*
-import org.slf4j.event.Level
 import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -24,13 +27,7 @@ import io.ktor.server.request.receive
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
-import model.Entry
-import model.EntryId
-import model.UserId
-import repository.MoodTrackerRepository
-import service.ExportService
-import service.ImportService
-import java.time.LocalDateTime
+import org.slf4j.event.Level
 import kotlin.time.Clock
 
 fun main() {

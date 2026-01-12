@@ -6,13 +6,13 @@ import extension.toExportDto
 import kotlinx.serialization.json.Json
 import model.UserId
 import repository.MoodTrackerRepository
-import java.time.LocalDateTime
+import kotlin.time.Clock
 
 class ExportService(private val repository: MoodTrackerRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {
         val entries = repository.findAllEntries(userId)
         val exportData = ExportData(
-            exportDate = LocalDateTime.now().toString(),
+            exportDate = Clock.System.now().toString(),
             userId = userId.value,
             totalEntries = entries.size,
             entries = entries.map { it.toExportDto() }

@@ -1,12 +1,14 @@
 package repository
 
 import kotlinx.coroutines.delay
-import java.time.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
-import java.time.LocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 
 class MoodTrackerRepository {
     private val users = mutableListOf<User>()
@@ -44,10 +46,8 @@ class MoodTrackerRepository {
     }
 
     fun initializeWithTestData() {
-        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", LocalDate.now())
+        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", Clock.System.todayIn(TimeZone.currentSystemDefault()))
         users.add(user)
-
-        val now = LocalDateTime.now()
 
         fun e(
             id: Long,
@@ -61,7 +61,7 @@ class MoodTrackerRepository {
             title = title,
             content = content,
             moodRating = mood,
-            createdAt = now.minusDays(daysAgo),
+            createdAt = Clock.System.now() - daysAgo.days,
             updatedAt = null,
             tags = emptySet()
         )
@@ -70,7 +70,7 @@ class MoodTrackerRepository {
             e(1, "Happy Day", "Great day,,, at work!", 8, 7),
             e(2, "Tired", "Long night.", 4, 6),
             e(3, "Excited", "New project started!", 9, 5),
-            e(4, "Neutral Day", "Nothing special.", null, 4),  // ohne moodRating
+            e(4, "Neutral Day", "Nothing special.", null, 4),
             e(5, "Focused", "Deep work session, few distractions.", 7, 3),
             e(6, "Stressed", "Deadlines piling up.", 3, 2),
             e(7, "Okay-ish", "Average day, nothing big.", 5, 1),

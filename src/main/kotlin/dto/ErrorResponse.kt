@@ -1,12 +1,12 @@
 package dto
 
 import kotlinx.serialization.*
-import java.time.LocalDateTime
+import kotlin.time.Clock
 
 // DTO für Error-Responses
 @Serializable
 data class ErrorResponse(
     val error: String,
     val message: String,
-    val timestamp: String = LocalDateTime.now().toString()
+    val timestamp: String =  Clock.System.now().toString()
 )
