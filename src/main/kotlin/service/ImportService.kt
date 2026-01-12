@@ -3,12 +3,13 @@ package service
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import dto.ExportData
 import dto.ImportResult
+import extension.isValidMoodRating
 import kotlinx.serialization.json.Json
-import model.EntryBuilder
+import model.Entry
 import model.EntryId
 import model.UserId
 import repository.MoodTrackerRepository
-import java.time.LocalDateTime
+import kotlin.time.Instant
 
 class ImportService(private val repository: MoodTrackerRepository) {
     suspend fun importFromJson(jsonData: String, userId: UserId): ImportResult {
@@ -47,21 +48,25 @@ class ImportService(private val repository: MoodTrackerRepository) {
                 }
 
                 try {
-                    val createdAt = LocalDateTime.parse(entryDto.createdAt)
-                    val builder = EntryBuilder()
-                        .withId(EntryId(entryDto.id))
-                        .forUser(userId)
-                        .withTitle(title)
-                        .withContent(entryDto.content)
-                        .createdAt(createdAt)
-
-                    entryDto.moodRating?.let { builder.withMood(it) }
-
-                    entryDto.updatedAt
+                    val moodRating = entryDto.moodRating
+                    if (moodRating != null && !moodRating.isValidMoodRating()) {
+                        throw IllegalArgumentException("Mood rating must be between 1 and 10")
+                    }
+                    val createdAt = Instant.parse(entryDto.createdAt)
+                    val updatedAt = entryDto.updatedAt
                         ?.takeIf { it.isNotBlank() }
-                        ?.let { builder.updatedAt(LocalDateTime.parse(it)) }
+                        ?.let { Instant.parse(it) }
 
-                    val entry = builder.build()
+                    val entry = Entry(
+                        id = EntryId(entryDto.id),
+                        userId = userId,
+                        title = title,
+                        content = entryDto.content,
+                        moodRating = moodRating,
+                        createdAt = createdAt,
+                        updatedAt = updatedAt,
+                        tags = emptySet()
+                    )
                     repository.addEntry(entry)
                     successful++
                     existingTitles += titleKey
@@ -125,21 +130,24 @@ class ImportService(private val repository: MoodTrackerRepository) {
                     }
                     val createdAtRaw = row["CreatedAt"]?.trim()
                         ?: throw IllegalArgumentException("CreatedAt missing")
-                    val createdAt = LocalDateTime.parse(createdAtRaw)
+                    val createdAt = Instant.parse(createdAtRaw)
                     val moodRating = row["MoodRating"].orEmpty().trim().takeIf { it.isNotEmpty() }?.toInt()
+                    if (moodRating != null && !moodRating.isValidMoodRating()) {
+                        throw IllegalArgumentException("Mood rating must be between 1 and 10")
+                    }
                     val updatedAt = row["UpdatedAt"].orEmpty().trim().takeIf { it.isNotEmpty() }
+                        ?.let { Instant.parse(it) }
 
-                    val builder = EntryBuilder()
-                        .withId(EntryId(id))
-                        .forUser(userId)
-                        .withTitle(title)
-                        .withContent(content)
-                        .createdAt(createdAt)
-
-                    moodRating?.let { builder.withMood(it) }
-                    updatedAt?.let { builder.updatedAt(LocalDateTime.parse(it)) }
-
-                    val entry = builder.build()
+                    val entry = Entry(
+                        id = EntryId(id),
+                        userId = userId,
+                        title = title,
+                        content = content,
+                        moodRating = moodRating,
+                        createdAt = createdAt,
+                        updatedAt = updatedAt,
+                        tags = emptySet()
+                    )
                     repository.addEntry(entry)
                     successful++
                     existingTitles += titleKey

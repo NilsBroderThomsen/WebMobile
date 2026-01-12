@@ -3,8 +3,7 @@ package extension
 import model.Entry
 import model.EntryId
 import model.UserId
-import model.EntryBuilder
-import java.time.LocalDateTime
+import kotlin.time.Instant
 
 val String.isValidEmail: Boolean
     get() = this.contains("@") && this.contains(".")
@@ -38,12 +37,21 @@ fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
             ?: throw IllegalArgumentException("Mood rating must be a number")
     }
 
-    return EntryBuilder()
-        .withId(idValue)
-        .forUser(targetUserId)
-        .createdAt(LocalDateTime.parse(createdAtValue))
-        .withTitle(title)
-        .withContent(content)
-        .apply { moodRating?.let { withMood(it) } }
-        .build()
+    if (title.isBlank()) {
+        throw IllegalArgumentException("Title must not be blank")
+    }
+    if (moodRating != null && !moodRating.isValidMoodRating()) {
+        throw IllegalArgumentException("Mood rating must be between 1 and 10")
+    }
+
+    return Entry(
+        id = idValue,
+        userId = targetUserId,
+        title = title,
+        content = content,
+        moodRating = moodRating,
+        createdAt = Instant.parse(createdAtValue),
+        updatedAt = null,
+        tags = emptySet()
+    )
 }
