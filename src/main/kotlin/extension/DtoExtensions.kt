@@ -14,8 +14,7 @@ fun Entry.toDto(): EntryDto = EntryDto(
     moodRating = this.moodRating,
     createdAt = this.createdAt,
     updatedAt = this.updatedAt,
-    wordCount = this.wordCount,
-    moodLevel = this.moodRating?.toMoodLevel()?.name
+    tags = this.tags
 )
 
 fun Entry.toExportDto(): EntryExportDto = EntryExportDto(
