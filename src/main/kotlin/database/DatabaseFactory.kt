@@ -1,16 +1,23 @@
 package database
 
+import database.tables.EntriesTable
+import database.tables.UsersTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
     fun init() {
-    // TODO: Database.connect() mit SQLite aufrufen
-    // URL: "jdbc:sqlite:moodtracker.db"
-    // Driver: "org.sqlite.JDBC"
+        Database.connect(
+            url = "jdbc:sqlite:moodtracker.db",
+            driver = "org.sqlite.JDBC"
+        )
 
-    // TODO: Schema erstellen in transaction { } Block
-    // SchemaUtils.create(...) mit allen Tables
+        transaction {
+            SchemaUtils.create(
+                EntriesTable,
+                UsersTable
+            )
+        }
     }
 }

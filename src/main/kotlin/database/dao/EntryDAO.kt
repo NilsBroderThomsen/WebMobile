@@ -20,7 +20,7 @@ class EntryDAO(id: EntityID<Long>) : LongEntity(id) {
 
     fun toModel(): Entry = Entry(
         id = EntryId(this.id.value),
-        userId = UserId(this.user.id),
+        userId = UserId(this.user.id.value),
         title = this.title,
         content = this.content,
         moodRating = this.moodRating,
