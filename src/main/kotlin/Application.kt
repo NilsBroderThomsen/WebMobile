@@ -257,7 +257,7 @@ private fun Route.putUpdateEntry(repository: MoodTrackerRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            updatedAt = LocalDateTime.now()
+            updatedAt = Clock.System.now()
         )
 
         val savedEntry = repository.updateEntry(updatedEntry)
