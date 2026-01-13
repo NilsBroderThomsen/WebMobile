@@ -1,6 +1,7 @@
 package service
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import database.MoodTrackerDatabaseRepository
 import dto.ExportData
 import dto.ImportResult
 import extension.isValidMoodRating
@@ -8,10 +9,9 @@ import kotlinx.serialization.json.Json
 import model.Entry
 import model.EntryId
 import model.UserId
-import repository.MoodTrackerRepository
 import kotlin.time.Instant
 
-class ImportService(private val repository: MoodTrackerRepository) {
+class ImportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun importFromJson(jsonData: String, userId: UserId): ImportResult {
         val json = Json { ignoreUnknownKeys = true }
         return try {
@@ -67,7 +67,7 @@ class ImportService(private val repository: MoodTrackerRepository) {
                         updatedAt = updatedAt,
                         tags = emptySet()
                     )
-                    repository.addEntry(entry)
+                    repository.createEntry(entry)
                     successful++
                     existingTitles += titleKey
                 } catch (e: Exception) {
@@ -148,7 +148,7 @@ class ImportService(private val repository: MoodTrackerRepository) {
                         updatedAt = updatedAt,
                         tags = emptySet()
                     )
-                    repository.addEntry(entry)
+                    repository.createEntry(entry)
                     successful++
                     existingTitles += titleKey
                 } catch (e: Exception) {

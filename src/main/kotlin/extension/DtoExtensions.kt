@@ -12,8 +12,8 @@ fun Entry.toDto(): EntryDto = EntryDto(
     title = this.title,
     content = this.content,
     moodRating = this.moodRating,
-    createdAt = this.createdAt,
-    updatedAt = this.updatedAt,
+    createdAt = this.createdAt.toString(),
+    updatedAt = this.updatedAt.toString(),
     tags = this.tags
 )
 
@@ -30,6 +30,6 @@ fun User.toDto(): UserDto = UserDto(
     id = this.id.value,
     username = this.username,
     email = this.email,
-    registrationDate = this.registrationDate,
+    registrationDate = this.registrationDate.toString(),
     isActive = this.isActive
 )

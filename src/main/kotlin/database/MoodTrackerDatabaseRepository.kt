@@ -1,54 +1,78 @@
 package database
 
-import kotlin.time.Clock
+import database.dao.EntryDAO
+import database.dao.UserDAO
+import database.tables.EntriesTable
+import database.tables.UsersTable
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import model.EntryId
 import model.User
 import model.Entry
 import model.UserId
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.time.Clock
 
 class MoodTrackerDatabaseRepository {
-    // User Operations
     fun createUser(user: User): User = transaction {
-    // TODO: UserDAO.new { } Block erstellen
-    // TODO: Alle Properties setzen (Typ-Konvertierung für registrationDate!)
-    // TODO: createdAt mit Clock.System.now() setzen
-    // TODO: toModel() zurückgeben
+        UserDAO.new {
+            username = user.username
+            email = user.email
+            passwordHash = user.passwordHash
+            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            isActive = user.isActive
+        }.toModel()
     }
 
     fun findUserById(userId: UserId): User? = transaction {
-    // TODO: UserDAO.findById() verwenden und mit toModel() konvertieren
+        UserDAO.findById(userId.value)?.toModel()
     }
 
     fun findUserByEmail(email: String): User? = transaction {
-    // TODO: UserDAO.find { } mit email-Bedingung verwenden
+        UserDAO.find { UsersTable.email eq email }.singleOrNull()?.toModel()
     }
 
-    // Entry Operations
     fun createEntry(entry: Entry): Entry = transaction {
-    // TODO: User-DAO laden (oder Exception)
-    // TODO: EntryDAO.new { } Block erstellen
-    // TODO: Properties setzen (Typ-Konvertierung für createdAt!)
-    // TODO: toModel() zurückgeben
+        val user = UserDAO.findById(entry.userId.value)
+            ?: error("User with id ${entry.userId.value} not found")
+
+        EntryDAO.new {
+            this.user = user
+            this.title = entry.title
+            this.content = entry.content
+            this.moodRating = entry.moodRating
+            this.createdAt = entry.createdAt
+            this.updatedAt = entry.updatedAt
+        }.toModel()
     }
 
     fun findAllEntries(userId: UserId): List<Entry> = transaction {
-    // TODO: EntryDAO.find { } mit userId-Filter
-    // TODO: Nach createdAt sortieren (verwende sortedByDescending, nicht orderBy!)
-    // TODO: Mit map { } zu List<Entry> konvertieren
+        EntryDAO.find { EntriesTable.userId eq userId.value }
+            .sortedByDescending { it.createdAt }
+            .map { it.toModel() }
     }
+
     fun findEntryById(entryId: EntryId): Entry? = transaction {
-    // TODO: EntryDAO.findById() und toModel()
+        EntryDAO.findById(entryId.value)?.toModel()
     }
+
     fun updateEntry(entry: Entry): Entry = transaction {
-    // TODO: EntryDAO finden
-    // TODO: Properties aktualisieren
-    // TODO: updatedAt setzen
-    // TODO: toModel() zurückgeben
+        val entryDAO = EntryDAO.findById(entry.id.value)
+            ?: error("Entry with id ${entry.id.value} not found")
+
+        entryDAO.apply {
+            title = entry.title
+            content = entry.content
+            moodRating = entry.moodRating
+            updatedAt = Clock.System.now()
+        }.toModel()
     }
+
     fun deleteEntry(entryId: EntryId): Boolean = transaction {
-    // TODO: EntryDAO finden und delete() aufrufen
-    // TODO: Boolean zurückgeben (Erfolg?)
+        val entryDAO = EntryDAO.findById(entryId.value)
+            ?: return@transaction false
+
+        entryDAO.delete()
+        true
     }
 }

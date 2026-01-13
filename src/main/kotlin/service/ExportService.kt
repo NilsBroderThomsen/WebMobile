@@ -1,14 +1,14 @@
 package service
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
+import database.MoodTrackerDatabaseRepository
 import dto.ExportData
 import extension.toExportDto
 import kotlinx.serialization.json.Json
 import model.UserId
-import repository.MoodTrackerRepository
 import kotlin.time.Clock
 
-class ExportService(private val repository: MoodTrackerRepository) {
+class ExportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {
         val entries = repository.findAllEntries(userId)
         val exportData = ExportData(

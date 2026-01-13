@@ -1,3 +1,5 @@
+import database.DatabaseFactory
+import database.MoodTrackerDatabaseRepository
 import dto.CreateEntryRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
@@ -9,7 +11,6 @@ import extension.toEmoji
 import model.Entry
 import model.EntryId
 import model.UserId
-import repository.MoodTrackerRepository
 import service.ExportService
 import service.ImportService
 import io.ktor.http.ContentDisposition
@@ -53,13 +54,19 @@ import kotlinx.html.section
 import kotlinx.html.textArea
 import kotlinx.html.title
 import kotlinx.html.ul
+import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
 
+fun Application.configureDatabases() {
+    DatabaseFactory.init()
+}
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        configureDatabases()
         install(CallLogging) {
             level = Level.INFO
         }
@@ -75,8 +82,7 @@ fun Application.configureRouting() {
             ignoreUnknownKeys = true
         })
     }
-    val repository = MoodTrackerRepository()
-    repository.initializeWithTestData()
+    val repository = MoodTrackerDatabaseRepository()
 
     routing {
         staticResources("/static", "static")
@@ -98,7 +104,7 @@ fun Application.configureRouting() {
     }
 }
 
-private fun Route.getHomeHTML(repository: MoodTrackerRepository) {
+private fun Route.getHomeHTML(repository: MoodTrackerDatabaseRepository) {
     get("/") {
         val userId = UserId(1)
         val entries = repository.findAllEntries(userId)
@@ -155,7 +161,7 @@ private fun Route.getHomeHTML(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.getEntryDetailsHTML(repository: MoodTrackerRepository) {
+private fun Route.getEntryDetailsHTML(repository: MoodTrackerDatabaseRepository) {
     get("/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
         if (id == null) {
@@ -211,7 +217,7 @@ private fun Route.getEntryDetailsHTML(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.postCreateEntryHTML(repository: MoodTrackerRepository) {
+private fun Route.postCreateEntryHTML(repository: MoodTrackerDatabaseRepository) {
     post("/entries") {
         val parameters = call.receiveParameters()
         val title = parameters["title"] ?: ""
@@ -275,13 +281,13 @@ private fun Route.postCreateEntryHTML(repository: MoodTrackerRepository) {
             updatedAt = null,
             tags = emptySet()
         )
-        repository.addEntry(entry)
+        repository.createEntry(entry)
 
         call.respondRedirect("/")
     }
 }
 
-private fun Route.postDeleteEntryHTML(repository: MoodTrackerRepository) {
+private fun Route.postDeleteEntryHTML(repository: MoodTrackerDatabaseRepository) {
     post("/entries/{id}/delete") {
         val id = call.parameters["id"]?.toLongOrNull()
         if (id == null) {
@@ -309,7 +315,7 @@ private fun Route.postDeleteEntryHTML(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.getUserEntries(repository: MoodTrackerRepository) {
+private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
     get("/api/users/{userId}/entries") {
         val userId = call.parameters["userId"]?.toLongOrNull()
 
@@ -330,7 +336,7 @@ private fun Route.getUserEntries(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
+private fun Route.getEntryDetails(repository: MoodTrackerDatabaseRepository) {
     get("/api/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
         if (id == null) {
@@ -360,7 +366,7 @@ private fun Route.getEntryDetails(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
+private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
     post("/api/users/{userId}/entries") {
         val userId = call.parameters["userId"]?.toLongOrNull()
             ?: return@post call.respond(
@@ -407,13 +413,13 @@ private fun Route.postCreateEntry(repository: MoodTrackerRepository) {
             tags = emptySet()
         )
 
-        val savedEntry = repository.addEntry(entry)
+        val savedEntry = repository.createEntry(entry)
 
         call.respond(HttpStatusCode.Created, savedEntry.toDto())
     }
 }
 
-private fun Route.deleteEntry(repository: MoodTrackerRepository) {
+private fun Route.deleteEntry(repository: MoodTrackerDatabaseRepository) {
     delete("/api/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
         if (id == null) {
@@ -446,7 +452,7 @@ private fun Route.deleteEntry(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.putUpdateEntry(repository: MoodTrackerRepository) {
+private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
     put("/api/entries/{id}") {
         val id = call.parameters["id"]?.toLongOrNull()
             ?: return@put call.respond(
@@ -537,7 +543,7 @@ private fun validateEntryPayload(
     return errors
 }
 
-private fun Route.exportJson(repository: MoodTrackerRepository) {
+private fun Route.exportJson(repository: MoodTrackerDatabaseRepository) {
     val exportService = ExportService(repository)
     get("/api/users/{userId}/export/json") {
         val userId = call.parameters["userId"]?.toLongOrNull()
@@ -560,7 +566,7 @@ private fun Route.exportJson(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.exportCsv(repository: MoodTrackerRepository) {
+private fun Route.exportCsv(repository: MoodTrackerDatabaseRepository) {
     val exportService = ExportService(repository)
     get("/api/users/{userId}/export/csv") {
         val userId = call.parameters["userId"]?.toLongOrNull()
@@ -588,7 +594,7 @@ private fun Route.exportCsv(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.importJson(repository: MoodTrackerRepository) {
+private fun Route.importJson(repository: MoodTrackerDatabaseRepository) {
     post("/api/users/{userId}/import/json") {
         val userId = call.parameters["userId"]?.toLongOrNull()
             ?: return@post call.respond(
@@ -610,7 +616,7 @@ private fun Route.importJson(repository: MoodTrackerRepository) {
     }
 }
 
-private fun Route.importCsv(repository: MoodTrackerRepository) {
+private fun Route.importCsv(repository: MoodTrackerDatabaseRepository) {
     post("/api/users/{userId}/import/csv") {
         val userId = call.parameters["userId"]?.toLongOrNull()
             ?: return@post call.respond(
