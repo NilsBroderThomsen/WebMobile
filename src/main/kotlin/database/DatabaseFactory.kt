@@ -9,6 +9,7 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import extension.toJavaInstant
 import kotlin.time.Clock
 
 object DatabaseFactory {
@@ -39,7 +40,7 @@ object DatabaseFactory {
                     title = "Mein erster Eintrag"
                     content = "Automatisch beim Start angelegt."
                     moodRating = 4
-                    createdAt = Clock.System.now()
+                    createdAt = Clock.System.now().toJavaInstant()
                     updatedAt = null
                 }
             }

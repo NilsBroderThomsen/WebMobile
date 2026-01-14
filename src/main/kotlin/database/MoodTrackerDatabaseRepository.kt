@@ -11,6 +11,7 @@ import model.User
 import model.Entry
 import model.UserId
 import org.jetbrains.exposed.sql.transactions.transaction
+import extension.toJavaInstant
 import kotlin.time.Clock
 
 class MoodTrackerDatabaseRepository {
@@ -45,8 +46,8 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = Clock.System.now()
-            this.updatedAt = entry.updatedAt
+            this.createdAt = Clock.System.now().toJavaInstant()
+            this.updatedAt = entry.updatedAt?.toJavaInstant()
         }.toModel()
     }
 
@@ -68,7 +69,7 @@ class MoodTrackerDatabaseRepository {
             title = entry.title
             content = entry.content
             moodRating = entry.moodRating
-            updatedAt = Clock.System.now()
+            updatedAt = Clock.System.now().toJavaInstant()
         }.toModel()
     }
 

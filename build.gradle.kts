@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.20"
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
     application
 }
 
@@ -18,6 +18,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.61.0")
 
     // SQLite JDBC Treiber
     implementation("org.xerial:sqlite-jdbc:3.47.1.0")
@@ -27,7 +28,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     // kotlinx.datetime
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.7.1")
 
     // Ktor Server (aus Woche 3-4)
     implementation("io.ktor:ktor-server-html-builder-jvm:$ktorVersion")

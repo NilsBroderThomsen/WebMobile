@@ -4,6 +4,7 @@ import database.tables.EntriesTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import extension.toKotlinInstant
 import model.Entry
 import model.EntryId
 import model.UserId
@@ -24,7 +25,7 @@ class EntryDAO(id: EntityID<Long>) : LongEntity(id) {
         title = title,
         content = content,
         moodRating = moodRating,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
+        createdAt = createdAt.toKotlinInstant(),
+        updatedAt = updatedAt?.toKotlinInstant(),
     )
 }
