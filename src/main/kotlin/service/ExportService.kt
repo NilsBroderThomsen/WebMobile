@@ -4,9 +4,9 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import database.MoodTrackerDatabaseRepository
 import dto.ExportData
 import extension.toExportDto
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import model.UserId
-import kotlin.time.Clock
 
 class ExportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {

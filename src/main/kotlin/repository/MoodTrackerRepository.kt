@@ -1,13 +1,13 @@
 package repository
 
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
-import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
 class MoodTrackerRepository {

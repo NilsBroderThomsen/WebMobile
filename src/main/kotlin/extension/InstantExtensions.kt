@@ -2,7 +2,7 @@ package extension
 
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 
 fun Instant.toDateString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     val localDateTime = this.toLocalDateTime(timeZone)

@@ -15,9 +15,9 @@ import model.EntryId
 import model.MoodLevel
 import model.User
 import model.UserId
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes

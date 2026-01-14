@@ -3,11 +3,11 @@ package model
 import extension.isValidMoodRating
 import extension.normalizeTag
 import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 @JvmInline
 value class EntryId (val value: Long)
