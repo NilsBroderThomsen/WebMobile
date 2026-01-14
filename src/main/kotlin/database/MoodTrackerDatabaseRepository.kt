@@ -11,7 +11,7 @@ import model.User
 import model.Entry
 import model.UserId
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 class MoodTrackerDatabaseRepository {
     fun createUser(user: User): User = transaction {

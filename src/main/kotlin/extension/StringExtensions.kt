@@ -3,7 +3,7 @@ package extension
 import model.Entry
 import model.EntryId
 import model.UserId
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 
 val String.isValidEmail: Boolean
     get() = this.contains("@") && this.contains(".")

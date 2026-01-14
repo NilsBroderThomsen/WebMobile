@@ -3,7 +3,7 @@ package model
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 @JvmInline
 value class UserId(val value: Long)
