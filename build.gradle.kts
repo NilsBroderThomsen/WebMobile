@@ -28,7 +28,6 @@ dependencies {
 
     // kotlinx.datetime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.7.1")
 
     // Ktor Server (aus Woche 3-4)
     implementation("io.ktor:ktor-server-html-builder-jvm:$ktorVersion")

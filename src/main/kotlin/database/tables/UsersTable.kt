@@ -2,7 +2,6 @@ package database.tables
 
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.kotlin.datetime.date
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 object UsersTable : LongIdTable("users") {
     val username = varchar("username", 100).uniqueIndex()

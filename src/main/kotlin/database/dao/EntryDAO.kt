@@ -19,12 +19,12 @@ class EntryDAO(id: EntityID<Long>) : LongEntity(id) {
     var updatedAt by EntriesTable.updatedAt
 
     fun toModel(): Entry = Entry(
-        id = EntryId(this.id.value),
-        userId = UserId(this.user.id.value),
-        title = this.title,
-        content = this.content,
-        moodRating = this.moodRating,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
+        id = EntryId(id.value),
+        userId = UserId(user.id.value),
+        title = title,
+        content = content,
+        moodRating = moodRating,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 }

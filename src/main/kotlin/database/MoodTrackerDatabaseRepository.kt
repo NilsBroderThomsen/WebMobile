@@ -45,7 +45,7 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = entry.createdAt
+            this.createdAt = Clock.System.now()
             this.updatedAt = entry.updatedAt
         }.toModel()
     }

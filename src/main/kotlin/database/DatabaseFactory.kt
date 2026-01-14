@@ -1,5 +1,6 @@
 package database
 
+import database.dao.EntryDAO
 import database.dao.UserDAO
 import database.tables.EntriesTable
 import database.tables.UsersTable
@@ -23,13 +24,23 @@ object DatabaseFactory {
                 EntriesTable
             )
 
-            if (UserDAO.findById(1L) == null) {
-                UserDAO.new(1L) {
-                    username = "default-user"
-                    email = "default@example.com"
-                    passwordHash = "test"
-                    registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
-                    isActive = true
+            val defaultUser = UserDAO.findById(1L) ?: UserDAO.new(1L) {
+                username = "default-user"
+                email = "default@example.com"
+                passwordHash = "test"
+                registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                isActive = true
+            }
+
+            val hasAnyEntry = EntryDAO.find { EntriesTable.userId eq defaultUser.id.value }.empty().not()
+            if (!hasAnyEntry) {
+                EntryDAO.new {
+                    user = defaultUser
+                    title = "Mein erster Eintrag"
+                    content = "Automatisch beim Start angelegt."
+                    moodRating = 4
+                    createdAt = Clock.System.now()
+                    updatedAt = null
                 }
             }
         }
