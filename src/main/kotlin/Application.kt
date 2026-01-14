@@ -1,11 +1,14 @@
 import database.DatabaseFactory
 import database.MoodTrackerDatabaseRepository
 import dto.CreateEntryRequest
+import dto.CreateUserRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
 import dto.UpdateEntryRequest
 import extension.entryCard
+import extension.isValidEmail
 import extension.isValidMoodRating
+import extension.isValidUsername
 import extension.toDto
 import extension.toEmoji
 import model.Entry
@@ -34,6 +37,8 @@ import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import kotlinx.html.ButtonType
 import kotlinx.html.FormMethod
 import kotlinx.html.InputType
@@ -93,6 +98,7 @@ fun Application.configureRouting() {
 
         getUserEntries(repository)
         getEntryDetails(repository)
+        postCreateUser(repository)
         postCreateEntry(repository)
         putUpdateEntry(repository)
         deleteEntry(repository)
@@ -366,6 +372,75 @@ private fun Route.getEntryDetails(repository: MoodTrackerDatabaseRepository) {
     }
 }
 
+private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
+    post("/api/users") {
+        val request = try {
+            call.receive<CreateUserRequest>()
+        } catch (ex: ContentTransformationException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Request body is not valid JSON"
+                )
+            )
+            return@post
+        }
+        
+        val username = request.username.trim()
+        val email = request.email.trim()
+        val password = request.password.trim()
+        val errors = validateUserPayload(username, email, password)
+
+        if (errors.isNotEmpty()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = errors.joinToString(" ")
+                )
+            )
+            return@post
+        }
+
+        val existingEmail = repository.findUserByEmail(email)
+        if (existingEmail != null) {
+            call.respond(
+                HttpStatusCode.Conflict,
+                ErrorResponse(
+                    error = "Conflict",
+                    message = "Email is already registered"
+                )
+            )
+            return@post
+        }
+
+        val existingUsername = repository.findUserByUsername(username)
+        if (existingUsername != null) {
+            call.respond(
+                HttpStatusCode.Conflict,
+                ErrorResponse(
+                    error = "Conflict",
+                    message = "Username is already taken"
+                )
+            )
+            return@post
+        }
+
+        val user = model.User(
+            id = UserId(System.currentTimeMillis()),
+            username = username,
+            email = email,
+            passwordHash = password,
+            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            isActive = true
+        )
+
+        val savedUser = repository.createUser(user)
+        call.respond(HttpStatusCode.Created, savedUser.toDto())
+    }
+}
+
 private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
     post("/api/users/{userId}/entries") {
         val userId = call.parameters["userId"]?.toLongOrNull()
@@ -373,6 +448,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
                 HttpStatusCode.BadRequest,
                 ErrorResponse("Bad Request", "Invalid userId")
             )
+
         val request = try {
             call.receive<CreateEntryRequest>()
         } catch (ex: ContentTransformationException) {
@@ -389,8 +465,8 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
         val title = request.title.trim()
         val content = request.content.trim()
         val moodRating = request.moodRating
-        val errors = validateEntryPayload(title, content, moodRating)
 
+        val errors = validateEntryPayload(title, content, moodRating)
         if (errors.isNotEmpty()) {
             call.respond(
                 HttpStatusCode.BadRequest,
@@ -538,6 +614,34 @@ private fun validateEntryPayload(
 
     if (moodRating != null && !moodRating.isValidMoodRating()) {
         errors += "Mood rating must be a number between 1 and 10 or Blank."
+    }
+
+    return errors
+}
+
+private fun validateUserPayload(
+    username: String,
+    email: String,
+    password: String
+): List<String> {
+    val errors = mutableListOf<String>()
+
+    if (username.isBlank()) {
+        errors += "Username must not be blank."
+    } else if (!username.isValidUsername) {
+        errors += "Username must be 3-20 characters (letters, numbers, underscore)."
+    }
+
+    if (email.isBlank()) {
+        errors += "Email must not be blank."
+    } else if (!email.isValidEmail) {
+        errors += "Email format is invalid."
+    }
+
+    if (password.isBlank()) {
+        errors += "Password must not be blank."
+    } else if (password.length < 8) {
+        errors += "Password must be at least 8 characters."
     }
 
     return errors

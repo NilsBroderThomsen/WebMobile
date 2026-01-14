@@ -32,6 +32,10 @@ class MoodTrackerDatabaseRepository {
         UserDAO.find { UsersTable.email eq email }.singleOrNull()?.toModel()
     }
 
+    fun findUserByUsername(username: String): User? = transaction {
+        UserDAO.find { UsersTable.username eq username }.singleOrNull()?.toModel()
+    }
+
     fun createEntry(entry: Entry): Entry = transaction {
         val user = UserDAO.findById(entry.userId.value)
             ?: error("User with id ${entry.userId.value} not found")
@@ -41,7 +45,7 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = Clock.System.now()
+            this.createdAt = entry.createdAt
             this.updatedAt = entry.updatedAt
         }.toModel()
     }
