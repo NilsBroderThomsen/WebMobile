@@ -45,11 +45,11 @@ data class Entry (
         }
 
     fun updateContent(newContent: String):
-        Entry = copy(content = newContent, updatedAt = Clock.System.now())
+        Entry = copy(content = newContent, updatedAt = kotlin.time.Clock.System.now())
 
     fun updateMood(newRating: Int): Entry {
         require(newRating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
-        return copy(moodRating = newRating, updatedAt = Clock.System.now())
+        return copy(moodRating = newRating, updatedAt = kotlin.time.Clock.System.now())
     }
 
     fun addTag(tag: String): Entry {

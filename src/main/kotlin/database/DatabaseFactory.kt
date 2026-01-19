@@ -9,7 +9,6 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlinx.datetime.Clock
 
 object DatabaseFactory {
     fun init() {
@@ -28,7 +27,7 @@ object DatabaseFactory {
                 username = "default-user"
                 email = "default@example.com"
                 passwordHash = "test"
-                registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                registrationDate = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
                 isActive = true
             }
 
@@ -39,7 +38,7 @@ object DatabaseFactory {
                     title = "Mein erster Eintrag"
                     content = "Automatisch beim Start angelegt."
                     moodRating = 4
-                    createdAt = Clock.System.now()
+                    createdAt = kotlin.time.Clock.System.now()
                     updatedAt = null
                 }
             }

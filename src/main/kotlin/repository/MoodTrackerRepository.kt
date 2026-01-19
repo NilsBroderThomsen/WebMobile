@@ -46,7 +46,7 @@ class MoodTrackerRepository {
     }
 
     fun initializeWithTestData() {
-        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault()))
         users.add(user)
 
         fun e(
@@ -61,7 +61,7 @@ class MoodTrackerRepository {
             title = title,
             content = content,
             moodRating = mood,
-            createdAt = Clock.System.now() - daysAgo.days,
+            createdAt = kotlin.time.Clock.System.now() - daysAgo.days,
             updatedAt = null,
             tags = emptySet()
         )

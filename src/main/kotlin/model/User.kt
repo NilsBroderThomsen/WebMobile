@@ -18,7 +18,7 @@ data class User(
 ) {
     val accountAge: Long
         get() {
-            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val today = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
             return (today.toEpochDays() - registrationDate.toEpochDays()).toLong()
         }
 

@@ -17,7 +17,6 @@ import model.User
 import model.UserId
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -30,7 +29,7 @@ fun main() {
         username = "alice_123",
         email = "alice@example.com",
         passwordHash = "hashed-password",
-        registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        registrationDate = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
     )
 
     println("User erstellt: ${user.username} (${user.email})")
@@ -54,7 +53,7 @@ fun main() {
         title = "Toller Tag",
         content = "Heute war ein toller Tag mit viel Sonne und einem langen Spaziergang im Park.",
         moodRating = 8,
-        createdAt = Clock.System.now() - 5.hours,
+        createdAt = kotlin.time.Clock.System.now() - 5.hours,
         tags = setOf("sport", "freunde")
     )
 
@@ -64,7 +63,7 @@ fun main() {
         title = "Stressiger Tag",
         content = "Viele Meetings und kaum Zeit für Pausen.",
         moodRating = 3,
-        createdAt = Clock.System.now() - 1.days - 9.hours - 30.minutes,
+        createdAt = kotlin.time.Clock.System.now() - 1.days - 9.hours - 30.minutes,
         tags = setOf("arbeit")
     )
 
@@ -74,7 +73,7 @@ fun main() {
         title = "Ruhiger Abend",
         content = "Lesen eines Buches und entspannen auf dem Sofa.",
         moodRating = null,
-        createdAt = Clock.System.now() - 1.days - 21.hours,
+        createdAt = kotlin.time.Clock.System.now() - 1.days - 21.hours,
         tags = setOf("entspannung")
     )
 

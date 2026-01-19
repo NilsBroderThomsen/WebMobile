@@ -12,7 +12,7 @@ class ExportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun exportToJson(userId: UserId, prettyPrint: Boolean = true): String {
         val entries = repository.findAllEntries(userId)
         val exportData = ExportData(
-            exportDate = Clock.System.now().toString(),
+            exportDate = kotlin.time.Clock.System.now().toString(),
             userId = userId.value,
             totalEntries = entries.size,
             entries = entries.map { it.toExportDto() }

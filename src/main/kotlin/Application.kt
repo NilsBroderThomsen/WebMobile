@@ -44,7 +44,6 @@ import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
-import kotlinx.datetime.Clock
 
 fun Application.configureDatabases() {
     DatabaseFactory.init()
@@ -264,7 +263,7 @@ private fun Route.postCreateEntryHTML(repository: MoodTrackerDatabaseRepository)
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt =  Clock.System.now(),
+            createdAt =  kotlin.time.Clock.System.now(),
             updatedAt = null,
             tags = emptySet()
         )
@@ -413,7 +412,7 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
             username = username,
             email = email,
             passwordHash = password,
-            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            registrationDate = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault()),
             isActive = true
         )
 
@@ -465,7 +464,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt = Clock.System.now(),
+            createdAt = kotlin.time.Clock.System.now(),
             updatedAt = null,
             tags = emptySet()
         )
@@ -562,7 +561,7 @@ private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            updatedAt = Clock.System.now()
+            updatedAt = kotlin.time.Clock.System.now()
         )
 
         val savedEntry = repository.updateEntry(updatedEntry)

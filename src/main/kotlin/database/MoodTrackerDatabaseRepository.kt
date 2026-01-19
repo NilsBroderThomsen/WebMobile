@@ -11,7 +11,6 @@ import model.User
 import model.Entry
 import model.UserId
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlinx.datetime.Clock
 
 class MoodTrackerDatabaseRepository {
     fun createUser(user: User): User = transaction {
@@ -19,7 +18,7 @@ class MoodTrackerDatabaseRepository {
             username = user.username
             email = user.email
             passwordHash = user.passwordHash
-            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            registrationDate = kotlin.time.Clock.System.todayIn(TimeZone.currentSystemDefault())
             isActive = user.isActive
         }.toModel()
     }
@@ -45,7 +44,7 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = Clock.System.now()
+            this.createdAt = kotlin.time.Clock.System.now()
             this.updatedAt = entry.updatedAt
         }.toModel()
     }
@@ -68,7 +67,7 @@ class MoodTrackerDatabaseRepository {
             title = entry.title
             content = entry.content
             moodRating = entry.moodRating
-            updatedAt = Clock.System.now()
+            updatedAt = kotlin.time.Clock.System.now()
         }.toModel()
     }
 
