@@ -39,26 +39,7 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlinx.html.ButtonType
-import kotlinx.html.FormMethod
-import kotlinx.html.InputType
-import kotlinx.html.a
-import kotlinx.html.body
-import kotlinx.html.br
-import kotlinx.html.button
-import kotlinx.html.form
-import kotlinx.html.h1
-import kotlinx.html.h2
-import kotlinx.html.head
-import kotlinx.html.input
-import kotlinx.html.label
-import kotlinx.html.li
-import kotlinx.html.link
-import kotlinx.html.p
-import kotlinx.html.section
-import kotlinx.html.textArea
-import kotlinx.html.title
-import kotlinx.html.ul
+import kotlinx.html.*
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
@@ -585,13 +566,6 @@ private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
         )
 
         val savedEntry = repository.updateEntry(updatedEntry)
-            ?: return@put call.respond(
-                HttpStatusCode.InternalServerError,
-                ErrorResponse(
-                    error = "Internal Server Error",
-                    message = "Failed to update entry"
-                )
-            )
 
         call.respond(HttpStatusCode.OK, savedEntry.toDto())
     }

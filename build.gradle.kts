@@ -7,37 +7,35 @@ plugins {
 group = "org.example"
 version = "1.0-SNAPSHOT"
 val ktorVersion = "3.2.2"
+val exposedVersion = "0.61.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    // Kotlin
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+
     // Exposed ORM
-    implementation("org.jetbrains.exposed:exposed-core:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
 
     // SQLite JDBC Treiber
     implementation("org.xerial:sqlite-jdbc:3.47.1.0")
 
-    // Kotlin
-    implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
-    // kotlinx.datetime
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
-
-    // Ktor Server (aus Woche 3-4)
-    implementation("io.ktor:ktor-server-html-builder-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
+    // Ktor Server
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
-    implementation("ch.qos.logback:logback-classic:1.5.11")
+    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
 
-    // Ktor Client (Woche 4)
+    // Ktor Client
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -46,6 +44,10 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")
+
+    // Logging
+    implementation("ch.qos.logback:logback-classic:1.5.11")
+
     testImplementation(kotlin("test"))
 }
 
@@ -58,4 +60,8 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
     }
+}
+
+application {
+    mainClass.set("ApplicationKt")
 }
