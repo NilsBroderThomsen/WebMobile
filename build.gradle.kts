@@ -23,7 +23,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
 
     // SQLite JDBC Treiber
     implementation("org.xerial:sqlite-jdbc:3.47.1.0")

@@ -2,6 +2,7 @@ package database.dao
 
 import database.tables.EntriesTable
 import database.tables.UsersTable
+import kotlinx.datetime.toKotlinLocalDate
 import model.User
 import model.UserId
 import org.jetbrains.exposed.dao.LongEntity
@@ -24,7 +25,7 @@ class UserDAO(id: EntityID<Long>) : LongEntity(id) {
         username = username,
         email = email,
         passwordHash = passwordHash,
-        registrationDate = registrationDate,
+        registrationDate = registrationDate.toKotlinLocalDate(),
         isActive = isActive
     )
 }
