@@ -9,7 +9,7 @@ import kotlinx.datetime.todayIn
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 object DatabaseFactory {
     fun init() {

@@ -6,8 +6,8 @@ import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
-import kotlin.time.Instant
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 @JvmInline
 value class EntryId (val value: Long)

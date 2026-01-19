@@ -7,7 +7,7 @@ import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
 class MoodTrackerRepository {

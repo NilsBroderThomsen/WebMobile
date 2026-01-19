@@ -44,7 +44,7 @@ import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 fun Application.configureDatabases() {
     DatabaseFactory.init()

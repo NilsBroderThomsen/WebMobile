@@ -1,7 +1,7 @@
 package dto
 
 import kotlinx.serialization.*
-import kotlin.time.Clock
+import kotlinx.datetime.Clock
 
 // DTO für Error-Responses
 @Serializable
