@@ -1,7 +1,7 @@
 package database.tables
 
 import org.jetbrains.exposed.dao.id.LongIdTable
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.sql.javatime.timestamp
 
 object EntriesTable : LongIdTable("entries") {
     val userId = long("user_id").references(UsersTable.id)

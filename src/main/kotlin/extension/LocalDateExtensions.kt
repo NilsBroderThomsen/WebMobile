@@ -1,21 +1,19 @@
 package extension
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
 
 fun LocalDate.isToday(): Boolean {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+    val today = LocalDate.now(ZoneId.systemDefault())
     return this == today
 }
 
 fun LocalDate.isInPast(): Boolean {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    return this < today
+    val today = LocalDate.now(ZoneId.systemDefault())
+    return this.isBefore(today)
 }
 
 fun LocalDate.daysSince(): Long {
-    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-    return (today.toEpochDays() - this.toEpochDays())
+    val today = LocalDate.now(ZoneId.systemDefault())
+    return (today.toEpochDay() - this.toEpochDay())
 }

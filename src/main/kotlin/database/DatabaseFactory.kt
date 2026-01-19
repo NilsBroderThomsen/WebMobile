@@ -4,12 +4,12 @@ import database.dao.EntryDAO
 import database.dao.UserDAO
 import database.tables.EntriesTable
 import database.tables.UsersTable
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Clock
 
 object DatabaseFactory {
     fun init() {
@@ -28,7 +28,7 @@ object DatabaseFactory {
                 username = "default-user"
                 email = "default@example.com"
                 passwordHash = "test"
-                registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                registrationDate = LocalDate.now(ZoneId.systemDefault())
                 isActive = true
             }
 
@@ -39,7 +39,7 @@ object DatabaseFactory {
                     title = "Mein erster Eintrag"
                     content = "Automatisch beim Start angelegt."
                     moodRating = 4
-                    createdAt = Clock.System.now()
+                    createdAt = Instant.now()
                     updatedAt = null
                 }
             }

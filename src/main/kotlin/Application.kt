@@ -37,14 +37,14 @@ import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.html.*
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
-import kotlin.time.Clock
 
 fun Application.configureDatabases() {
     DatabaseFactory.init()
@@ -264,7 +264,7 @@ private fun Route.postCreateEntryHTML(repository: MoodTrackerDatabaseRepository)
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt =  Clock.System.now(),
+            createdAt =  Instant.now(),
             updatedAt = null,
             tags = emptySet()
         )
@@ -413,7 +413,7 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
             username = username,
             email = email,
             passwordHash = password,
-            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            registrationDate = LocalDate.now(ZoneId.systemDefault()),
             isActive = true
         )
 
@@ -465,7 +465,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt = Clock.System.now(),
+            createdAt = Instant.now(),
             updatedAt = null,
             tags = emptySet()
         )
@@ -562,7 +562,7 @@ private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            updatedAt = Clock.System.now()
+            updatedAt = Instant.now()
         )
 
         val savedEntry = repository.updateEntry(updatedEntry)

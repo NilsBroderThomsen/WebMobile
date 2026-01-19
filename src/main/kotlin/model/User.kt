@@ -1,9 +1,7 @@
 package model
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
 
 @JvmInline
 value class UserId(val value: Long)
@@ -18,8 +16,8 @@ data class User(
 ) {
     val accountAge: Long
         get() {
-            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-            return (today.toEpochDays() - registrationDate.toEpochDays()).toLong()
+            val today = LocalDate.now(ZoneId.systemDefault())
+            return (today.toEpochDay() - registrationDate.toEpochDay())
         }
 
     val isNewUser: Boolean

@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import model.Entry
 import model.EntryId
 import model.UserId
-import kotlin.time.Instant
+import java.time.Instant
 
 class ImportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun importFromJson(jsonData: String, userId: UserId): ImportResult {

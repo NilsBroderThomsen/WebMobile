@@ -4,14 +4,14 @@ import database.dao.EntryDAO
 import database.dao.UserDAO
 import database.tables.EntriesTable
 import database.tables.UsersTable
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import model.EntryId
 import model.User
 import model.Entry
 import model.UserId
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Clock
 
 class MoodTrackerDatabaseRepository {
     fun createUser(user: User): User = transaction {
@@ -19,7 +19,7 @@ class MoodTrackerDatabaseRepository {
             username = user.username
             email = user.email
             passwordHash = user.passwordHash
-            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            registrationDate = LocalDate.now(ZoneId.systemDefault())
             isActive = user.isActive
         }.toModel()
     }
@@ -45,7 +45,7 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = Clock.System.now()
+            this.createdAt = Instant.now()
             this.updatedAt = entry.updatedAt
         }.toModel()
     }
@@ -68,7 +68,7 @@ class MoodTrackerDatabaseRepository {
             title = entry.title
             content = entry.content
             moodRating = entry.moodRating
-            updatedAt = Clock.System.now()
+            updatedAt = Instant.now()
         }.toModel()
     }
 

@@ -1,14 +1,14 @@
 package repository
 
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.delay
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
 
 class MoodTrackerRepository {
     private val users = mutableListOf<User>()
@@ -46,7 +46,7 @@ class MoodTrackerRepository {
     }
 
     fun initializeWithTestData() {
-        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", Clock.System.todayIn(TimeZone.currentSystemDefault()))
+        val user = User(id = UserId(1), "Nils", "nils@sample.com", "dbhasjl", LocalDate.now(ZoneId.systemDefault()))
         users.add(user)
 
         fun e(
@@ -61,7 +61,7 @@ class MoodTrackerRepository {
             title = title,
             content = content,
             moodRating = mood,
-            createdAt = Clock.System.now() - daysAgo.days,
+            createdAt = Instant.now().minus(Duration.ofDays(daysAgo)),
             updatedAt = null,
             tags = emptySet()
         )

@@ -15,12 +15,10 @@ import model.EntryId
 import model.MoodLevel
 import model.User
 import model.UserId
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 fun main() {
     println("=== MoodTracker Demo ===\n")
@@ -30,7 +28,7 @@ fun main() {
         username = "alice_123",
         email = "alice@example.com",
         passwordHash = "hashed-password",
-        registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        registrationDate = LocalDate.now(ZoneId.systemDefault())
     )
 
     println("User erstellt: ${user.username} (${user.email})")
@@ -54,7 +52,7 @@ fun main() {
         title = "Toller Tag",
         content = "Heute war ein toller Tag mit viel Sonne und einem langen Spaziergang im Park.",
         moodRating = 8,
-        createdAt = Clock.System.now() - 5.hours,
+        createdAt = Instant.now().minus(Duration.ofHours(5)),
         tags = setOf("sport", "freunde")
     )
 
@@ -64,7 +62,7 @@ fun main() {
         title = "Stressiger Tag",
         content = "Viele Meetings und kaum Zeit für Pausen.",
         moodRating = 3,
-        createdAt = Clock.System.now() - 1.days - 9.hours - 30.minutes,
+        createdAt = Instant.now().minus(Duration.ofDays(1).plusHours(9).plusMinutes(30)),
         tags = setOf("arbeit")
     )
 
@@ -74,7 +72,7 @@ fun main() {
         title = "Ruhiger Abend",
         content = "Lesen eines Buches und entspannen auf dem Sofa.",
         moodRating = null,
-        createdAt = Clock.System.now() - 1.days - 21.hours,
+        createdAt = Instant.now().minus(Duration.ofDays(1).plusHours(21)),
         tags = setOf("entspannung")
     )
 
