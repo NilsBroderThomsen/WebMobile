@@ -11,6 +11,7 @@ import model.EntryId
 import model.User
 import model.Entry
 import model.UserId
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class MoodTrackerDatabaseRepository {
@@ -51,7 +52,7 @@ class MoodTrackerDatabaseRepository {
     }
 
     fun findAllEntries(userId: UserId): List<Entry> = transaction {
-        EntryDAO.find { EntriesTable.userId eq userId.value }
+        EntryDAO.find { EntriesTable.userId eq EntityID(userId.value, UsersTable) }
             .sortedByDescending { it.createdAt }
             .map { it.toModel() }
     }

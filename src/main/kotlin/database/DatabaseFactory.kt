@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
@@ -32,7 +33,9 @@ object DatabaseFactory {
                 isActive = true
             }
 
-            val hasAnyEntry = EntryDAO.find { EntriesTable.userId eq defaultUser.id.value }.empty().not()
+            val hasAnyEntry = EntryDAO.find {
+                EntriesTable.userId eq EntityID(defaultUser.id.value, UsersTable)
+            }.empty().not()
             if (!hasAnyEntry) {
                 EntryDAO.new {
                     user = defaultUser
