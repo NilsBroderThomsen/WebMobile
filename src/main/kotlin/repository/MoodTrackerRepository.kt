@@ -1,14 +1,15 @@
 package repository
 
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import model.Entry
 import model.EntryId
 import model.User
 import model.UserId
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
 
 class MoodTrackerRepository {
     private val users = mutableListOf<User>()
@@ -61,7 +62,7 @@ class MoodTrackerRepository {
             title = title,
             content = content,
             moodRating = mood,
-            createdAt = Clock.System.now() - daysAgo.days,
+            createdAt = LocalDateTime.now(ZoneOffset.UTC).minusDays(daysAgo),
             updatedAt = null,
             tags = emptySet()
         )

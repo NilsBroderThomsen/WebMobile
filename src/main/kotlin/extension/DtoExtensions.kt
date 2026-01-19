@@ -13,7 +13,7 @@ fun Entry.toDto(): EntryDto = EntryDto(
     content = this.content,
     moodRating = this.moodRating,
     createdAt = this.createdAt.toString(),
-    updatedAt = this.updatedAt.toString(),
+    updatedAt = this.updatedAt?.toString(),
     tags = this.tags
 )
 

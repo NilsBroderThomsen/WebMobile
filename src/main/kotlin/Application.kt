@@ -37,6 +37,9 @@ import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.html.*
@@ -44,7 +47,6 @@ import org.jetbrains.exposed.sql.Database
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
-import kotlin.time.Clock
 
 fun Application.configureDatabases() {
     DatabaseFactory.init()
@@ -264,7 +266,7 @@ private fun Route.postCreateEntryHTML(repository: MoodTrackerDatabaseRepository)
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt =  Clock.System.now(),
+            createdAt = LocalDateTime.now(ZoneOffset.UTC),
             updatedAt = null,
             tags = emptySet()
         )
@@ -465,7 +467,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            createdAt = Clock.System.now(),
+            createdAt = LocalDateTime.now(ZoneOffset.UTC),
             updatedAt = null,
             tags = emptySet()
         )
@@ -562,7 +564,7 @@ private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
             title = title,
             content = content,
             moodRating = moodRating,
-            updatedAt = Clock.System.now()
+            updatedAt = LocalDateTime.now(ZoneOffset.UTC)
         )
 
         val savedEntry = repository.updateEntry(updatedEntry)

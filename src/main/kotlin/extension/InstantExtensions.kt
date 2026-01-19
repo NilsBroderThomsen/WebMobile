@@ -1,30 +1,29 @@
 package extension
 
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
-fun Instant.toDateString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
-    val localDateTime = this.toLocalDateTime(timeZone)
-
-    val date = localDateTime.date
+fun LocalDateTime.toDateString(zoneId: ZoneId = ZoneId.systemDefault()): String {
+    val date = atZone(ZoneOffset.UTC)
+        .withZoneSameInstant(zoneId)
+        .toLocalDate()
 
     return "%02d.%02d.%04d".format(
         date.dayOfMonth,
-        date.monthNumber,
+        date.monthValue,
         date.year
     )
 }
 
-fun Instant.toDateTimeString(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
-    val localDateTime = this.toLocalDateTime(timeZone)
-
-    val date = localDateTime.date
-    val time = localDateTime.time
+fun LocalDateTime.toDateTimeString(zoneId: ZoneId = ZoneId.systemDefault()): String {
+    val zonedDateTime = atZone(ZoneOffset.UTC).withZoneSameInstant(zoneId)
+    val date = zonedDateTime.toLocalDate()
+    val time = zonedDateTime.toLocalTime()
 
     return "%02d.%02d.%04d %02d:%02d".format(
         date.dayOfMonth,
-        date.monthNumber,
+        date.monthValue,
         date.year,
         time.hour,
         time.minute

@@ -4,12 +4,12 @@ import database.dao.EntryDAO
 import database.dao.UserDAO
 import database.tables.EntriesTable
 import database.tables.UsersTable
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Clock
 
 object DatabaseFactory {
     fun init() {

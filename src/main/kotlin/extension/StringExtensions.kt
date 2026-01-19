@@ -3,7 +3,6 @@ package extension
 import model.Entry
 import model.EntryId
 import model.UserId
-import kotlin.time.Instant
 
 val String.isValidEmail: Boolean
     get() = this.contains("@") && this.contains(".")
@@ -50,7 +49,7 @@ fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
         title = title,
         content = content,
         moodRating = moodRating,
-        createdAt = Instant.parse(createdAtValue),
+        createdAt = createdAtValue.toLocalDateTimeFromIso(),
         updatedAt = null,
         tags = emptySet()
     )

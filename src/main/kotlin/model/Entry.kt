@@ -2,12 +2,10 @@ package model
 
 import extension.isValidMoodRating
 import extension.normalizeTag
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import kotlin.math.roundToInt
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 @JvmInline
 value class EntryId (val value: Long)
@@ -18,8 +16,8 @@ data class Entry (
     val title: String,
     val content: String,
     val moodRating: Int? = null,
-    val createdAt: Instant,
-    val updatedAt: Instant? = null,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime? = null,
     val tags: Set<String> = emptySet()
 ) {
     init {
@@ -41,15 +39,15 @@ data class Entry (
 
     val createdDate: LocalDate
         get() {
-            return createdAt.toLocalDateTime(TimeZone.UTC).date
+            return createdAt.toLocalDate()
         }
 
     fun updateContent(newContent: String):
-        Entry = copy(content = newContent, updatedAt = Clock.System.now())
+        Entry = copy(content = newContent, updatedAt = LocalDateTime.now(ZoneOffset.UTC))
 
     fun updateMood(newRating: Int): Entry {
         require(newRating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
-        return copy(moodRating = newRating, updatedAt = Clock.System.now())
+        return copy(moodRating = newRating, updatedAt = LocalDateTime.now(ZoneOffset.UTC))
     }
 
     fun addTag(tag: String): Entry {

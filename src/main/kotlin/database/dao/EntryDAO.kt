@@ -1,6 +1,11 @@
 package database.dao
 
 import database.tables.EntriesTable
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlinx.datetime.Instant as KotlinInstant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -24,7 +29,25 @@ class EntryDAO(id: EntityID<Long>) : LongEntity(id) {
         title = title,
         content = content,
         moodRating = moodRating,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
+        createdAt = createdAt.toJavaLocalDateTime(),
+        updatedAt = updatedAt?.toJavaLocalDateTime(),
     )
+}
+
+private fun KotlinInstant.toJavaLocalDateTime(): LocalDateTime {
+    val localDateTime = toLocalDateTime(TimeZone.UTC)
+    return LocalDateTime.of(
+        localDateTime.year,
+        localDateTime.monthNumber,
+        localDateTime.dayOfMonth,
+        localDateTime.hour,
+        localDateTime.minute,
+        localDateTime.second,
+        localDateTime.nanosecond
+    )
+}
+
+fun LocalDateTime.toKotlinInstant(): KotlinInstant {
+    val instant = toInstant(ZoneOffset.UTC)
+    return KotlinInstant.fromEpochSeconds(instant.epochSecond, instant.nano)
 }

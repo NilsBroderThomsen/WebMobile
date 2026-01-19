@@ -5,11 +5,11 @@ import database.MoodTrackerDatabaseRepository
 import dto.ExportData
 import dto.ImportResult
 import extension.isValidMoodRating
+import extension.toLocalDateTimeFromIso
 import kotlinx.serialization.json.Json
 import model.Entry
 import model.EntryId
 import model.UserId
-import kotlin.time.Instant
 
 class ImportService(private val repository: MoodTrackerDatabaseRepository) {
     suspend fun importFromJson(jsonData: String, userId: UserId): ImportResult {
@@ -52,10 +52,10 @@ class ImportService(private val repository: MoodTrackerDatabaseRepository) {
                     if (moodRating != null && !moodRating.isValidMoodRating()) {
                         throw IllegalArgumentException("Mood rating must be between 1 and 10")
                     }
-                    val createdAt = Instant.parse(entryDto.createdAt)
+                    val createdAt = entryDto.createdAt.toLocalDateTimeFromIso()
                     val updatedAt = entryDto.updatedAt
                         ?.takeIf { it.isNotBlank() }
-                        ?.let { Instant.parse(it) }
+                        ?.let { it.toLocalDateTimeFromIso() }
 
                     val entry = Entry(
                         id = EntryId(entryDto.id),
@@ -130,13 +130,13 @@ class ImportService(private val repository: MoodTrackerDatabaseRepository) {
                     }
                     val createdAtRaw = row["CreatedAt"]?.trim()
                         ?: throw IllegalArgumentException("CreatedAt missing")
-                    val createdAt = Instant.parse(createdAtRaw)
+                    val createdAt = createdAtRaw.toLocalDateTimeFromIso()
                     val moodRating = row["MoodRating"].orEmpty().trim().takeIf { it.isNotEmpty() }?.toInt()
                     if (moodRating != null && !moodRating.isValidMoodRating()) {
                         throw IllegalArgumentException("Mood rating must be between 1 and 10")
                     }
                     val updatedAt = row["UpdatedAt"].orEmpty().trim().takeIf { it.isNotEmpty() }
-                        ?.let { Instant.parse(it) }
+                        ?.let { it.toLocalDateTimeFromIso() }
 
                     val entry = Entry(
                         id = EntryId(id),
