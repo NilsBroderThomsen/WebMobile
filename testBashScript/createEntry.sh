@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "== Create user =="
-curl -X POST http://localhost:8080/api/users/1/entries \
+curl -X POST http://localhost:8080/api/users/2/entries \
   -H "Content-Type: application/json" \
   -d @- <<EOF
   {

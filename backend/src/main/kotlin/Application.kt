@@ -58,17 +58,10 @@ fun Application.configureDI() {
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        configureDI()
         install(CallLogging) {
             level = Level.INFO
         }
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
-        }
-        configureDI()
         configureRouting()
     }.start(wait = true)
 }
@@ -77,6 +70,14 @@ fun Application.configureRouting() {
     val di by closestDI()
 
     val repository: MoodTrackerDatabaseRepository by di.instance()
+
+    install(ContentNegotiation) {
+        json(Json {
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+        })
+    }
 
     routing {
         staticResources("/static", "static")

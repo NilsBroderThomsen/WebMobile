@@ -11,7 +11,10 @@ val appModule = DI.Module("app") {
         DatabaseFactory.also { it.init() }
     }
 
-    bind<MoodTrackerDatabaseRepository>() with singleton { MoodTrackerDatabaseRepository() }
+    bind<MoodTrackerDatabaseRepository>() with singleton {
+        instance<DatabaseFactory>()
+        MoodTrackerDatabaseRepository()
+    }
 
     bind<ExportService>() with singleton { ExportService(instance()) }
     bind<ImportService>() with singleton { ImportService(instance()) }
