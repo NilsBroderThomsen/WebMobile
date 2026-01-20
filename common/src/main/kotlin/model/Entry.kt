@@ -1,7 +1,5 @@
 package model
 
-import extension.isValidMoodRating
-import extension.normalizeTag
 import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -22,10 +20,6 @@ data class Entry (
     val updatedAt: Instant? = null,
     val tags: Set<String> = emptySet()
 ) {
-    init {
-        val normalized = tags.map { it.normalizeTag() }.filter { it.isNotBlank() }.toSet()
-        require(tags == normalized) { "Tags must be normalized and non-blank" }
-    }
 
     val wordCount: Int
         get() = content.split(Regex("\\s")).count { it.isNotBlank() }
@@ -48,20 +42,17 @@ data class Entry (
         Entry = copy(content = newContent, updatedAt = Clock.System.now())
 
     fun updateMood(newRating: Int): Entry {
-        require(newRating.isValidMoodRating()) { "Mood rating must be between 1 and 10" }
         return copy(moodRating = newRating, updatedAt = Clock.System.now())
     }
 
     fun addTag(tag: String): Entry {
-        val normalized = tag.normalizeTag()
-        require(normalized.isNotBlank()) { "Tag must not be blank" }
-        return copy(tags = tags + normalized)
+        require(tag.isNotBlank()) { "Tag must not be blank" }
+        return copy(tags = tags + tag)
     }
 
     fun removeTag(tag: String): Entry {
-        val normalized = tag.normalizeTag()
-        require(normalized.isNotBlank()) { "Tag must not be blank" }
-        return copy(tags = tags - normalized)
+        require(tag.isNotBlank()) { "Tag must not be blank" }
+        return copy(tags = tags - tag)
     }
 
     fun similarity(other: Entry): Double {

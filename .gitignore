@@ -1,6 +1,8 @@
 # Gradle
 /.gradle/
 /build/
+/common/build/
+/backend/build/
 /out/
 
 # Kotlin specific (IDE metadata)
@@ -22,3 +24,5 @@ Thumbs.db
 # Local environment configs
 *.local
 *.env
+/backend/moodtracker.db
+/moodtracker.db

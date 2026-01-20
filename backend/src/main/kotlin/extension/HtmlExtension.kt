@@ -4,6 +4,8 @@ import model.Entry
 import kotlinx.html.*
 
 fun FlowContent.entryCard(entry: Entry) {
+    val mood = entry.moodRating
+
     article(classes = "entry-card") {
         h3 { +entry.title }
         p {
@@ -11,8 +13,8 @@ fun FlowContent.entryCard(entry: Entry) {
             +if (entry.content.length > 100) "..." else ""
         }
         p {
-            if (entry.moodRating != null) {
-                +"Stimmung: ${entry.moodRating}/10 ${entry.moodRating.toEmoji()}"
+            if (mood != null) {
+                +"Stimmung: ${mood}/10 ${mood.toEmoji()}"
             } else {
                 +"Keine Stimmung angegeben"
             }

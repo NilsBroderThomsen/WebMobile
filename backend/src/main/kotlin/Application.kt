@@ -1,5 +1,6 @@
 import database.DatabaseFactory
 import database.MoodTrackerDatabaseRepository
+import di.appModule
 import dto.CreateEntryRequest
 import dto.CreateUserRequest
 import dto.ErrorResponse
@@ -41,34 +42,41 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlinx.html.*
 import org.jetbrains.exposed.sql.Database
+import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
+import org.kodein.di.ktor.di
 import org.slf4j.event.Level
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
 
-fun Application.configureDatabases() {
-    DatabaseFactory.init()
+fun Application.configureDI() {
+    di {
+        import(appModule)
+    }
 }
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        configureDatabases()
         install(CallLogging) {
             level = Level.INFO
         }
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            })
+        }
+        configureDI()
         configureRouting()
     }.start(wait = true)
 }
 
 fun Application.configureRouting() {
-    install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-        })
-    }
-    val repository = MoodTrackerDatabaseRepository()
+    val di by closestDI()
+
+    val repository: MoodTrackerDatabaseRepository by di.instance()
 
     routing {
         staticResources("/static", "static")
@@ -185,11 +193,13 @@ private fun Route.getEntryDetailsHTML(repository: MoodTrackerDatabaseRepository)
             body {
                 h1 { +entry.title }
                 p { +"Erstellt am: ${entry.createdDate}" }
-                if (entry.moodRating != null) {
-                    p { +"Stimmung: ${entry.moodRating}/10 ${entry.moodRating.toEmoji()}" }
-                } else {
+
+                entry.moodRating?.let { mood ->
+                    p { +"Stimmung: $mood/10 ${mood.toEmoji()}" }
+                } ?: run {
                     p { +"Keine Stimmung angegeben" }
                 }
+
                 section {
                     h2 { +"Inhalt" }
                     p { +entry.content }
