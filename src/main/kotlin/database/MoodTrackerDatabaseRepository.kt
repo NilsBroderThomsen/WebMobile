@@ -4,12 +4,15 @@ import database.dao.EntryDAO
 import database.dao.UserDAO
 import database.tables.EntriesTable
 import database.tables.UsersTable
+import extension.toJavaInstant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.toJavaLocalDate
 import model.EntryId
 import model.User
 import model.Entry
 import model.UserId
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.Clock
 
@@ -19,7 +22,7 @@ class MoodTrackerDatabaseRepository {
             username = user.username
             email = user.email
             passwordHash = user.passwordHash
-            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toJavaLocalDate()
             isActive = user.isActive
         }.toModel()
     }
@@ -45,13 +48,13 @@ class MoodTrackerDatabaseRepository {
             this.title = entry.title
             this.content = entry.content
             this.moodRating = entry.moodRating
-            this.createdAt = Clock.System.now()
-            this.updatedAt = entry.updatedAt
+            this.createdAt = Clock.System.now().toJavaInstant()
+            this.updatedAt = entry.updatedAt?.toJavaInstant()
         }.toModel()
     }
 
     fun findAllEntries(userId: UserId): List<Entry> = transaction {
-        EntryDAO.find { EntriesTable.userId eq userId.value }
+        EntryDAO.find { EntriesTable.userId eq EntityID(userId.value, UsersTable) }
             .sortedByDescending { it.createdAt }
             .map { it.toModel() }
     }
@@ -68,7 +71,7 @@ class MoodTrackerDatabaseRepository {
             title = entry.title
             content = entry.content
             moodRating = entry.moodRating
-            updatedAt = Clock.System.now()
+            updatedAt = Clock.System.now().toJavaInstant()
         }.toModel()
     }
 
