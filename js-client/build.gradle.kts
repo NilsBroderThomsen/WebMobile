@@ -14,8 +14,7 @@ kotlin {
         jsMain {
             dependencies {
                 implementation(project(":client"))
-                implementation("org.jetbrains.kotlinx:kotlinx-html
-                        js:0.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.11.0")
             }
         }
     }

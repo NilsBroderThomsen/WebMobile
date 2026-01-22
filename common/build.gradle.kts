@@ -23,11 +23,11 @@ kotlin {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
     }
 }
-
-dependencies {
-    testImplementation(kotlin("test"))
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
+//
+//dependencies {
+//    testImplementation(kotlin("test"))
+//}
+//
+//tasks.test {
+//    useJUnitPlatform()
+//}

@@ -4,7 +4,7 @@ plugins {
 }
 dependencies {
     implementation(project(":client"))
-    // TODO: Fügen Sie Coroutines hinzu
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 application {
     mainClass.set("MainKt")
