@@ -1,6 +1,10 @@
+package api
+
 import dto.EntryDto
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -16,9 +20,8 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
-        // TODO: Implementieren Sie HTTP GET Request
-        // URL: "$baseUrl/api/entries?userId=$userId"
-        throw NotImplementedError()
+        var url = "$baseUrl/api/users/{userId}/entries"
+        return client.get(url).body<List<EntryDto>>()
     }
 
     fun close() {

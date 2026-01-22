@@ -17,6 +17,7 @@ dependencies {
 
     // Kotlin
     implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
     // Ktor Server
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")

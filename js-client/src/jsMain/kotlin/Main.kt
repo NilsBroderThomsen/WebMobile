@@ -1,3 +1,5 @@
+import kotlinx.browser.document
+
 fun main() {
     document.addEventListener("DOMContentLoaded", {
         // TODO: Root Element holen
