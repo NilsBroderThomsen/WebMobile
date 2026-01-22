@@ -31,6 +31,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveParameters
@@ -61,6 +62,11 @@ fun main() {
         configureDI()
         install(CallLogging) {
             level = Level.INFO
+        }
+        install(CORS) {
+            allowHost("localhost:8080")
+            allowHost("127.0.0.1:8080")
+            allowHeader(HttpHeaders.ContentType)
         }
         configureRouting()
     }.start(wait = true)

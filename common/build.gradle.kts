@@ -1,10 +1,23 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     kotlin("plugin.serialization")
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvm()
+    linuxX64()
+    js(IR) { browser() }
+
+    applyDefaultHierarchyTemplate()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+            }
+        }
+    }
 
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
@@ -12,9 +25,6 @@ kotlin {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-
     testImplementation(kotlin("test"))
 }
 

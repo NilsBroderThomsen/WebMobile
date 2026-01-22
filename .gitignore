@@ -3,6 +3,10 @@
 /build/
 /common/build/
 /backend/build/
+/js-client/build/
+/jvm-client/build/
+/native-client/build/
+/client/build/
 /out/
 
 # Kotlin specific (IDE metadata)
