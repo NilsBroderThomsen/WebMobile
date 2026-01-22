@@ -15,5 +15,16 @@ fun main(args: Array<String>) {
         val entries = client.getEntries(userId)
 
         // TODO: Entries formatiert ausgeben
+        entries.forEach { entry ->
+            println("--------------------------------------------------")
+            println("Entry ID: ${entry.id}")
+            println("Title: ${entry.title}")
+            println("Content: ${entry.content}")
+            println("Mood Rating: ${entry.moodRating ?: "N/A"}")
+            println("Created At: ${entry.createdAt}")
+            println("Updated At: ${entry.updatedAt ?: "N/A"}")
+            println("Tags: ${if (entry.tags.isEmpty()) "None" else entry.tags.joinToString(", ")}")
+            println("--------------------------------------------------")
+        }
     }
 }
