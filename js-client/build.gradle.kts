@@ -4,9 +4,9 @@ plugins {
 kotlin {
     js(IR) {
         browser {
-            commonWebpackConfig {
-                cssSupport.enabled = true
-            }
+//            cssSupport {
+//                enabled = true
+//            }
         }
         binaries.executable()
     }

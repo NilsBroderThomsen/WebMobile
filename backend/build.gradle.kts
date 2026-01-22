@@ -17,8 +17,6 @@ dependencies {
 
     // Kotlin
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
 
     // Ktor Server
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
@@ -28,6 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
+//    implementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:$ktorVersion")

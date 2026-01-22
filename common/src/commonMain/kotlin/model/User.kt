@@ -3,6 +3,7 @@ package model
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.jvm.JvmInline
 import kotlin.time.Clock
 
 @JvmInline

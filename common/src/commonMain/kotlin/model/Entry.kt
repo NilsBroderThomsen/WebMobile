@@ -4,6 +4,7 @@ import kotlin.math.roundToInt
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.jvm.JvmInline
 import kotlin.time.Clock
 import kotlin.time.Instant
 
