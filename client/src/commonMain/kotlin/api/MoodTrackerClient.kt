@@ -20,7 +20,7 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
-        var url = "$baseUrl/api/users/{userId}/entries"
+        var url = "$baseUrl/api/users/$userId/entries"
         return client.get(url).body<List<EntryDto>>()
     }
 
