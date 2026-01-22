@@ -5,6 +5,7 @@ plugins {
 val ktorVersion = "3.2.2"
 
 kotlin {
+    jvmToolchain(17)
     jvm()
     linuxX64()
     js(IR) { browser() }

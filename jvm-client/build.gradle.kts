@@ -2,6 +2,11 @@ plugins {
     kotlin("jvm")
     application
 }
+
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation(project(":client"))
     implementation(project(":common"))
