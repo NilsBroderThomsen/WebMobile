@@ -15,6 +15,7 @@ kotlin {
             dependencies {
                 implementation(project(":client"))
                 implementation(project(":common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
     }

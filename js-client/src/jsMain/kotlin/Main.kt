@@ -8,6 +8,7 @@ import kotlinx.html.js.onClickFunction
 
 fun main() {
     val scope = MainScope()
+
     document.addEventListener("DOMContentLoaded", {
         val root = document.getElementById("root") ?: return@addEventListener
         root.append {

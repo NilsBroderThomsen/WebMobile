@@ -65,6 +65,7 @@ fun main() {
         }
         install(CORS) {
             allowHost("localhost:8080")
+            allowHost("localhost:8081")
             allowHost("127.0.0.1:8080")
             allowHeader(HttpHeaders.ContentType)
         }
@@ -87,10 +88,10 @@ fun Application.configureRouting() {
 
     routing {
         staticResources("/static", "static")
-        getHomeHTML(repository)
-        getEntryDetailsHTML(repository)
-        postCreateEntryHTML(repository)
-        postDeleteEntryHTML(repository)
+//        getHomeHTML(repository)
+//        getEntryDetailsHTML(repository)
+//        postCreateEntryHTML(repository)
+//        postDeleteEntryHTML(repository)
 
         getUserEntries(repository)
         getEntryDetails(repository)
