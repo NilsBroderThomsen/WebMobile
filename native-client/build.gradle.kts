@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
 }
 kotlin {
+    jvmToolchain(17)
     linuxX64 {
         binaries {
             executable {
@@ -13,6 +14,7 @@ kotlin {
         linuxX64Main {
             dependencies {
                 implementation(project(":client"))
+                implementation(project(":common"))
             }
         }
     }
