@@ -12,6 +12,7 @@ kotlin {
 
 dependencies {
     implementation(project(":client"))
+    implementation(project(":common"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")

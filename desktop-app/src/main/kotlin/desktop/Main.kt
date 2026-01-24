@@ -35,14 +35,14 @@ fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "MoodTracker - Einträge") {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                EntryListScreen()
+                entryListScreen()
             }
         }
     }
 }
 
 @Composable
-private fun EntryListScreen() {
+private fun entryListScreen() {
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -82,14 +82,14 @@ private fun EntryListScreen() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(entries, key = { it.id }) { entry ->
-                EntryCard(entry)
+                entryCard(entry)
             }
         }
     }
 }
 
 @Composable
-private fun EntryCard(entry: EntryDto) {
+private fun entryCard(entry: EntryDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
