@@ -8,6 +8,7 @@ allprojects {
     group = "de.hs-flensburg.moodtracker"
     version = "1.0-SNAPSHOT"
     repositories {
+        google()
         mavenCentral()
     }
 }
