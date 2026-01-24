@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform")
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
 val ktorVersion = "3.2.2"
@@ -7,8 +7,6 @@ val ktorVersion = "3.2.2"
 kotlin {
     jvmToolchain(17)
     jvm()
-    linuxX64()
-    js(IR) { browser() }
 
     applyDefaultHierarchyTemplate()
 
@@ -25,11 +23,6 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
-            }
-        }
-        jsMain {
-            dependencies {
-                implementation("io.ktor:ktor-client-js:$ktorVersion")
             }
         }
     }
