@@ -1,24 +1,33 @@
-import api.MoodTrackerClient
-import kotlinx.coroutines.runBlocking
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
 
-fun main(args: Array<String>) {
-    val userId = 1L  // TODO: Parse aus args
-    val baseUrl = "http://localhost:8080"
-    println("=== MoodTracker JVM Client ===")
+fun main() = application {
+    Window(onCloseRequest = ::exitApplication, title = "Hello Compose") {
+        App()
+    }
+}
 
-    runBlocking {
-        val client = MoodTrackerClient(baseUrl)
-        val entries = client.getEntries(userId)
-
-        entries.forEach { entry ->
-            println("Entry ID   : ${entry.id}")
-            println("Title      : ${entry.title}")
-            println("Content    : ${entry.content}")
-            println("Mood Rating: ${entry.moodRating ?: "N/A"}")
-            println("Tags       : ${if (entry.tags.isEmpty()) "None" else entry.tags.joinToString(", ")}")
-            println("Created At : ${entry.createdAt}")
-            println("Updated At : ${entry.updatedAt ?: "N/A"}")
-            println("--------------------------------------------------")
+@Composable
+fun App() {
+    MaterialTheme {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Hello World")
+            Button(onClick = {}) {
+                Text("Click Me")
+            }
         }
     }
 }

@@ -1,6 +1,9 @@
 plugins {
-    kotlin("jvm") version "2.2.20" apply false
-    kotlin("plugin.serialization") version "2.2.20" apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 allprojects {
