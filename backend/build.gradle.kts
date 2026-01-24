@@ -27,7 +27,6 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
-//    implementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -56,11 +55,6 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.11")
-
-    // Testing
-    testImplementation(kotlin("test"))
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 
 kotlin {
