@@ -6,8 +6,6 @@ plugins {
 kotlin {
     jvmToolchain(17)
     jvm()
-    linuxX64()
-    js(IR) { browser() }
 
     applyDefaultHierarchyTemplate()
 
