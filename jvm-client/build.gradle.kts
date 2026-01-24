@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
-    application
 }
 
 kotlin {
@@ -15,10 +14,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
-}
-
-application {
-    mainClass.set("MainKt")
 }
 
 compose.desktop {
