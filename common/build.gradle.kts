@@ -6,8 +6,6 @@ plugins {
 kotlin {
     jvmToolchain(17)
     jvm()
-    linuxX64()
-    js(IR) { browser() }
 
     applyDefaultHierarchyTemplate()
 
@@ -24,11 +22,3 @@ kotlin {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
     }
 }
-//
-//dependencies {
-//    testImplementation(kotlin("test"))
-//}
-//
-//tasks.test {
-//    useJUnitPlatform()
-//}
