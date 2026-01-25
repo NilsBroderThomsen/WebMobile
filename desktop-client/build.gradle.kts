@@ -16,7 +16,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.navigation)
 }
 
 compose.desktop {
