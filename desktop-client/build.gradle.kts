@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
-    implementation(libs.compose.navigation)
     implementation(libs.kotlinx.serialization.core)
 }
 
