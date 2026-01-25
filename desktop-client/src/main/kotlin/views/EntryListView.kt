@@ -13,7 +13,11 @@ import api.MoodTrackerClient
 import dto.EntryDto
 
 @Composable
-fun EntryListView(userId: Long, onNavigateBack: () -> Unit,  onCreateEntry: () -> Unit) {
+fun EntryListView(
+    userId: Long,
+    onNavigateBack: () -> Unit,
+    onCreateEntry: () -> Unit
+) {
     val baseUrl = "http://localhost:8080"
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
 
