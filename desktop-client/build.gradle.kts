@@ -1,19 +1,32 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
     jvmToolchain(17)
-}
+    jvm("desktop")
 
-dependencies {
-    implementation(project(":client"))
-    implementation(project(":common"))
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(compose.desktop.currentOs)
-    implementation(libs.compose.material3)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":client"))
+            implementation(project(":common"))
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+        }
+
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+            }
+        }
+    }
 }
 
 compose.desktop {
