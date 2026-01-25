@@ -19,8 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import api.MoodTrackerClient
 import dto.EntryDto
+import kotlinx.serialization.Serializable
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "Mood Tracker") {
