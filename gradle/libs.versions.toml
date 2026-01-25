@@ -20,5 +20,4 @@ compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref ="compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
-compose-navigation = { module = "org.jetbrains.compose.navigation:navigation", version.ref = "compose-navigation" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
