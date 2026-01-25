@@ -1,3 +1,5 @@
+package views
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text

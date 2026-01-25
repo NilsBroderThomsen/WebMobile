@@ -1,3 +1,5 @@
+package views
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -11,7 +13,7 @@ import api.MoodTrackerClient
 import dto.EntryDto
 
 @Composable
-fun EntryList(userId: Long, onNavigateBack: () -> Unit) {
+fun EntryListView(userId: Long, onNavigateBack: () -> Unit,  onCreateEntry: () -> Unit) {
     val baseUrl = "http://localhost:8080"
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
 
@@ -23,6 +25,10 @@ fun EntryList(userId: Long, onNavigateBack: () -> Unit) {
     Column {
         Button(onClick = onNavigateBack) {
             Text("Back")
+        }
+
+        Button(onClick = onCreateEntry) {
+            Text("Create New Entry")
         }
 
         entries.forEach { entry ->
