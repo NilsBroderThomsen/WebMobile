@@ -6,4 +6,4 @@ rootProject.name = "moodtracker"
 include(":common")
 include(":backend")
 include(":client")
-include(":jvm-client")
+include(":desktop-client")
