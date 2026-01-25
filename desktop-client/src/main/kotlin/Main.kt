@@ -19,8 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import api.MoodTrackerClient
 import dto.EntryDto
+import kotlinx.serialization.Serializable
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "Mood Tracker") {
@@ -37,10 +41,19 @@ fun App() {
             startDestination = HomePage
         ) {
             composable<HomePage> {
-                HomeView()
+                HomeView(
+                    onNavigateToEntries = {
+                        navController.navigate(EntriesPage)
+                    }
+                )
             }
             composable<EntriesPage> {
-                EntryList(1L)
+                EntryList(
+                    userId = 1L,
+                    onNavigateBack = {
+                        navController.navigate(HomePage)
+                    }
+                )
             }
         }
     }
@@ -50,8 +63,8 @@ fun App() {
 object HomePage
 
 @Composable
-fun HomeView() {
-    Button(onClick = { /*TODO*/ }) {
+fun HomeView(onNavigateToEntries: () -> Unit) {
+    Button(onClick = onNavigateToEntries) {
         Text("My Entries")
     }
 }
@@ -60,7 +73,7 @@ fun HomeView() {
 object EntriesPage
 
 @Composable
-fun EntryList(userId: Long) {
+fun EntryList(userId: Long, onNavigateBack: () -> Unit) {
     val baseUrl = "http://localhost:8080"
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
 
@@ -70,9 +83,11 @@ fun EntryList(userId: Long) {
     }
 
     Column {
+        Button(onClick = onNavigateBack) {
+            Text("Back")
+        }
         entries.forEach { entry ->
             Text("Entry ID: ${entry.id}, Title: ${entry.title}, Content: ${entry.content}, Mood: ${entry.moodRating}")
         }
     }
 }
-
