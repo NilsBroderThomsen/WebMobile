@@ -14,5 +14,6 @@ allprojects {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/ktor/maven")
         maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
-        maven("https://maven.pkg.jetbrains.space/public/p/ktor/dev")    }
+        maven("https://maven.pkg.jetbrains.space/public/p/ktor/dev")
+    }
 }
