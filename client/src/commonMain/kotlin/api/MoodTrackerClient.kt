@@ -1,5 +1,6 @@
 package api
 
+import dto.CreateEntryRequest
 import dto.CreateUserRequest
 import dto.EntryDto
 import dto.ErrorResponse
@@ -92,6 +93,23 @@ class MoodTrackerClient(private val baseUrl: String) {
             }
             throw IllegalStateException("Keine Verbindung zum Server möglich.")
         }
+    }
+
+    suspend fun createEntry(userId: Long ,request: CreateEntryRequest): EntryDto {
+        val url = "$baseUrl/api/users/$userId/entries"
+        val response = client.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+        if (response.status.isSuccess()) {
+            return response.body()
+        }
+
+        val bodyText = response.bodyAsText()
+        val errorMessage = runCatching {
+            json.decodeFromString<ErrorResponse>(bodyText).message
+        }.getOrNull() ?: "Registrierung fehlgeschlagen (${response.status.value})"
+        throw IllegalStateException(errorMessage)
     }
 
     fun close() {
