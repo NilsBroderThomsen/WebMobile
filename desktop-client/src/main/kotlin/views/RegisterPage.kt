@@ -19,15 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
+import config.AppConfig
 import dto.CreateUserRequest
 import kotlinx.coroutines.launch
 
 @Composable
-fun RegisterView(
+fun RegisterPage(
     onNavigateBack: () -> Unit,
-    onNavigateToEntries: () -> Unit
+    onNavigateToEntries: () -> Unit      //TODO: implement UserID navigation to entries after login
 ) {
-    val baseUrl = "http://localhost:8080"
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -47,14 +47,12 @@ fun RegisterView(
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth()
         )
-
         TextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth()
         )
-
         TextField(
             value = password,
             onValueChange = { password = it },
@@ -65,10 +63,7 @@ fun RegisterView(
 
         Button(
             onClick = {
-                val trimmedUsername = username.trim()
-                val trimmedEmail = email.trim()
-                val trimmedPassword = password.trim()
-                if (trimmedUsername.isBlank() || trimmedEmail.isBlank() || trimmedPassword.isBlank()) {
+                if (username.isBlank() || email.isBlank() || password.isBlank()) {
                     errorMessage = "Bitte alle Felder ausfüllen."
                     statusMessage = null
                     return@Button
@@ -78,13 +73,13 @@ fun RegisterView(
                 statusMessage = null
                 errorMessage = null
                 scope.launch {
-                    val client = MoodTrackerClient(baseUrl)
+                    val client = MoodTrackerClient(AppConfig.BASE_URL)
                     try {
                         val user = client.registerUser(
                             CreateUserRequest(
-                                username = trimmedUsername,
-                                email = trimmedEmail,
-                                password = trimmedPassword
+                                username = username,
+                                email = email,
+                                password = password
                             )
                         )
                         statusMessage = "Registrierung erfolgreich. Willkommen, ${user.username}!"
@@ -112,7 +107,7 @@ fun RegisterView(
         }
 
         errorMessage?.let { message ->
-            Text(message)
+            Text(message, color = androidx.compose.material3.MaterialTheme.colorScheme.error)
         }
     }
 }
