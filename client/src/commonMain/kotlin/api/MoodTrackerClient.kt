@@ -29,28 +29,6 @@ class MoodTrackerClient(private val baseUrl: String) {
         }
     }
 
-    suspend fun getEntries(userId: Long): List<EntryDto> {
-        val url = "$baseUrl/api/users/$userId/entries"
-        try {
-            val response = client.get(url)
-            if (response.status.isSuccess()) {
-                return response.body()
-            }
-
-            val bodyText = response.bodyAsText()
-            val errorMessage = runCatching {
-                json.decodeFromString<ErrorResponse>(bodyText).message
-            }.getOrNull() ?: "Abrufen der Einträge fehlgeschlagen (${response.status.value})"
-            throw IllegalStateException(errorMessage)
-        } catch (ex: Exception) {
-            if (ex is IllegalStateException) {
-                throw ex
-            }
-            throw IllegalStateException("Keine Verbindung zum Server möglich.")
-        }
-    }
-
-
     suspend fun registerUser(request: CreateUserRequest): UserDto {
         val url = "$baseUrl/api/users"
         val response = client.post(url) {
@@ -67,6 +45,52 @@ class MoodTrackerClient(private val baseUrl: String) {
         }.getOrNull() ?: "Registrierung fehlgeschlagen (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
+
+    suspend fun getEntries(userId: Long): List<EntryDto> {
+        val url = "$baseUrl/api/users/$userId/entries"
+        try {
+            val response = client.get(url)
+            if (response.status.isSuccess()) {
+                return response.body()
+            }
+
+            val bodyText = response.bodyAsText()
+            val errorMessage = runCatching {
+                json.decodeFromString<ErrorResponse>(bodyText).message
+            }.getOrNull() ?: "Abrufen der Einträge fehlgeschlagen (${response.status.value})"
+
+            throw IllegalStateException(errorMessage)
+        } catch (ex: Exception) {
+            if (ex is IllegalStateException) {
+                throw ex
+            }
+            throw IllegalStateException("Keine Verbindung zum Server möglich.")
+        }
+    }
+
+    suspend fun getEntryDetails(entryId: Long): EntryDto {
+        val url = "$baseUrl/api/entries/$entryId"
+        try {
+            val response = client.get(url)
+            if (response.status.isSuccess()) {
+                return response.body()
+            }
+
+            val bodyText = response.bodyAsText()
+            val errorMessage = runCatching {
+                json.decodeFromString<ErrorResponse>(bodyText).message
+            }.getOrNull() ?: "Abrufen der Eintragsdetails fehlgeschlagen (${response.status.value})"
+
+            throw IllegalStateException(errorMessage)
+        } catch (ex: Exception) {
+            if (ex is IllegalStateException) {
+                throw ex
+            }
+            throw IllegalStateException("Keine Verbindung zum Server möglich.")
+        }
+    }
+
+
 
     fun close() {
         client.close()
