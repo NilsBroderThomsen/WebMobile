@@ -2,6 +2,7 @@ package api
 
 import dto.CreateUserRequest
 import dto.EntryDto
+import dto.UserDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -25,6 +26,13 @@ class MoodTrackerClient(private val baseUrl: String) {
     suspend fun getEntries(userId: Long): List<EntryDto> {
         var url = "$baseUrl/api/users/$userId/entries"
         return client.get(url).body<List<EntryDto>>()
+    }
+
+    suspend fun registerUser(request: CreateUserRequest): UserDto {
+        val url = "$baseUrl/api/users"
+        return client.post(url) {
+            setBody(request)
+        }.body()
     }
 
     fun close() {
