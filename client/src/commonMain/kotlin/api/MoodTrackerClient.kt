@@ -22,13 +22,6 @@ class MoodTrackerClient(private val baseUrl: String) {
         }
     }
 
-    suspend fun postCreateUser(username: String, email: String, password: String) {
-        var url = "$baseUrl/api/users"
-        client.post(url) {
-            setBody(CreateUserRequest(username, email, password))
-        }
-    }
-
     suspend fun getEntries(userId: Long): List<EntryDto> {
         var url = "$baseUrl/api/users/$userId/entries"
         return client.get(url).body<List<EntryDto>>()
