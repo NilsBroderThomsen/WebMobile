@@ -81,6 +81,7 @@ fun App() {
             }
             Screen.CreateEntry -> {
                 CreateEntryPage(
+                    client = client,
                     onNavigateBack = {
                         currentScreen = Screen.Entries
                     }
