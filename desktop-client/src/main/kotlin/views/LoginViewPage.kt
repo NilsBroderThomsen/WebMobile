@@ -69,8 +69,8 @@ fun LoginViewPage(
                 scope.launch {
                     try {
                         delay(5000) // Simuliere Netzwerkverzögerung
-    //                    val user = client.login(
-    //                        LoginRequest(
+    //                    val user = client.loginUser(
+    //                        LoginUserRequest(
     //                            username = username,
     //                            password = password
     //                        )

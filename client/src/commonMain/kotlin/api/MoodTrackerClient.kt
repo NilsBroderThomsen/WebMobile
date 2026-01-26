@@ -46,6 +46,10 @@ class MoodTrackerClient(private val baseUrl: String) {
         throw IllegalStateException(errorMessage)
     }
 
+    suspend fun loginUser(username: String, password: String): UserDto {
+        TODO("Not implemented yet")
+    }
+
     suspend fun getEntries(userId: Long): List<EntryDto> {
         val url = "$baseUrl/api/users/$userId/entries"
         try {
@@ -89,8 +93,6 @@ class MoodTrackerClient(private val baseUrl: String) {
             throw IllegalStateException("Keine Verbindung zum Server möglich.")
         }
     }
-
-
 
     fun close() {
         client.close()
