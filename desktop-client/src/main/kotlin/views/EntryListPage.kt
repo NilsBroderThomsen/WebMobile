@@ -15,21 +15,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
+import config.AppConfig
 import dto.EntryDto
 
 @Composable
-fun EntryListView(
+fun EntryListPage(
     userId: Long,
     onNavigateBack: () -> Unit,
     onCreateEntry: () -> Unit
 ) {
-    val baseUrl = "http://localhost:8080"
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val client = MoodTrackerClient(baseUrl)
+        val client = MoodTrackerClient(AppConfig.BASE_URL)
         try {
             entries = client.getEntries(userId)
         } catch (ex: Exception) {

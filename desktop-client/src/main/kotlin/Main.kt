@@ -6,11 +6,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import views.CreateEntryView
-import views.EntryListView
-import views.HomeView
-import views.LoginView
-import views.RegisterView
+import views.CreateEntryPage
+import views.EntryListPage
+import views.HomePage
+import views.LoginViewPage
+import views.RegisterPage
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "Mood Tracker") {
@@ -24,7 +24,7 @@ fun App() {
     MaterialTheme {
         when (currentScreen) {
             Screen.Home -> {
-                HomeView(
+                HomePage(
                     onNavigateToEntries = {
                         currentScreen = Screen.Entries
                     },
@@ -37,7 +37,7 @@ fun App() {
                 )
             }
             Screen.Login -> {
-                LoginView(
+                LoginViewPage(
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
@@ -47,7 +47,7 @@ fun App() {
                 )
             }
             Screen.Register -> {
-                RegisterView(
+                RegisterPage(
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
@@ -57,7 +57,7 @@ fun App() {
                 )
             }
             Screen.Entries -> {
-                EntryListView(
+                EntryListPage(
                     userId = 1L,
                     onNavigateBack = {
                         currentScreen = Screen.Home
@@ -68,7 +68,7 @@ fun App() {
                 )
             }
             Screen.CreateEntry -> {
-                CreateEntryView(
+                CreateEntryPage(
                     onNavigateBack = {
                         currentScreen = Screen.Entries
                     }

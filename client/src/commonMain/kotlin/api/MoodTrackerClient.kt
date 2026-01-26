@@ -25,11 +25,6 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
     private val client = HttpClient {
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
             json(json)
         }
     }
