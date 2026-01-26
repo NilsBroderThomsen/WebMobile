@@ -19,12 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import config.AppConfig
 import dto.CreateUserRequest
 import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterPage(
+    client: MoodTrackerClient,
     onNavigateBack: () -> Unit,
     onNavigateToEntries: () -> Unit      //TODO: implement UserID navigation to entries after login
 ) {
@@ -73,7 +73,6 @@ fun RegisterPage(
                 statusMessage = null
                 errorMessage = null
                 scope.launch {
-                    val client = MoodTrackerClient(AppConfig.BASE_URL)
                     try {
                         val user = client.registerUser(
                             CreateUserRequest(
@@ -87,7 +86,6 @@ fun RegisterPage(
                     } catch (ex: Exception) {
                         errorMessage = ex.message ?: "Registrierung fehlgeschlagen."
                     } finally {
-                        client.close()
                         isLoading = false
                     }
                 }

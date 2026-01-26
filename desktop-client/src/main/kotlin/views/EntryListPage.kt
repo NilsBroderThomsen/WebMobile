@@ -15,11 +15,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import config.AppConfig
 import dto.EntryDto
 
 @Composable
 fun EntryListPage(
+    client: MoodTrackerClient,
     userId: Long,
     onNavigateBack: () -> Unit,
     onCreateEntry: () -> Unit
@@ -29,14 +29,12 @@ fun EntryListPage(
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val client = MoodTrackerClient(AppConfig.BASE_URL)
         try {
             entries = client.getEntries(userId)
         } catch (ex: Exception) {
             errorMessage = ex.message ?: "Einträge konnten nicht geladen werden."
         } finally {
             isLoading = false
-            client.close()
         }
     }
 

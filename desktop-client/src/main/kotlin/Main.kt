@@ -1,11 +1,14 @@
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import api.MoodTrackerClient
+import config.AppConfig
 import views.CreateEntryPage
 import views.EntryListPage
 import views.HomePage
@@ -21,6 +24,12 @@ fun main() = application {
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
+    DisposableEffect(Unit) {
+        onDispose {
+            client.close()
+        }
+    }
     MaterialTheme {
         when (currentScreen) {
             Screen.Home -> {
@@ -38,6 +47,7 @@ fun App() {
             }
             Screen.Login -> {
                 LoginViewPage(
+                    client = client,
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
@@ -48,6 +58,7 @@ fun App() {
             }
             Screen.Register -> {
                 RegisterPage(
+                    client = client,
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
@@ -58,6 +69,7 @@ fun App() {
             }
             Screen.Entries -> {
                 EntryListPage(
+                    client = client,
                     userId = 1L,
                     onNavigateBack = {
                         currentScreen = Screen.Home
