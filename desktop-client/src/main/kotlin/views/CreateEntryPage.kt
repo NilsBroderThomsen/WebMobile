@@ -25,9 +25,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun CreateEntryPage(
     client: MoodTrackerClient,
+    userId: Long,
     onNavigateBack: () -> Unit
 ) {
-    val userId = 1L
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var moodRatingInput by remember { mutableStateOf("") }

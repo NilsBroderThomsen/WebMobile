@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 fun RegisterPage(
     client: MoodTrackerClient,
     onNavigateBack: () -> Unit,
-    onNavigateToEntries: () -> Unit      //TODO: implement UserID navigation to entries after login
+    onNavigateToEntries: (Long) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -81,8 +81,12 @@ fun RegisterPage(
                                 password = password
                             )
                         )
+                        val loginResponse = client.loginUser(
+                            username = username,
+                            password = password
+                        )
                         statusMessage = "Registrierung erfolgreich. Willkommen, ${user.username}!"
-                        onNavigateToEntries()
+                        onNavigateToEntries(loginResponse.userId)
                     } catch (ex: Exception) {
                         errorMessage = ex.message ?: "Registrierung fehlgeschlagen."
                     } finally {

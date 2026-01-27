@@ -210,7 +210,7 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
 
         call.respond(
             HttpStatusCode.OK,
-            LoginResponse(token = token)
+            LoginResponse(token = token, userId = user.id.value)
         )
     }
 }

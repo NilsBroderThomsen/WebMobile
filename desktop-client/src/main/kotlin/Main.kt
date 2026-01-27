@@ -16,6 +16,7 @@ fun main() = application {
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    var authUserId by remember { mutableStateOf<Long?>(null) }
     val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
     DisposableEffect(Unit) {
         onDispose {
@@ -27,7 +28,11 @@ fun App() {
             Screen.Home -> {
                 HomePage(
                     onNavigateToEntries = {
-                        currentScreen = Screen.Entries
+                        currentScreen = if (authUserId == null) {
+                            Screen.Login
+                        } else {
+                            Screen.Entries
+                        }
                     },
                     onNavigateToLogin = {
                         currentScreen = Screen.Login
@@ -43,7 +48,8 @@ fun App() {
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
-                    onNavigateToEntries = {
+                    onNavigateToEntries = { userId ->
+                        authUserId = userId
                         currentScreen = Screen.Entries
                     }
                 )
@@ -54,36 +60,52 @@ fun App() {
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
-                    onNavigateToEntries = {
+                    onNavigateToEntries = { userId ->
+                        authUserId = userId
                         currentScreen = Screen.Entries
                     }
                 )
             }
             Screen.Entries -> {
-                EntryListPage(
-                    client = client,
-                    userId = 1L,
-                    onNavigateBack = {
-                        currentScreen = Screen.Home
-                    },
-                    onCreateEntry = {
-                        currentScreen = Screen.CreateEntry
-                    },
-                    onUpdateEntry = { entryDto ->
-                        currentScreen = Screen.UpdateEntry(entryDto)
-                    },
-                    onEntrySelected = { entryId ->
-                        currentScreen = Screen.EntryDetails(entryId)
+                val userId = authUserId
+                if (userId == null) {
+                    LaunchedEffect(Unit) {
+                        currentScreen = Screen.Login
                     }
-                )
+                } else {
+                    EntryListPage(
+                        client = client,
+                        userId = userId,
+                        onNavigateBack = {
+                            currentScreen = Screen.Home
+                        },
+                        onCreateEntry = {
+                            currentScreen = Screen.CreateEntry
+                        },
+                        onUpdateEntry = { entryDto ->
+                            currentScreen = Screen.UpdateEntry(entryDto)
+                        },
+                        onEntrySelected = { entryId ->
+                            currentScreen = Screen.EntryDetails(entryId)
+                        }
+                    )
+                }
             }
             Screen.CreateEntry -> {
-                CreateEntryPage(
-                    client = client,
-                    onNavigateBack = {
-                        currentScreen = Screen.Entries
+                val userId = authUserId
+                if (userId == null) {
+                    LaunchedEffect(Unit) {
+                        currentScreen = Screen.Login
                     }
-                )
+                } else {
+                    CreateEntryPage(
+                        client = client,
+                        userId = userId,
+                        onNavigateBack = {
+                            currentScreen = Screen.Entries
+                        }
+                    )
+                }
             }
             is Screen.UpdateEntry -> {
                 UpdateEntryPage(
