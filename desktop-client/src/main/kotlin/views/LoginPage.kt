@@ -67,7 +67,7 @@ fun LoginPage(
 
                 scope.launch {
                     try {
-                        val loginResponse = client.loginUser(
+                        val loginResponse = client.login(
                             username = username,
                             password = password
                         )

@@ -31,7 +31,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         }
     }
 
-    suspend fun registerUser(request: CreateUserRequest): UserDto {
+    suspend fun register(request: CreateUserRequest): UserDto {
         val url = "$baseUrl/api/users"
         val response = client.post(url) {
             contentType(ContentType.Application.Json)
@@ -48,7 +48,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         throw IllegalStateException(errorMessage)
     }
 
-    suspend fun loginUser(username: String, password: String): LoginResponse {
+    suspend fun login(username: String, password: String): LoginResponse {
         val url = "$baseUrl/api/login"
         val response = client.post(url) {
             contentType(ContentType.Application.Json)

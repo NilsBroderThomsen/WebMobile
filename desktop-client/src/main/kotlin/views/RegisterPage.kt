@@ -74,14 +74,14 @@ fun RegisterPage(
                 errorMessage = null
                 scope.launch {
                     try {
-                        val user = client.registerUser(
+                        val user = client.register(
                             CreateUserRequest(
                                 username = username,
                                 email = email,
                                 password = password
                             )
                         )
-                        val loginResponse = client.loginUser(
+                        val loginResponse = client.login(
                             username = username,
                             password = password
                         )
