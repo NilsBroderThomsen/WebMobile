@@ -1,3 +1,5 @@
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import database.MoodTrackerDatabaseRepository
 import di.appModule
 import dto.CreateEntryRequest
@@ -23,6 +25,9 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
 import io.ktor.server.response.respond
@@ -44,6 +49,24 @@ import security.PasswordHasher
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
+
+
+fun main() {
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+        configureDI()
+        install(CallLogging) {
+            level = Level.INFO
+        }
+        install(CORS) {
+            allowHost("localhost:8080")
+            allowHost("localhost:8081")
+            allowHost("127.0.0.1:8080")
+            allowHeader(HttpHeaders.ContentType)
+        }
+        configureJWT()
+        configureRouting()
+    }.start(wait = true)
+}
 
 fun Application.configureDI() {
     di {
@@ -75,22 +98,6 @@ fun Application.configureJWT() {
     }
 }
 
-fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        configureDI()
-        install(CallLogging) {
-            level = Level.INFO
-        }
-        install(CORS) {
-            allowHost("localhost:8080")
-            allowHost("localhost:8081")
-            allowHost("127.0.0.1:8080")
-            allowHeader(HttpHeaders.ContentType)
-        }
-        configureRouting()
-    }.start(wait = true)
-}
-
 fun Application.configureRouting() {
     val di by closestDI()
 
@@ -106,6 +113,7 @@ fun Application.configureRouting() {
 
     routing {
         staticResources("/static", "static")
+
         getUserEntries(repository)
         getEntryDetails(repository)
         postCreateUser(repository)
@@ -118,6 +126,57 @@ fun Application.configureRouting() {
         exportCsv(repository)
         importJson(repository)
         importCsv(repository)
+    }
+}
+
+private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
+    post("/api/login") {
+        val request = try {
+            call.receive<LoginRequest>()
+        } catch (ex: ContentTransformationException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Request body is not valid JSON"
+                )
+            )
+            return@post
+        }
+
+        val username = request.username.trim()
+        val password = request.password.trim()
+
+        if (username.isBlank() || password.isBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = "Username and password are required"
+                )
+            )
+            return@post
+        }
+
+        val user = repository.findUserByUsername(username)
+        if (user == null || !PasswordHasher.verify(password, user.passwordHash)) {
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                ErrorResponse(
+                    error = "Unauthorized",
+                    message = "Invalid username or password"
+                )
+            )
+            return@post
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            SuccessResponse(
+                message = "Login successful",
+                data = user.id.value.toString()
+            )
+        )
     }
 }
 
@@ -186,7 +245,7 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
             )
             return@post
         }
-        
+
         val username = request.username.trim()
         val email = request.email.trim()
         val password = request.password.trim()
@@ -241,56 +300,6 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
     }
 }
 
-private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
-    post("/api/login") {
-        val request = try {
-            call.receive<LoginRequest>()
-        } catch (ex: ContentTransformationException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Request body is not valid JSON"
-                )
-            )
-            return@post
-        }
-
-        val username = request.username.trim()
-        val password = request.password.trim()
-
-        if (username.isBlank() || password.isBlank()) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Validation Error",
-                    message = "Username and password are required"
-                )
-            )
-            return@post
-        }
-
-        val user = repository.findUserByUsername(username)
-        if (user == null || !PasswordHasher.verify(password, user.passwordHash)) {
-            call.respond(
-                HttpStatusCode.Unauthorized,
-                ErrorResponse(
-                    error = "Unauthorized",
-                    message = "Invalid username or password"
-                )
-            )
-            return@post
-        }
-
-        call.respond(
-            HttpStatusCode.OK,
-            SuccessResponse(
-                message = "Login successful",
-                data = user.id.value.toString()
-            )
-        )
-    }
-}
 
 private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
     post("/api/users/{userId}/entries") {
