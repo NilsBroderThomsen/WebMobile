@@ -55,6 +55,9 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.11")
+
+    // Security
+    implementation("org.mindrot:jbcrypt:0.4")
 }
 
 kotlin {

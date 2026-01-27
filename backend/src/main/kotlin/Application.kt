@@ -3,6 +3,7 @@ import database.MoodTrackerDatabaseRepository
 import di.appModule
 import dto.CreateEntryRequest
 import dto.CreateUserRequest
+import dto.LoginUserRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
 import dto.UpdateEntryRequest
@@ -47,6 +48,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.slf4j.event.Level
+import security.PasswordHasher
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
@@ -91,6 +93,7 @@ fun Application.configureRouting() {
         getUserEntries(repository)
         getEntryDetails(repository)
         postCreateUser(repository)
+        postLogin(repository)
         postCreateEntry(repository)
         putUpdateEntry(repository)
         deleteEntry(repository)
@@ -212,13 +215,64 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
             id = UserId(System.currentTimeMillis()),
             username = username,
             email = email,
-            passwordHash = password,
+            passwordHash = PasswordHasher.hash(password),
             registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             isActive = true
         )
 
         val savedUser = repository.createUser(user)
         call.respond(HttpStatusCode.Created, savedUser.toDto())
+    }
+}
+
+private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
+    post("/api/login") {
+        val request = try {
+            call.receive<LoginUserRequest>()
+        } catch (ex: ContentTransformationException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Request body is not valid JSON"
+                )
+            )
+            return@post
+        }
+
+        val username = request.username.trim()
+        val password = request.password.trim()
+
+        if (username.isBlank() || password.isBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Validation Error",
+                    message = "Username and password are required"
+                )
+            )
+            return@post
+        }
+
+        val user = repository.findUserByUsername(username)
+        if (user == null || !PasswordHasher.verify(password, user.passwordHash)) {
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                ErrorResponse(
+                    error = "Unauthorized",
+                    message = "Invalid username or password"
+                )
+            )
+            return@post
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            SuccessResponse(
+                message = "Login successful",
+                data = user.id.value.toString()
+            )
+        )
     }
 }
 
