@@ -3,7 +3,7 @@ package dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginUserRequest(
+data class LoginRequest(
     val username: String,
     val password: String
 )

@@ -1,18 +1,15 @@
-import database.DatabaseFactory
 import database.MoodTrackerDatabaseRepository
 import di.appModule
 import dto.CreateEntryRequest
 import dto.CreateUserRequest
-import dto.LoginUserRequest
+import dto.LoginRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
 import dto.UpdateEntryRequest
-import extension.entryCard
 import extension.isValidEmail
 import extension.isValidMoodRating
 import extension.isValidUsername
 import extension.toDto
-import extension.toEmoji
 import model.Entry
 import model.EntryId
 import model.UserId
@@ -26,7 +23,6 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
-import io.ktor.server.html.respondHtml
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
 import io.ktor.server.response.respond
@@ -35,15 +31,11 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
-import io.ktor.server.request.receiveParameters
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
-import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlinx.html.*
-import org.jetbrains.exposed.sql.Database
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
@@ -56,6 +48,30 @@ import kotlin.time.Clock
 fun Application.configureDI() {
     di {
         import(appModule)
+    }
+}
+
+fun Application.configureJWT() {
+    val secret = "my-very-secret-key"
+    val issuer = "student-management"
+
+    install(Authentication) {
+        jwt("jwt-auth") {
+            verifier(
+                JWT.require(Algorithm.HMAC256(secret))
+                    .withIssuer(issuer)
+                    .build()
+            )
+            validate { credential ->
+                if (credential.payload.getClaim("username").asString() !=
+                    null) {
+                    UserIdPrincipal(credential.payload.getClaim("username").asString())
+                }
+                else {
+                    null
+                }
+            }
+        }
     }
 }
 
@@ -228,7 +244,7 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
 private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
     post("/api/login") {
         val request = try {
-            call.receive<LoginUserRequest>()
+            call.receive<LoginRequest>()
         } catch (ex: ContentTransformationException) {
             call.respond(
                 HttpStatusCode.BadRequest,
