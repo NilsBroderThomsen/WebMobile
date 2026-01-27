@@ -4,6 +4,7 @@ import database.MoodTrackerDatabaseRepository
 import di.appModule
 import dto.CreateEntryRequest
 import dto.CreateUserRequest
+import dto.LoginResponse
 import dto.LoginRequest
 import dto.ErrorResponse
 import dto.SuccessResponse
@@ -46,9 +47,16 @@ import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.slf4j.event.Level
 import security.PasswordHasher
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
+
+private const val JWT_SECRET = "my-very-secret-key"
+private const val JWT_ISSUER = "student-management"
+private const val JWT_TOKEN_TTL_HOURS = 24L
 
 
 fun main() {
@@ -75,14 +83,11 @@ fun Application.configureDI() {
 }
 
 fun Application.configureJWT() {
-    val secret = "my-very-secret-key"
-    val issuer = "student-management"
-
     install(Authentication) {
         jwt("jwt-auth") {
             verifier(
-                JWT.require(Algorithm.HMAC256(secret))
-                    .withIssuer(issuer)
+                JWT.require(Algorithm.HMAC256(JWT_SECRET))
+                    .withIssuer(JWT_ISSUER)
                     .build()
             )
             validate { credential ->
@@ -170,12 +175,18 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
             return@post
         }
 
+        val now = Instant.now()
+        val token = JWT.create()
+            .withIssuer(JWT_ISSUER)
+            .withIssuedAt(Date.from(now))
+            .withExpiresAt(Date.from(now.plus(JWT_TOKEN_TTL_HOURS, ChronoUnit.HOURS)))
+            .withClaim("username", user.username)
+            .withClaim("userId", user.id.value)
+            .sign(Algorithm.HMAC256(JWT_SECRET))
+
         call.respond(
             HttpStatusCode.OK,
-            SuccessResponse(
-                message = "Login successful",
-                data = user.id.value.toString()
-            )
+            LoginResponse(token = token)
         )
     }
 }
