@@ -13,15 +13,6 @@ repositories {
 }
 
 dependencies {
-    // Exposed ORM
-    implementation("org.jetbrains.exposed:exposed-core:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
-
-    // SQLite JDBC Treiber
-    implementation("org.xerial:sqlite-jdbc:3.47.1.0")
-    
     // Ktor Server
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")

@@ -1,0 +1,36 @@
+package extension
+
+import dto.EntryDto
+import dto.EntryExportDto
+import dto.UserDto
+import model.Entry
+import model.User
+
+fun Entry.toDto(): EntryDto = EntryDto(
+    id = this.id.value,
+    userId = this.userId.value,
+    title = this.title,
+    content = this.content,
+    moodRating = this.moodRating,
+    createdAt = this.createdAt,
+    updatedAt = this.updatedAt,
+    wordCount = this.wordCount,
+    moodLevel = this.moodRating?.toMoodLevel()?.name
+)
+
+fun Entry.toExportDto(): EntryExportDto = EntryExportDto(
+    id = this.id.value,
+    title = this.title,
+    content = this.content,
+    moodRating = this.moodRating,
+    createdAt = this.createdAt.toString(),
+    updatedAt = this.updatedAt?.toString()
+)
+
+fun User.toDto(): UserDto = UserDto(
+    id = this.id.value,
+    username = this.username,
+    email = this.email,
+    registrationDate = this.registrationDate,
+    isActive = this.isActive
+)
