@@ -2,60 +2,43 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import database.MoodTrackerDatabaseRepository
 import di.appModule
-import dto.CreateEntryRequest
-import dto.CreateUserRequest
-import dto.LoginResponse
-import dto.LoginRequest
-import dto.ErrorResponse
-import dto.SuccessResponse
-import dto.UpdateEntryRequest
+import dto.*
 import extension.isValidEmail
 import extension.isValidMoodRating
 import extension.isValidUsername
 import extension.toDto
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.request.*
+import io.ktor.server.request.ContentTransformationException
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlinx.serialization.json.Json
 import model.Entry
 import model.EntryId
 import model.UserId
-import service.ExportService
-import service.ImportService
-import io.ktor.http.ContentDisposition
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.UserIdPrincipal
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.jwt
-import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.auth.principal
-import io.ktor.server.http.content.staticResources
-import io.ktor.server.routing.*
-import io.ktor.server.response.respond
-import io.ktor.server.plugins.calllogging.*
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.cors.routing.CORS
-import io.ktor.server.plugins.origin
-import io.ktor.server.request.ContentTransformationException
-import io.ktor.server.request.receive
-import kotlinx.serialization.json.Json
-import io.ktor.server.request.receiveText
-import io.ktor.server.response.respondText
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.slf4j.event.Level
 import security.PasswordHasher
+import service.ExportService
+import service.ImportService
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Date
-import kotlin.text.isBlank
-import kotlin.text.trim
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -103,13 +86,8 @@ fun Application.configureJWT() {
                     .build()
             )
             validate { credential ->
-                if (credential.payload.getClaim("username").asString() !=
-                    null) {
-                    UserIdPrincipal(credential.payload.getClaim("username").asString())
-                }
-                else {
-                    null
-                }
+                val username = credential.payload.getClaim("username").asString()
+                if (username != null) JWTPrincipal(credential.payload) else null
             }
         }
     }
@@ -210,7 +188,7 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
 
         call.respond(
             HttpStatusCode.OK,
-            LoginResponse(token = token)
+            LoginResponse(token = token, userId = user.id.value)
         )
     }
 }

@@ -34,8 +34,7 @@ object DatabaseFactory {
                 registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toJavaLocalDate()
                 isActive = true
             }
-            val hasAnyEntry = false
-//            val hasAnyEntry = EntryDAO.find { EntriesTable.userId eq defaultUser.id }.empty().not()
+            val hasAnyEntry = EntryDAO.find { EntriesTable.userId eq defaultUser.id }.empty().not()
             if (!hasAnyEntry) {
                 EntryDAO.new {
                     user = defaultUser
