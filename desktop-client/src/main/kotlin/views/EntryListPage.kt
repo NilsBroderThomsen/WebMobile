@@ -6,12 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
@@ -21,8 +16,9 @@ import dto.EntryDto
 fun EntryListPage(
     client: MoodTrackerClient,
     userId: Long,
-    onNavigateBack: () -> Unit,
-    onCreateEntry: () -> Unit
+    onCreateEntry: () -> Unit,
+    onUpdateEntry: (EntryDto) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -57,7 +53,11 @@ fun EntryListPage(
         }
 
         entries.forEach { entry ->
-            Text("Entry ID: ${entry.id}, Title: ${entry.title}, Content: ${entry.content}, Mood: ${entry.moodRating}")
+            Spacer(Modifier.height(12.dp))
+            Text("Title: ${entry.title}")
+            Text("Mood: ${entry.moodRating ?: "—"}")
+            Text("Created: ${entry.createdAt}")
+            Button(onClick = { onUpdateEntry(entry) }) { Text("Update") }
         }
     }
 }

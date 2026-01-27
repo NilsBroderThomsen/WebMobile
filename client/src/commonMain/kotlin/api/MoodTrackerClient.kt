@@ -4,12 +4,14 @@ import dto.CreateEntryRequest
 import dto.CreateUserRequest
 import dto.EntryDto
 import dto.ErrorResponse
+import dto.UpdateEntryRequest
 import dto.UserDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -109,6 +111,23 @@ class MoodTrackerClient(private val baseUrl: String) {
         val errorMessage = runCatching {
             json.decodeFromString<ErrorResponse>(bodyText).message
         }.getOrNull() ?: "Registrierung fehlgeschlagen (${response.status.value})"
+        throw IllegalStateException(errorMessage)
+    }
+
+    suspend fun updateEntry(entryId: Long, request: UpdateEntryRequest): EntryDto {
+        val url = "$baseUrl/api/entries/${entryId}"
+        val response = client.put(url) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+        if (response.status.isSuccess()) {
+            return response.body()
+        }
+
+        val bodyText = response.bodyAsText()
+        val errorMessage = runCatching {
+            json.decodeFromString<ErrorResponse>(bodyText).message
+        }.getOrNull() ?: "Aktualisierung des Eintrags fehlgeschlagen (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
 
