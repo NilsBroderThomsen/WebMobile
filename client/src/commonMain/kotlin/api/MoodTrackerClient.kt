@@ -68,9 +68,14 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
+        if (authToken == null) {
+            throw IllegalStateException("Login erforderlich.")
+        }
         val url = "$baseUrl/api/users/$userId/entries"
         try {
-            val response = client.get(url)
+            val response = client.get(url) {
+                header(HttpHeaders.Authorization, "Bearer $authToken")
+            }
             if (response.status.isSuccess()) {
                 return response.body()
             }
