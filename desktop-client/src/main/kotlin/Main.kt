@@ -39,6 +39,12 @@ fun App() {
                     },
                     onNavigateToRegister = {
                         currentScreen = Screen.Register
+                    },
+                    showLogout = authUserId != null,
+                    onLogout = {
+                        client.logout()
+                        authUserId = null
+                        currentScreen = Screen.Home
                     }
                 )
             }

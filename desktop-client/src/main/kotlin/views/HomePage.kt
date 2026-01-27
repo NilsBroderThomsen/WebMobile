@@ -9,17 +9,26 @@ import androidx.compose.runtime.Composable
 fun HomePage(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToEntries: () -> Unit
+    onNavigateToEntries: () -> Unit,
+    showLogout: Boolean,
+    onLogout: () -> Unit
 ) {
     Column {
-        Button(onClick = onNavigateToLogin) {
-            Text("Login")
+        if (!showLogout) {
+            Button(onClick = onNavigateToLogin) {
+                Text("Login")
+            }
+            Button(onClick = onNavigateToRegister) {
+                Text("Register")
+            }
         }
-        Button(onClick = onNavigateToRegister) {
-            Text("Register")
-        }
-        Button(onClick = onNavigateToEntries) {
-            Text("My Entries")
+        if (showLogout) {
+            Button(onClick = onNavigateToEntries) {
+                Text("My Entries")
+            }
+            Button(onClick = onLogout) {
+                Text("Logout")
+            }
         }
     }
 }
