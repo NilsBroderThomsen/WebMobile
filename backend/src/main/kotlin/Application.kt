@@ -27,8 +27,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
@@ -38,8 +37,6 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
-import io.ktor.server.request.origin
-import io.ktor.server.auth.principal
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
@@ -53,23 +50,13 @@ import security.PasswordHasher
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
 
 private const val JWT_SECRET = "my-very-secret-key"
-private const val JWT_ISSUER = "student-management"
-private const val JWT_TOKEN_TTL_HOURS = 24L
-private const val LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5
-private val LOGIN_RATE_LIMIT_WINDOW = java.time.Duration.ofMinutes(1)
-
-private data class LoginAttemptBucket(
-    var windowStart: Instant,
-    var count: Int
-)
-
-private val loginAttempts = ConcurrentHashMap<String, LoginAttemptBucket>()
+private const val JWT_ISSUER = "MoodTrackerServer"
+private const val JWT_TOKEN_TTL_HOURS = 1L
 
 
 fun main() {
@@ -104,9 +91,9 @@ fun Application.configureJWT() {
                     .build()
             )
             validate { credential ->
-                val username = credential.payload.getClaim("username").asString()
-                if (username != null) {
-                    JWTPrincipal(credential.payload)
+                if (credential.payload.getClaim("username").asString() !=
+                    null) {
+                    UserIdPrincipal(credential.payload.getClaim("username").asString())
                 }
                 else {
                     null
@@ -149,18 +136,6 @@ fun Application.configureRouting() {
 
 private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
     post("/api/login") {
-        val clientIP = call.request.origin.remoteHost
-        if (isRateLimited(clientIP)) {
-            call.respond(
-                HttpStatusCode.TooManyRequests,
-                ErrorResponse(
-                    error = "Too Many Requests",
-                    message = "Too many login attempts. Please try again later."
-                )
-            )
-            return@post
-        }
-
         val request = try {
             call.receive<LoginRequest>()
         } catch (ex: ContentTransformationException) {
@@ -194,7 +169,7 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
                 HttpStatusCode.Unauthorized,
                 ErrorResponse(
                     error = "Unauthorized",
-                    message = "Invalid username or password"
+                    message = "Wrong username or password"
                 )
             )
             return@post
@@ -216,75 +191,24 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
     }
 }
 
-private fun isRateLimited(clientIP: String): Boolean {
-    val now = Instant.now()
-    var limited = false
-
-    loginAttempts.compute(clientIP) { _, existing ->
-        val current = if (existing == null ||
-            now.isAfter(existing.windowStart.plus(LOGIN_RATE_LIMIT_WINDOW))
-        ) {
-            LoginAttemptBucket(windowStart = now, count = 0)
-        } else {
-            existing
-        }
-
-        if (current.count >= LOGIN_RATE_LIMIT_MAX_ATTEMPTS) {
-            limited = true
-        } else {
-            current.count += 1
-        }
-
-        current
-    }
-
-    return limited
-}
-
 private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
-    authenticate("jwt-auth") {
-        get("/api/users/{userId}/entries") {
-            val userId = call.parameters["userId"]?.toLongOrNull()
+    get("/api/users/{userId}/entries") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
 
-            if (userId == null) {
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    ErrorResponse(
-                        error = "Bad Request",
-                        message = "Invalid userId"
-                    )
+        if (userId == null) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse(
+                    error = "Bad Request",
+                    message = "Invalid userId"
                 )
-                return@get
-            }
-
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Missing authentication token"
-                    )
-                )
-                return@get
-            }
-
-            if (tokenUserId != userId) {
-                call.respond(
-                    HttpStatusCode.Forbidden,
-                    ErrorResponse(
-                        error = "Forbidden",
-                        message = "UserId does not match authenticated user"
-                    )
-                )
-                return@get
-            }
-
-            val entries = repository.findAllEntries(UserId(userId))
-            val dtos = entries.map { it.toDto() }
-            call.respond(HttpStatusCode.OK, dtos)
+            )
+            return@get
         }
+
+        val entries = repository.findAllEntries(UserId(userId))
+        val dtos = entries.map { it.toDto() }
+        call.respond(HttpStatusCode.OK, dtos)
     }
 }
 
