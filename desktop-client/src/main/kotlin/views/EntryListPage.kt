@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
@@ -25,8 +26,11 @@ fun EntryListPage(
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    suspend fun refreshEntries() {
+        isLoading = true
+        errorMessage = null
         try {
             entries = client.getEntries(userId)
         } catch (ex: Exception) {
@@ -34,6 +38,10 @@ fun EntryListPage(
         } finally {
             isLoading = false
         }
+    }
+
+    LaunchedEffect(userId) {
+        refreshEntries()
     }
 
     Column {
@@ -64,6 +72,25 @@ fun EntryListPage(
                 Text("Created: ${entry.createdAt}")
             }
             Button(onClick = { onUpdateEntry(entry) }) { Text("Update") }
+            Button(
+                onClick = {
+                    scope.launch {
+                        isLoading = true
+                        errorMessage = null
+                        try {
+                            client.deleteEntry(entry.id)
+                            entries = entries.filterNot { it.id == entry.id }
+                        } catch (ex: Exception) {
+                            errorMessage = ex.message ?: "Eintrag konnte nicht gelöscht werden."
+                        } finally {
+                            isLoading = false
+                        }
+                    }
+                },
+                enabled = !isLoading
+            ) {
+                Text("Delete")
+            }
         }
     }
 }
