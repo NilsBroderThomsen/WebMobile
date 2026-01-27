@@ -43,7 +43,7 @@ fun App() {
                 )
             }
             Screen.Login -> {
-                LoginViewPage(
+                LoginPage(
                     client = client,
                     onNavigateBack = {
                         currentScreen = Screen.Home

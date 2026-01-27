@@ -22,7 +22,7 @@ import api.MoodTrackerClient
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginViewPage(
+fun LoginPage(
     client: MoodTrackerClient,
     onNavigateBack: () -> Unit,
     onNavigateToEntries: (Long) -> Unit
