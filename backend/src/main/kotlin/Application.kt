@@ -28,7 +28,10 @@ import io.ktor.server.netty.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
 import io.ktor.server.response.respond
@@ -227,23 +230,49 @@ private fun shouldRateLimitLogin(clientIp: String, now: Instant): Boolean {
 }
 
 private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
-    get("/api/users/{userId}/entries") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
+    authenticate("jwt-auth") {
+        get("/api/users/{userId}/entries") {
+            val userId = call.parameters["userId"]?.toLongOrNull()
 
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
+            if (userId == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid userId"
+                    )
                 )
-            )
-            return@get
-        }
+                return@get
+            }
 
-        val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDto() }
-        call.respond(HttpStatusCode.OK, dtos)
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Authentication required"
+                    )
+                )
+                return@get
+            }
+
+            if (tokenUserId != userId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User can only access their own entries"
+                    )
+                )
+                return@get
+            }
+
+            val entries = repository.findAllEntries(UserId(userId))
+            val dtos = entries.map { it.toDto() }
+            call.respond(HttpStatusCode.OK, dtos)
+        }
     }
 }
 
