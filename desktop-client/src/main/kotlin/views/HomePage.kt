@@ -14,20 +14,21 @@ fun HomePage(
     onLogout: () -> Unit
 ) {
     Column {
-        if (!showLogout) {
-            Button(onClick = onNavigateToLogin) {
-                Text("Login")
-            }
-            Button(onClick = onNavigateToRegister) {
-                Text("Register")
-            }
-        }
         if (showLogout) {
             Button(onClick = onNavigateToEntries) {
                 Text("My Entries")
             }
             Button(onClick = onLogout) {
                 Text("Logout")
+            }
+        } else {
+            Text("Welcome to the Home Page!")
+            Text("Please login or register to continue.")
+            Button(onClick = onNavigateToLogin) {
+                Text("Login")
+            }
+            Button(onClick = onNavigateToRegister) {
+                Text("Register")
             }
         }
     }
