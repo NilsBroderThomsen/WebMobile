@@ -3,6 +3,7 @@ kotlin = "2.1.0-RC2"
 compose = "1.7.1"
 compose-navigation = "1.7.1"
 coroutines = "1.10.2"
+android-gradle = "8.5.2"
 androidx-lifecycle = "2.8.2"
 kotlinx-serialization = "1.7.3"
 kotlinx-serialization-json = "1.9.0"
@@ -17,10 +18,12 @@ kotlin-csv = "1.10.0"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-application = { id = "com.android.application", version.ref = "android-gradle" }
 
 [libraries]
 ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
@@ -53,3 +56,7 @@ compose-foundation = { module = "androidx.compose.foundation:foundation", versio
 compose-ui = { module = "androidx.compose.ui:ui", version.ref ="compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.13.1" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
+google-material = { module = "com.google.android.material:material", version = "1.12.0" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
