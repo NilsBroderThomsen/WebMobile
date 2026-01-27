@@ -27,7 +27,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
@@ -37,6 +38,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
+import io.ktor.server.auth.principal
 import kotlinx.serialization.json.Json
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
@@ -91,9 +93,9 @@ fun Application.configureJWT() {
                     .build()
             )
             validate { credential ->
-                if (credential.payload.getClaim("username").asString() !=
-                    null) {
-                    UserIdPrincipal(credential.payload.getClaim("username").asString())
+                val username = credential.payload.getClaim("username").asString()
+                if (username != null) {
+                    JWTPrincipal(credential.payload)
                 }
                 else {
                     null
@@ -192,23 +194,49 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
 }
 
 private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
-    get("/api/users/{userId}/entries") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
+    authenticate("jwt-auth") {
+        get("/api/users/{userId}/entries") {
+            val userId = call.parameters["userId"]?.toLongOrNull()
 
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
+            if (userId == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid userId"
+                    )
                 )
-            )
-            return@get
-        }
+                return@get
+            }
 
-        val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDto() }
-        call.respond(HttpStatusCode.OK, dtos)
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Missing authentication token"
+                    )
+                )
+                return@get
+            }
+
+            if (tokenUserId != userId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "UserId does not match authenticated user"
+                    )
+                )
+                return@get
+            }
+
+            val entries = repository.findAllEntries(UserId(userId))
+            val dtos = entries.map { it.toDto() }
+            call.respond(HttpStatusCode.OK, dtos)
+        }
     }
 }
 
