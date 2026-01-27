@@ -1,5 +1,6 @@
 package views
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ fun EntryListPage(
     userId: Long,
     onCreateEntry: () -> Unit,
     onUpdateEntry: (EntryDto) -> Unit,
+    onEntrySelected: (Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
@@ -54,9 +56,13 @@ fun EntryListPage(
 
         entries.forEach { entry ->
             Spacer(Modifier.height(12.dp))
-            Text("Title: ${entry.title}")
-            Text("Mood: ${entry.moodRating ?: "—"}")
-            Text("Created: ${entry.createdAt}")
+            Column(
+                modifier = Modifier.clickable { onEntrySelected(entry.id) }
+            ) {
+                Text("Title: ${entry.title}")
+                Text("Mood: ${entry.moodRating ?: "—"}")
+                Text("Created: ${entry.createdAt}")
+            }
             Button(onClick = { onUpdateEntry(entry) }) { Text("Update") }
         }
     }
