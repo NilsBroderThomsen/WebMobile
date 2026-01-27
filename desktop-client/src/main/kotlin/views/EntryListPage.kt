@@ -26,6 +26,7 @@ fun EntryListPage(
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var isAscending by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
     suspend fun refreshEntries() {
@@ -53,6 +54,10 @@ fun EntryListPage(
             Text("Create New Entry")
         }
 
+        Button(onClick = { isAscending = !isAscending }) {
+            Text(if (isAscending) "Sort: Oldest first" else "Sort: Newest first")
+        }
+
         if (isLoading) {
             Spacer(modifier = Modifier.height(8.dp))
             CircularProgressIndicator()
@@ -62,7 +67,15 @@ fun EntryListPage(
             Text(message)
         }
 
-        entries.forEach { entry ->
+        val sortedEntries = remember(entries, isAscending) {
+            if (isAscending) {
+                entries.sortedBy { it.createdAt }
+            } else {
+                entries.sortedByDescending { it.createdAt }
+            }
+        }
+
+        sortedEntries.forEach { entry ->
             Spacer(Modifier.height(12.dp))
             Column(
                 modifier = Modifier.clickable { onEntrySelected(entry.id) }
