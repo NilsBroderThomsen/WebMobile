@@ -11,6 +11,7 @@ import kotlinx.datetime.toJavaLocalDate
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import security.PasswordHasher
 import kotlin.time.Clock
 
 object DatabaseFactory {
@@ -29,7 +30,7 @@ object DatabaseFactory {
             val defaultUser = UserDAO.findById(1L) ?: UserDAO.new(1L) {
                 username = "default-user"
                 email = "default@example.com"
-                passwordHash = "test"
+                passwordHash = PasswordHasher.hash("test")
                 registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).toJavaLocalDate()
                 isActive = true
             }

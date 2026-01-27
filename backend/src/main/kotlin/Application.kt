@@ -47,6 +47,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.slf4j.event.Level
+import security.PasswordHasher
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
@@ -212,7 +213,7 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
             id = UserId(System.currentTimeMillis()),
             username = username,
             email = email,
-            passwordHash = password,
+            passwordHash = PasswordHasher.hash(password),
             registrationDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             isActive = true
         )
