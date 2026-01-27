@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
+import extension.toEmoji
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,7 +82,7 @@ fun EntryListPage(
                 modifier = Modifier.clickable { onEntrySelected(entry.id) }
             ) {
                 Text("Title: ${entry.title}")
-                Text("Mood: ${entry.moodRating ?: "—"}")
+                Text("Mood: ${entry.moodRating ?: "—"} ${entry.moodRating?.toEmoji() ?: ""}")
                 Text("Created: ${entry.createdAt}")
             }
             Button(onClick = { onUpdateEntry(entry) }) { Text("Update") }
