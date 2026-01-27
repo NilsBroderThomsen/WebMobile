@@ -28,6 +28,8 @@ import io.ktor.server.netty.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.routing.*
@@ -227,23 +229,49 @@ private fun shouldRateLimitLogin(clientIp: String, now: Instant): Boolean {
 }
 
 private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
-    get("/api/users/{userId}/entries") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
+    authenticate("jwt-auth") {
+        get("/api/users/{userId}/entries") {
+            val userId = call.parameters["userId"]?.toLongOrNull()
 
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
+            if (userId == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid userId"
+                    )
                 )
-            )
-            return@get
-        }
+                return@get
+            }
 
-        val entries = repository.findAllEntries(UserId(userId))
-        val dtos = entries.map { it.toDto() }
-        call.respond(HttpStatusCode.OK, dtos)
+            val principal = call.principal<JWTPrincipal>()
+            val authenticatedUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (authenticatedUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Missing or invalid authentication"
+                    )
+                )
+                return@get
+            }
+
+            if (authenticatedUserId != userId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User is not allowed to access these entries"
+                    )
+                )
+                return@get
+            }
+
+            val entries = repository.findAllEntries(UserId(userId))
+            val dtos = entries.map { it.toDto() }
+            call.respond(HttpStatusCode.OK, dtos)
+        }
     }
 }
 

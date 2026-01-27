@@ -19,14 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import util.extractUserIdFromToken
 
 @Composable
 fun LoginViewPage(
     client: MoodTrackerClient,
     onNavigateBack: () -> Unit,
-    onNavigateToEntries: () -> Unit     //TODO: implement UserID navigation to entries after login
+    onNavigateToEntries: (Long) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -68,17 +68,19 @@ fun LoginViewPage(
 
                 scope.launch {
                     try {
-                        delay(5000) // Simuliere Netzwerkverzögerung
-    //                    val user = client.loginUser(
-    //                        LoginUserRequest(
-    //                            username = username,
-    //                            password = password
-    //                        )
-    //                    )
-    //                    statusMessage = "Registrierung erfolgreich. Willkommen, ${user.username}!"
-    //                    onNavigateToEntries()
+                        val response = client.loginUser(
+                            username = username,
+                            password = password
+                        )
+                        val userId = extractUserIdFromToken(response.token)
+                        if (userId == null) {
+                            errorMessage = "Login fehlgeschlagen: Benutzer-ID konnte nicht ermittelt werden."
+                            return@launch
+                        }
+                        statusMessage = "Login erfolgreich."
+                        onNavigateToEntries(userId)
                     } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Registrierung fehlgeschlagen."
+                        errorMessage = ex.message ?: "Login fehlgeschlagen."
                     } finally {
                         isLoading = false
                     }

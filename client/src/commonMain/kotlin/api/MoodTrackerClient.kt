@@ -16,6 +16,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         isLenient = true
         ignoreUnknownKeys = true
     }
+    private var authToken: String? = null
     private val client = HttpClient {
         install(ContentNegotiation) {
             json(json)
@@ -39,14 +40,37 @@ class MoodTrackerClient(private val baseUrl: String) {
         throw IllegalStateException(errorMessage)
     }
 
-    suspend fun loginUser(username: String, password: String): UserDto {
-        TODO("Not implemented yet")
+    suspend fun loginUser(username: String, password: String): LoginResponse {
+        val url = "$baseUrl/api/login"
+        val response = client.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(LoginRequest(username = username, password = password))
+        }
+        if (response.status.isSuccess()) {
+            val loginResponse: LoginResponse = response.body()
+            authToken = loginResponse.token
+            return loginResponse
+        }
+
+        val bodyText = response.bodyAsText()
+        val errorMessage = runCatching {
+            json.decodeFromString<ErrorResponse>(bodyText).message
+        }.getOrNull() ?: "Login fehlgeschlagen (${response.status.value})"
+        throw IllegalStateException(errorMessage)
+    }
+
+    fun setAuthToken(token: String) {
+        authToken = token
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
         val url = "$baseUrl/api/users/$userId/entries"
         try {
-            val response = client.get(url)
+            val response = client.get(url) {
+                authToken?.let { token ->
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+            }
             if (response.status.isSuccess()) {
                 return response.body()
             }

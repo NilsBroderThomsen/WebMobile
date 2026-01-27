@@ -16,6 +16,7 @@ fun main() = application {
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    var currentUserId by remember { mutableStateOf<Long?>(null) }
     val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
     DisposableEffect(Unit) {
         onDispose {
@@ -27,7 +28,12 @@ fun App() {
             Screen.Home -> {
                 HomePage(
                     onNavigateToEntries = {
-                        currentScreen = Screen.Entries
+                        val userId = currentUserId
+                        if (userId == null) {
+                            currentScreen = Screen.Login
+                        } else {
+                            currentScreen = Screen.Entries(userId)
+                        }
                     },
                     onNavigateToLogin = {
                         currentScreen = Screen.Login
@@ -43,8 +49,9 @@ fun App() {
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
-                    onNavigateToEntries = {
-                        currentScreen = Screen.Entries
+                    onNavigateToEntries = { userId ->
+                        currentUserId = userId
+                        currentScreen = Screen.Entries(userId)
                     }
                 )
             }
@@ -54,20 +61,22 @@ fun App() {
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
-                    onNavigateToEntries = {
-                        currentScreen = Screen.Entries
+                    onNavigateToEntries = { userId ->
+                        currentUserId = userId
+                        currentScreen = Screen.Entries(userId)
                     }
                 )
             }
-            Screen.Entries -> {
+            is Screen.Entries -> {
+                val userId = (currentScreen as Screen.Entries).userId
                 EntryListPage(
                     client = client,
-                    userId = 1L,
+                    userId = userId,
                     onNavigateBack = {
                         currentScreen = Screen.Home
                     },
                     onCreateEntry = {
-                        currentScreen = Screen.CreateEntry
+                        currentScreen = Screen.CreateEntry(userId)
                     },
                     onUpdateEntry = { entryDto ->
                         currentScreen = Screen.UpdateEntry(entryDto)
@@ -77,11 +86,17 @@ fun App() {
                     }
                 )
             }
-            Screen.CreateEntry -> {
+            is Screen.CreateEntry -> {
                 CreateEntryPage(
                     client = client,
+                    userId = (currentScreen as Screen.CreateEntry).userId,
                     onNavigateBack = {
-                        currentScreen = Screen.Entries
+                        val userId = currentUserId
+                        if (userId == null) {
+                            currentScreen = Screen.Home
+                        } else {
+                            currentScreen = Screen.Entries(userId)
+                        }
                     }
                 )
             }
@@ -90,7 +105,12 @@ fun App() {
                     client = client,
                     entryDto = (currentScreen as Screen.UpdateEntry).entryDto, // Replace with actual entry ID
                     onNavigateBack = {
-                        currentScreen = Screen.Entries
+                        val userId = currentUserId
+                        if (userId == null) {
+                            currentScreen = Screen.Home
+                        } else {
+                            currentScreen = Screen.Entries(userId)
+                        }
                     }
                 )
             }
@@ -99,7 +119,12 @@ fun App() {
                     client = client,
                     entryId = (currentScreen as Screen.EntryDetails).entryId,
                     onNavigateBack = {
-                        currentScreen = Screen.Entries
+                        val userId = currentUserId
+                        if (userId == null) {
+                            currentScreen = Screen.Home
+                        } else {
+                            currentScreen = Screen.Entries(userId)
+                        }
                     }
                 )
             }
@@ -111,8 +136,8 @@ private sealed interface Screen {
     data object Home : Screen
     data object Login : Screen
     data object Register : Screen
-    data object Entries : Screen
-    data object CreateEntry : Screen
+    data class Entries(val userId: Long) : Screen
+    data class CreateEntry(val userId: Long) : Screen
     data class UpdateEntry(val entryDto: EntryDto) : Screen
     data class EntryDetails(val entryId: Long) : Screen
 }

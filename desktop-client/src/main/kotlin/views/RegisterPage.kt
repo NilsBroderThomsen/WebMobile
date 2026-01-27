@@ -21,12 +21,13 @@ import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.CreateUserRequest
 import kotlinx.coroutines.launch
+import util.extractUserIdFromToken
 
 @Composable
 fun RegisterPage(
     client: MoodTrackerClient,
     onNavigateBack: () -> Unit,
-    onNavigateToEntries: () -> Unit      //TODO: implement UserID navigation to entries after login
+    onNavigateToEntries: (Long) -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -81,8 +82,10 @@ fun RegisterPage(
                                 password = password
                             )
                         )
+                        val loginResponse = client.loginUser(username = username, password = password)
+                        val userId = extractUserIdFromToken(loginResponse.token) ?: user.id
                         statusMessage = "Registrierung erfolgreich. Willkommen, ${user.username}!"
-                        onNavigateToEntries()
+                        onNavigateToEntries(userId)
                     } catch (ex: Exception) {
                         errorMessage = ex.message ?: "Registrierung fehlgeschlagen."
                     } finally {
