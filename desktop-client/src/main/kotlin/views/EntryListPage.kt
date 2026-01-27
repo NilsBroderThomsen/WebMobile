@@ -21,7 +21,8 @@ fun EntryListPage(
     onCreateEntry: () -> Unit,
     onUpdateEntry: (EntryDto) -> Unit,
     onEntrySelected: (Long) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onLogout: () -> Unit
 ) {
     var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -47,6 +48,10 @@ fun EntryListPage(
     Column {
         Button(onClick = onNavigateBack) {
             Text("Back")
+        }
+
+        Button(onClick = onLogout) {
+            Text("Logout")
         }
 
         Button(onClick = onCreateEntry) {

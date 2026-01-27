@@ -68,6 +68,11 @@ class MoodTrackerClient(private val baseUrl: String) {
         throw IllegalStateException(errorMessage)
     }
 
+    fun logout() {
+        authToken = null
+        authenticatedUserId = null
+    }
+
     suspend fun getEntries(userId: Long): List<EntryDto> {
         if (authToken == null) {
             throw IllegalStateException("Login erforderlich.")

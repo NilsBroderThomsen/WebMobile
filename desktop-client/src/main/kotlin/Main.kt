@@ -79,6 +79,11 @@ fun App() {
                         onNavigateBack = {
                             currentScreen = Screen.Home
                         },
+                        onLogout = {
+                            client.logout()
+                            authUserId = null
+                            currentScreen = Screen.Home
+                        },
                         onCreateEntry = {
                             currentScreen = Screen.CreateEntry
                         },
