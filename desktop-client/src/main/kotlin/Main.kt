@@ -71,6 +71,9 @@ fun App() {
                     },
                     onUpdateEntry = { entryDto ->
                         currentScreen = Screen.UpdateEntry(entryDto)
+                    },
+                    onEntrySelected = { entryId ->
+                        currentScreen = Screen.EntryDetails(entryId)
                     }
                 )
             }
@@ -91,6 +94,15 @@ fun App() {
                     }
                 )
             }
+            is Screen.EntryDetails -> {
+                EntryDetailsPage(
+                    client = client,
+                    entryId = (currentScreen as Screen.EntryDetails).entryId,
+                    onNavigateBack = {
+                        currentScreen = Screen.Entries
+                    }
+                )
+            }
         }
     }
 }
@@ -102,4 +114,5 @@ private sealed interface Screen {
     data object Entries : Screen
     data object CreateEntry : Screen
     data class UpdateEntry(val entryDto: EntryDto) : Screen
+    data class EntryDetails(val entryId: Long) : Screen
 }
