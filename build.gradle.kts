@@ -1,43 +1,20 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.serialization") version "2.2.20"
-    application
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
-val ktorVersion = "3.2.2"
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // Ktor Server
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
-
-    // Content Negotiation & Serialization (NEU!)
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-
-    // CSV (NEU!)
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0")
-
-    // Aus vorherigen Wochen
-    implementation("ch.qos.logback:logback-classic:1.5.11")
-    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
-    testImplementation(kotlin("test"))
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(21)
+allprojects {
+    group = "de.hs-flensburg.moodtracker"
+    version = "1.0-SNAPSHOT"
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://maven.pkg.jetbrains.space/public/p/ktor/maven")
+        maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        maven("https://maven.pkg.jetbrains.space/public/p/ktor/dev")
+    }
 }
