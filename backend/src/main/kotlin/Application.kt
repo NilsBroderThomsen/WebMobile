@@ -35,6 +35,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.origin
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.request.receive
 import kotlinx.serialization.json.Json
@@ -53,11 +54,19 @@ import java.util.Date
 import kotlin.text.isBlank
 import kotlin.text.trim
 import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 private const val JWT_SECRET = "my-very-secret-key"
 private const val JWT_ISSUER = "MoodTrackerServer"
 private const val JWT_TOKEN_TTL_HOURS = 1L
+private const val LOGIN_RATE_LIMIT_MAX_ATTEMPTS = 5
+private val LOGIN_RATE_LIMIT_WINDOW: Duration = 1.minutes
 
+private data class RateLimitState(var windowStart: Instant, var attempts: Int)
+
+private val loginRateLimitState = mutableMapOf<String, RateLimitState>()
+private val loginRateLimitLock = Any()
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -136,6 +145,18 @@ fun Application.configureRouting() {
 
 private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
     post("/api/login") {
+        val clientIp = call.request.origin.remoteHost
+        if (shouldRateLimitLogin(clientIp, Instant.now())) {
+            call.respond(
+                HttpStatusCode.TooManyRequests,
+                ErrorResponse(
+                    error = "Too Many Requests",
+                    message = "Too many login attempts. Please try again later."
+                )
+            )
+            return@post
+        }
+
         val request = try {
             call.receive<LoginRequest>()
         } catch (ex: ContentTransformationException) {
@@ -189,6 +210,20 @@ private fun Route.postLogin(repository: MoodTrackerDatabaseRepository) {
             LoginResponse(token = token)
         )
     }
+}
+
+private fun shouldRateLimitLogin(clientIp: String, now: Instant): Boolean {
+    val state = synchronized(loginRateLimitLock) {
+        val existing = loginRateLimitState[clientIp]
+        if (existing == null || now.isAfter(existing.windowStart.plusMillis(LOGIN_RATE_LIMIT_WINDOW.inWholeMilliseconds))) {
+            RateLimitState(windowStart = now, attempts = 1).also { loginRateLimitState[clientIp] = it }
+        } else {
+            existing.attempts += 1
+            existing
+        }
+    }
+
+    return state.attempts > LOGIN_RATE_LIMIT_MAX_ATTEMPTS
 }
 
 private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
