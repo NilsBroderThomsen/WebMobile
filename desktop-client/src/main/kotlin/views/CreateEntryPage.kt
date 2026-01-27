@@ -119,7 +119,7 @@ fun CreateEntryPage(
             },
             enabled = !isLoading
         ) {
-            Text("Create Entry")
+            Text("Eintrag erstellen")
         }
 
         if (isLoading) {
