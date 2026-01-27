@@ -124,7 +124,7 @@ class MoodTrackerClient(private val baseUrl: String) {
     suspend fun deleteEntry(entryId: Long) {
         val url = "$baseUrl/api/entries/$entryId"
         try {
-            val response = client.get(url)
+            val response = client.delete(url)
             if (response.status.isSuccess()) {
                 return
             }
