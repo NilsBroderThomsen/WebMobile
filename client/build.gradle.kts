@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
 }
 
 kotlin {
@@ -29,5 +30,14 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
             }
         }
+    }
+}
+
+android {
+    namespace = "de.hsflensburg.moodtracker.client"
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 24
     }
 }
