@@ -1,19 +1,11 @@
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import api.MoodTrackerClient
 import config.AppConfig
-import views.CreateEntryPage
-import views.EntryListPage
-import views.HomePage
-import views.LoginViewPage
-import views.RegisterPage
+import dto.EntryDto
+import views.*
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication, title = "Mood Tracker") {
@@ -76,11 +68,24 @@ fun App() {
                     },
                     onCreateEntry = {
                         currentScreen = Screen.CreateEntry
+                    },
+                    onUpdateEntry = { entryDto ->
+                        currentScreen = Screen.UpdateEntry(entryDto)
                     }
                 )
             }
             Screen.CreateEntry -> {
                 CreateEntryPage(
+                    client = client,
+                    onNavigateBack = {
+                        currentScreen = Screen.Entries
+                    }
+                )
+            }
+            is Screen.UpdateEntry -> {
+                UpdateEntryPage(
+                    client = client,
+                    entryDto = (currentScreen as Screen.UpdateEntry).entryDto, // Replace with actual entry ID
                     onNavigateBack = {
                         currentScreen = Screen.Entries
                     }
@@ -96,4 +101,5 @@ private sealed interface Screen {
     data object Register : Screen
     data object Entries : Screen
     data object CreateEntry : Screen
+    data class UpdateEntry(val entryDto: EntryDto) : Screen
 }

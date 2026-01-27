@@ -19,18 +19,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import dto.CreateEntryRequest
+import dto.EntryDto
+import dto.UpdateEntryRequest
 import kotlinx.coroutines.launch
 
 @Composable
-fun CreateEntryPage(
+fun UpdateEntryPage(
     client: MoodTrackerClient,
+    entryDto: EntryDto,
     onNavigateBack: () -> Unit
 ) {
-    val userId = 1L
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
-    var moodRatingInput by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("${entryDto.title}") }
+    var content by remember { mutableStateOf("${entryDto.content}") }
+    var moodRatingInput by remember { mutableStateOf("${entryDto.moodRating}") }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -97,21 +98,21 @@ fun CreateEntryPage(
                 errorMessage = null
                 scope.launch {
                     try {
-                        client.createEntry(
-                            userId = userId,
-                            request = CreateEntryRequest(
+                        client.updateEntry(
+                            entryId = entryDto.id,
+                            request = UpdateEntryRequest(
                                 title = trimmedTitle,
                                 content = trimmedContent,
                                 moodRating = moodRating
                             )
                         )
-                        statusMessage = "Eintrag wurde erstellt."
+                        statusMessage = "Eintrag erfolgreich aktualisiert."
                         title = ""
                         content = ""
                         moodRatingInput = ""
                         onNavigateBack()
                     } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Eintrag konnte nicht erstellt werden."
+                        errorMessage = ex.message ?: "Fehler beim Aktualisieren des Eintrags."
                     } finally {
                         isLoading = false
                     }
@@ -119,7 +120,7 @@ fun CreateEntryPage(
             },
             enabled = !isLoading
         ) {
-            Text("Eintrag erstellen")
+            Text("Eintrag aktualisieren")
         }
 
         if (isLoading) {
