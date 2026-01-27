@@ -5,6 +5,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     jvm()
+    androidTarget()
 
     applyDefaultHierarchyTemplate()
 
@@ -15,12 +16,17 @@ kotlin {
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
-                implementation(libs.logback.classic)
             }
         }
         jvmMain {
             dependencies {
+                implementation(libs.logback.classic)
                 implementation(libs.ktor.client.cio)
+            }
+        }
+        androidMain {
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
             }
         }
     }
