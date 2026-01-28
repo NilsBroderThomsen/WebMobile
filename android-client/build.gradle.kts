@@ -41,4 +41,6 @@ dependencies {
     implementation(libs.google.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(project(":client"))
 }

@@ -13,4 +13,7 @@
     <string name="action_register">Register</string>
     <string name="login_footer_text">Don\u2019t have an account yet?</string>
     <string name="register_footer_text">Already have an account?</string>
+    <string name="error_required_field">Please fill in this field.</string>
+    <string name="login_success">Login successful.</string>
+    <string name="login_failed">Login failed.</string>
 </resources>
