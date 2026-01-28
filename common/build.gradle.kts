@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.android.library)
     kotlin("multiplatform")
     kotlin("plugin.serialization")
 }
@@ -6,6 +7,7 @@ plugins {
 kotlin {
     jvmToolchain(17)
     jvm()
+    androidTarget()
 
     applyDefaultHierarchyTemplate()
 
@@ -20,5 +22,14 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    }
+}
+
+android {
+    namespace = "de.hsflensburg.moodtracker.common"
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 24
     }
 }
