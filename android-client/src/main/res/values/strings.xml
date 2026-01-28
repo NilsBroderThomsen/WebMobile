@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">Moodtracker</string>
-    <string name="hello_world">Hello World</string>
+    <string name="tab_login">Login</string>
+    <string name="tab_register">Register</string>
+    <string name="login_welcome_title">Welcome back</string>
+    <string name="login_welcome_subtitle">Sign in to continue tracking your mood.</string>
+    <string name="register_title">Create your account</string>
+    <string name="register_subtitle">Join Moodtracker and start your journey today.</string>
+    <string name="label_username">Username</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="action_log_in">Log in</string>
+    <string name="action_register">Register</string>
+    <string name="login_footer_text">Don\u2019t have an account yet?</string>
+    <string name="register_footer_text">Already have an account?</string>
 </resources>
