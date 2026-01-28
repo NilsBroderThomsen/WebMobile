@@ -2,7 +2,10 @@ package de.hsflensburg.moodtracker.android
 
 import android.os.Bundle
 import android.view.View
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -36,15 +39,55 @@ class EntriesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val entries = client.getEntries(userId)
+                val entries = client.getEntries(userId).toMutableList()
                 if (entries.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
                 } else {
                     listView.adapter = ArrayAdapter(
                         this@EntriesActivity,
-                        android.R.layout.simple_list_item_1,
-                        entries.map { entry -> formatEntry(entry) }
-                    )
+                        R.layout.entry_list_item,
+                        R.id.entryText,
+                        entries
+                    ) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val rowView = convertView ?: LayoutInflater.from(context).inflate(
+                                R.layout.entry_list_item,
+                                parent,
+                                false
+                            )
+                            val entry = getItem(position)
+                            val entryText = rowView.findViewById<TextView>(R.id.entryText)
+                            val deleteButton = rowView.findViewById<Button>(R.id.entryDelete)
+
+                            if (entry != null) {
+                                entryText.text = formatEntry(entry)
+                                deleteButton.setOnClickListener {
+                                    lifecycleScope.launch {
+                                        try {
+                                            client.deleteEntry(entry.id)
+                                            remove(entry)
+                                            notifyDataSetChanged()
+                                            if (isEmpty) {
+                                                listView.visibility = View.GONE
+                                                emptyView.visibility = View.VISIBLE
+                                            }
+                                        } catch (ex: Exception) {
+                                            Toast.makeText(
+                                                this@EntriesActivity,
+                                                ex.message ?: getString(R.string.entries_delete_failed),
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            } else {
+                                entryText.text = ""
+                                deleteButton.setOnClickListener(null)
+                            }
+
+                            return rowView
+                        }
+                    }
                     listView.visibility = View.VISIBLE
                 }
             } catch (ex: Exception) {

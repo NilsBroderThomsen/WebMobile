@@ -24,4 +24,6 @@
     <string name="entries_mood_format">Mood: %1$d</string>
     <string name="entries_mood_unknown">Mood: n/a</string>
     <string name="entries_item_format">%1$s · %2$s · %3$s</string>
+    <string name="entries_delete">Delete</string>
+    <string name="entries_delete_failed">Unable to delete entry.</string>
 </resources>
