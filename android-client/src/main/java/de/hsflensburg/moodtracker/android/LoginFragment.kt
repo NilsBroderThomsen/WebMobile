@@ -1,19 +1,19 @@
 package de.hsflensburg.moodtracker.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import api.MoodTrackerClient
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
-    private val client = MoodTrackerClient(AppConfig.BASE_URL)
+    private val client = MoodTrackerClientProvider.client
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -47,12 +47,17 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             loginButton.isEnabled = false
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    client.login(username = username, password = password)
+                    val response = client.login(username = username, password = password)
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.login_success),
                         Toast.LENGTH_LONG
                     ).show()
+                    val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
+                        putExtra(EntriesActivity.EXTRA_USER_ID, response.userId)
+                    }
+                    startActivity(intent)
+                    activity?.finish()
                 } catch (ex: Exception) {
                     Toast.makeText(
                         requireContext(),

@@ -18,4 +18,10 @@
     <string name="login_failed">Login failed.</string>
     <string name="register_success">Registration successful.</string>
     <string name="register_failed">Registration failed.</string>
+    <string name="entries_empty">No entries yet.</string>
+    <string name="entries_missing_user">Missing user details.</string>
+    <string name="entries_load_failed">Unable to load entries.</string>
+    <string name="entries_mood_format">Mood: %1$d</string>
+    <string name="entries_mood_unknown">Mood: n/a</string>
+    <string name="entries_item_format">%1$s · %2$s · %3$s</string>
 </resources>
