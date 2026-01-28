@@ -3,6 +3,7 @@ package de.hsflensburg.moodtracker.android
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
+    private var currentEntries: List<EntryDto> = emptyList()
+    private var isAscending = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,10 +32,12 @@ class EntriesActivity : AppCompatActivity() {
         val listView = findViewById<ListView>(R.id.entriesList)
         val emptyView = findViewById<TextView>(R.id.entriesEmpty)
         val loadingView = findViewById<ProgressBar>(R.id.entriesLoading)
+        val sortToggle = findViewById<Button>(R.id.entriesSortToggle)
 
         loadingView.visibility = View.VISIBLE
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
+        sortToggle.visibility = View.GONE
 
         lifecycleScope.launch {
             try {
@@ -40,11 +45,11 @@ class EntriesActivity : AppCompatActivity() {
                 if (entries.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
                 } else {
-                    listView.adapter = ArrayAdapter(
-                        this@EntriesActivity,
-                        android.R.layout.simple_list_item_1,
-                        entries.map { entry -> formatEntry(entry) }
-                    )
+                    currentEntries = entries
+                    isAscending = true
+                    updateSortToggle(sortToggle)
+                    sortToggle.visibility = View.VISIBLE
+                    renderEntries(listView, currentEntries, isAscending)
                     listView.visibility = View.VISIBLE
                 }
             } catch (ex: Exception) {
@@ -58,6 +63,31 @@ class EntriesActivity : AppCompatActivity() {
                 loadingView.visibility = View.GONE
             }
         }
+
+        sortToggle.setOnClickListener {
+            isAscending = !isAscending
+            updateSortToggle(sortToggle)
+            renderEntries(listView, currentEntries, isAscending)
+        }
+    }
+
+    private fun renderEntries(listView: ListView, entries: List<EntryDto>, ascending: Boolean) {
+        val sortedEntries = if (ascending) {
+            entries.sortedBy { it.createdAt }
+        } else {
+            entries.sortedByDescending { it.createdAt }
+        }
+        listView.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            sortedEntries.map { entry -> formatEntry(entry) }
+        )
+    }
+
+    private fun updateSortToggle(sortToggle: Button) {
+        sortToggle.setText(
+            if (isAscending) R.string.entries_sort_oldest else R.string.entries_sort_newest
+        )
     }
 
     private fun formatEntry(entry: EntryDto): String {
