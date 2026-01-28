@@ -1,12 +1,12 @@
 package de.hsflensburg.moodtracker.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import api.MoodTrackerClient
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -16,7 +16,7 @@ import model.RegisterModel
 import model.RegisterResult
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
-    private val client = MoodTrackerClient(AppConfig.BASE_URL)
+    private val client = MoodTrackerClientProvider.client
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,7 +75,11 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                             getString(R.string.register_success),
                             Toast.LENGTH_LONG
                         ).show()
-                        activity?.findViewById<ViewPager2>(R.id.authPager)?.currentItem = 0
+                        val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
+                            putExtra(EntriesActivity.EXTRA_USER_ID, result.loginResponse.userId)
+                        }
+                        startActivity(intent)
+                        activity?.finish()
                     }
                     is RegisterResult.Failure -> {
                         Toast.makeText(
