@@ -33,6 +33,12 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
+
+    packaging {
+        resources {
+            excludes += setOf("META-INF/INDEX.LIST")
+        }
+    }
 }
 
 dependencies {
