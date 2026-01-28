@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import dto.CreateUserRequest
 import kotlinx.coroutines.launch
+import model.RegisterInput
+import model.RegisterModel
+import model.RegisterResult
 
 @Composable
 fun RegisterPage(
@@ -35,6 +37,7 @@ fun RegisterPage(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val registerModel = remember(client) { RegisterModel(client) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(onClick = onNavigateBack) {
@@ -63,35 +66,31 @@ fun RegisterPage(
 
         Button(
             onClick = {
-                if (username.isBlank() || email.isBlank() || password.isBlank()) {
-                    errorMessage = "Bitte alle Felder ausfüllen."
-                    statusMessage = null
-                    return@Button
-                }
-
                 isLoading = true
                 statusMessage = null
                 errorMessage = null
                 scope.launch {
-                    try {
-                        val user = client.register(
-                            CreateUserRequest(
+                    when (
+                        val result = registerModel.register(
+                            RegisterInput(
                                 username = username,
                                 email = email,
                                 password = password
                             )
                         )
-                        val loginResponse = client.login(
-                            username = username,
-                            password = password
-                        )
-                        statusMessage = "Registrierung erfolgreich. Willkommen, ${user.username}!"
-                        onNavigateToEntries(loginResponse.userId)
-                    } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Registrierung fehlgeschlagen."
-                    } finally {
-                        isLoading = false
+                    ) {
+                        is RegisterResult.ValidationError -> {
+                            errorMessage = "Bitte alle Felder ausfüllen."
+                        }
+                        is RegisterResult.Success -> {
+                            statusMessage = "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
+                            onNavigateToEntries(result.loginResponse.userId)
+                        }
+                        is RegisterResult.Failure -> {
+                            errorMessage = result.message ?: "Registrierung fehlgeschlagen."
+                        }
                     }
+                    isLoading = false
                 }
             },
             enabled = !isLoading
