@@ -4,7 +4,8 @@
 /common/build/
 /backend/build/
 /client/build/
-/desktop-client/build
+/desktop-client/build/
+/android-client/build/
 
 /out/
 
