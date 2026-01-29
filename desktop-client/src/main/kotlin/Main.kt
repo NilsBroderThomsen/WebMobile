@@ -27,18 +27,17 @@ fun App() {
         when (currentScreen) {
             Screen.Home -> {
                 HomePage(
+                    client = client,
+                    onAuthenticated = { userId ->
+                        authUserId = userId
+                        currentScreen = Screen.Entries
+                    },
                     onNavigateToEntries = {
                         currentScreen = if (authUserId == null) {
                             Screen.Login
                         } else {
                             Screen.Entries
                         }
-                    },
-                    onNavigateToLogin = {
-                        currentScreen = Screen.Login
-                    },
-                    onNavigateToRegister = {
-                        currentScreen = Screen.Register
                     },
                     showLogout = authUserId != null,
                     onLogout = {
