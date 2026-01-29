@@ -15,7 +15,7 @@ fun main() = application {
 
 @Composable
 fun App() {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
     var authUserId by remember { mutableStateOf<Long?>(null) }
     val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
     DisposableEffect(Unit) {
@@ -25,58 +25,46 @@ fun App() {
     }
     MaterialTheme {
         when (currentScreen) {
+            Screen.Landing -> {
+                LandingPage(
+                    client = client,
+                    onLoginSuccess = { userId ->
+                        authUserId = userId
+                        currentScreen = Screen.Entries
+                    },
+                    onRegisterSuccess = { userId ->
+                        authUserId = userId
+                        currentScreen = Screen.Entries
+                    }
+                )
+            }
             Screen.Home -> {
-                HomePage(
-                    onNavigateToEntries = {
-                        currentScreen = if (authUserId == null) {
-                            Screen.Login
-                        } else {
-                            Screen.Entries
+                val userId = authUserId
+                if (userId == null) {
+                    LaunchedEffect(Unit) {
+                        currentScreen = Screen.Landing
+                    }
+                } else {
+                    HomePage(
+                        onNavigateToEntries = {
+                            currentScreen = Screen.Entries
+                        },
+                        onNavigateToCreateEntry = {
+                            currentScreen = Screen.CreateEntry
+                        },
+                        onLogout = {
+                            client.logout()
+                            authUserId = null
+                            currentScreen = Screen.Landing
                         }
-                    },
-                    onNavigateToLogin = {
-                        currentScreen = Screen.Login
-                    },
-                    onNavigateToRegister = {
-                        currentScreen = Screen.Register
-                    },
-                    showLogout = authUserId != null,
-                    onLogout = {
-                        client.logout()
-                        authUserId = null
-                        currentScreen = Screen.Home
-                    }
-                )
-            }
-            Screen.Login -> {
-                LoginPage(
-                    client = client,
-                    onNavigateBack = {
-                        currentScreen = Screen.Home
-                    },
-                    onNavigateToEntries = { userId ->
-                        authUserId = userId
-                        currentScreen = Screen.Entries
-                    }
-                )
-            }
-            Screen.Register -> {
-                RegisterPage(
-                    client = client,
-                    onNavigateBack = {
-                        currentScreen = Screen.Home
-                    },
-                    onNavigateToEntries = { userId ->
-                        authUserId = userId
-                        currentScreen = Screen.Entries
-                    }
-                )
+                    )
+                }
             }
             Screen.Entries -> {
                 val userId = authUserId
                 if (userId == null) {
                     LaunchedEffect(Unit) {
-                        currentScreen = Screen.Login
+                        currentScreen = Screen.Landing
                     }
                 } else {
                     EntryListPage(
@@ -101,7 +89,7 @@ fun App() {
                 val userId = authUserId
                 if (userId == null) {
                     LaunchedEffect(Unit) {
-                        currentScreen = Screen.Login
+                        currentScreen = Screen.Landing
                     }
                 } else {
                     CreateEntryPage(
@@ -136,9 +124,8 @@ fun App() {
 }
 
 private sealed interface Screen {
+    data object Landing : Screen
     data object Home : Screen
-    data object Login : Screen
-    data object Register : Screen
     data object Entries : Screen
     data object CreateEntry : Screen
     data class UpdateEntry(val entryDto: EntryDto) : Screen

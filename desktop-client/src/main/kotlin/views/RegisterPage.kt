@@ -29,8 +29,8 @@ import model.RegisterValidation
 @Composable
 fun RegisterPage(
     client: MoodTrackerClient,
-    onNavigateBack: () -> Unit,
-    onNavigateToEntries: (Long) -> Unit
+    onNavigateToEntries: (Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -74,11 +74,8 @@ fun RegisterPage(
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
-        Button(onClick = onNavigateBack) {
-            Text("Back")
-        }
 
         TextField(
             value = username,
