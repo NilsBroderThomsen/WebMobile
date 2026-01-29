@@ -1,8 +1,7 @@
 package views
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,14 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -117,7 +113,7 @@ fun HomePage(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,7 +132,8 @@ fun HomePage(
         if (showLogout) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(24.dp),
@@ -153,7 +150,7 @@ fun HomePage(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = onNavigateToEntries) {
+                        ElevatedButton(onClick = onNavigateToEntries) {
                             Text("My Entries")
                         }
                         OutlinedButton(onClick = onLogout) {
@@ -163,286 +160,268 @@ fun HomePage(
                 }
             }
         } else {
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                Card(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val isCompact = maxWidth < 900.dp
+                val cardModifier = if (isCompact) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.weight(1f).fillMaxHeight()
+                }
+                val cardSpacing = if (isCompact) 20.dp else 24.dp
+
+                val loginCard: @Composable () -> Unit = {
+                    Card(
+                        modifier = cardModifier,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Text(
-                            text = "Sign in",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = "Access your entries and continue your streak.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OutlinedTextField(
-                                value = loginUsername,
-                                onValueChange = {
-                                    loginUsername = it
-                                    loginUsernameError = null
-                                },
-                                label = { Text("Username") },
-                                isError = loginUsernameError != null,
-                                modifier = Modifier.fillMaxWidth()
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "Sign in",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
                             )
-                            loginUsernameError?.let {
-                                Text(it, color = MaterialTheme.colorScheme.error)
-                            }
-
-                            OutlinedTextField(
-                                value = loginPassword,
-                                onValueChange = {
-                                    loginPassword = it
-                                    loginPasswordError = null
-                                },
-                                label = { Text("Password") },
-                                visualTransformation = PasswordVisualTransformation(),
-                                isError = loginPasswordError != null,
-                                modifier = Modifier.fillMaxWidth()
+                            Text(
+                                text = "Access your entries and continue your streak.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            loginPasswordError?.let {
-                                Text(it, color = MaterialTheme.colorScheme.error)
-                            }
-                        }
 
-                        ElevatedButton(
-                            enabled = !isLoginLoading,
-                            onClick = {
-                                if (isLoginLoading) return@ElevatedButton
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                OutlinedTextField(
+                                    value = loginUsername,
+                                    onValueChange = {
+                                        loginUsername = it
+                                        loginUsernameError = null
+                                    },
+                                    label = { Text("Username") },
+                                    isError = loginUsernameError != null,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                loginUsernameError?.let {
+                                    Text(it, color = MaterialTheme.colorScheme.error)
+                                }
 
-                                clearLoginErrors()
-                                loginStatusMessage = null
-                                isLoginLoading = true
-
-                                scope.launch {
-                                    try {
-                                        when (
-                                            val result = loginModel.login(
-                                                LoginInput(
-                                                    username = loginUsername,
-                                                    password = loginPassword
-                                                )
-                                            )
-                                        ) {
-                                            is LoginResult.ValidationError -> {
-                                                applyLoginValidation(result.validation)
-                                            }
-
-                                            is LoginResult.Success -> {
-                                                loginStatusMessage =
-                                                    "Login erfolgreich. Willkommen, ${loginUsername.trim()}!"
-                                                onAuthenticated(result.loginResponse.userId)
-                                            }
-
-                                            is LoginResult.Failure -> {
-                                                loginStatusMessage =
-                                                    result.message ?: "Login fehlgeschlagen."
-                                            }
-                                        }
-                                    } finally {
-                                        isLoginLoading = false
-                                    }
+                                OutlinedTextField(
+                                    value = loginPassword,
+                                    onValueChange = {
+                                        loginPassword = it
+                                        loginPasswordError = null
+                                    },
+                                    label = { Text("Password") },
+                                    visualTransformation = PasswordVisualTransformation(),
+                                    isError = loginPasswordError != null,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                loginPasswordError?.let {
+                                    Text(it, color = MaterialTheme.colorScheme.error)
                                 }
                             }
-                        ) {
-                            Text("Login")
-                        }
 
-                        if (isLoginLoading) {
-                            CircularProgressIndicator()
-                        }
+                            ElevatedButton(
+                                enabled = !isLoginLoading,
+                                onClick = {
+                                    if (isLoginLoading) return@ElevatedButton
 
-                        loginStatusMessage?.let { msg ->
-                            Text(
-                                msg,
-                                color = MaterialTheme.colorScheme.error.takeIf {
-                                    loginUsernameError != null || loginPasswordError != null
-                                } ?: MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                                    clearLoginErrors()
+                                    loginStatusMessage = null
+                                    isLoginLoading = true
 
-                        TextButton(onClick = { loginStatusMessage = "Password reset links are coming soon." }) {
-                            Text("Forgot password?")
+                                    scope.launch {
+                                        try {
+                                            when (
+                                                val result = loginModel.login(
+                                                    LoginInput(
+                                                        username = loginUsername,
+                                                        password = loginPassword
+                                                    )
+                                                )
+                                            ) {
+                                                is LoginResult.ValidationError -> {
+                                                    applyLoginValidation(result.validation)
+                                                }
+
+                                                is LoginResult.Success -> {
+                                                    loginStatusMessage =
+                                                        "Login erfolgreich. Willkommen, ${loginUsername.trim()}!"
+                                                    onAuthenticated(result.loginResponse.userId)
+                                                }
+
+                                                is LoginResult.Failure -> {
+                                                    loginStatusMessage =
+                                                        result.message ?: "Login fehlgeschlagen."
+                                                }
+                                            }
+                                        } finally {
+                                            isLoginLoading = false
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text("Login")
+                            }
+
+                            if (isLoginLoading) {
+                                CircularProgressIndicator()
+                            }
+
+                            loginStatusMessage?.let { msg ->
+                                Text(
+                                    msg,
+                                    color = MaterialTheme.colorScheme.error.takeIf {
+                                        loginUsernameError != null || loginPasswordError != null
+                                    } ?: MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
                         }
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.outlineVariant)
-                )
-
-                Card(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                val registerCard: @Composable () -> Unit = {
+                    Card(
+                        modifier = cardModifier,
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Text(
-                            text = "Create an account",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = "Start tracking today with guided prompts and weekly insights.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OutlinedTextField(
-                                value = registerUsername,
-                                onValueChange = {
-                                    registerUsername = it
-                                    registerUsernameError = null
-                                },
-                                label = { Text("Username") },
-                                isError = registerUsernameError != null,
-                                modifier = Modifier.fillMaxWidth()
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "Create an account",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
                             )
-                            registerUsernameError?.let {
-                                Text(it, color = MaterialTheme.colorScheme.error)
-                            }
-
-                            OutlinedTextField(
-                                value = registerEmail,
-                                onValueChange = {
-                                    registerEmail = it
-                                    registerEmailError = null
-                                },
-                                label = { Text("Email") },
-                                isError = registerEmailError != null,
-                                modifier = Modifier.fillMaxWidth()
+                            Text(
+                                text = "Start tracking today with guided prompts and weekly insights.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            registerEmailError?.let {
-                                Text(it, color = MaterialTheme.colorScheme.error)
-                            }
 
-                            OutlinedTextField(
-                                value = registerPassword,
-                                onValueChange = {
-                                    registerPassword = it
-                                    registerPasswordError = null
-                                },
-                                label = { Text("Password") },
-                                visualTransformation = PasswordVisualTransformation(),
-                                isError = registerPasswordError != null,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            registerPasswordError?.let {
-                                Text(it, color = MaterialTheme.colorScheme.error)
-                            }
-                        }
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                OutlinedTextField(
+                                    value = registerUsername,
+                                    onValueChange = {
+                                        registerUsername = it
+                                        registerUsernameError = null
+                                    },
+                                    label = { Text("Username") },
+                                    isError = registerUsernameError != null,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                registerUsernameError?.let {
+                                    Text(it, color = MaterialTheme.colorScheme.error)
+                                }
 
-                        ElevatedButton(
-                            enabled = !isRegisterLoading,
-                            onClick = {
-                                if (isRegisterLoading) return@ElevatedButton
+                                OutlinedTextField(
+                                    value = registerEmail,
+                                    onValueChange = {
+                                        registerEmail = it
+                                        registerEmailError = null
+                                    },
+                                    label = { Text("Email") },
+                                    isError = registerEmailError != null,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                registerEmailError?.let {
+                                    Text(it, color = MaterialTheme.colorScheme.error)
+                                }
 
-                                clearRegisterErrors()
-                                registerStatusMessage = null
-                                isRegisterLoading = true
-
-                                scope.launch {
-                                    try {
-                                        when (
-                                            val result = registerModel.register(
-                                                RegisterInput(
-                                                    username = registerUsername,
-                                                    email = registerEmail,
-                                                    password = registerPassword
-                                                )
-                                            )
-                                        ) {
-                                            is RegisterResult.ValidationError -> {
-                                                applyRegisterValidation(result.validation)
-                                            }
-
-                                            is RegisterResult.Success -> {
-                                                registerStatusMessage =
-                                                    "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
-                                                onAuthenticated(result.loginResponse.userId)
-                                            }
-
-                                            is RegisterResult.Failure -> {
-                                                registerStatusMessage =
-                                                    result.message ?: "Registrierung fehlgeschlagen."
-                                            }
-                                        }
-                                    } finally {
-                                        isRegisterLoading = false
-                                    }
+                                OutlinedTextField(
+                                    value = registerPassword,
+                                    onValueChange = {
+                                        registerPassword = it
+                                        registerPasswordError = null
+                                    },
+                                    label = { Text("Password") },
+                                    visualTransformation = PasswordVisualTransformation(),
+                                    isError = registerPasswordError != null,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                registerPasswordError?.let {
+                                    Text(it, color = MaterialTheme.colorScheme.error)
                                 }
                             }
-                        ) {
-                            Text("Register")
-                        }
 
-                        if (isRegisterLoading) {
-                            CircularProgressIndicator()
-                        }
+                            ElevatedButton(
+                                enabled = !isRegisterLoading,
+                                onClick = {
+                                    if (isRegisterLoading) return@ElevatedButton
 
-                        registerStatusMessage?.let { msg ->
-                            Text(
-                                msg,
-                                color = MaterialTheme.colorScheme.error.takeIf {
-                                    registerUsernameError != null ||
-                                        registerEmailError != null ||
-                                        registerPasswordError != null
-                                } ?: MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                                    clearRegisterErrors()
+                                    registerStatusMessage = null
+                                    isRegisterLoading = true
 
-                        Text(
-                            text = "By creating an account you agree to the terms and privacy policy.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                                    scope.launch {
+                                        try {
+                                            when (
+                                                val result = registerModel.register(
+                                                    RegisterInput(
+                                                        username = registerUsername,
+                                                        email = registerEmail,
+                                                        password = registerPassword
+                                                    )
+                                                )
+                                            ) {
+                                                is RegisterResult.ValidationError -> {
+                                                    applyRegisterValidation(result.validation)
+                                                }
+
+                                                is RegisterResult.Success -> {
+                                                    registerStatusMessage =
+                                                        "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
+                                                    onAuthenticated(result.loginResponse.userId)
+                                                }
+
+                                                is RegisterResult.Failure -> {
+                                                    registerStatusMessage =
+                                                        result.message ?: "Registrierung fehlgeschlagen."
+                                                }
+                                            }
+                                        } finally {
+                                            isRegisterLoading = false
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text("Register")
+                            }
+
+                            if (isRegisterLoading) {
+                                CircularProgressIndicator()
+                            }
+
+                            registerStatusMessage?.let { msg ->
+                                Text(
+                                    msg,
+                                    color = MaterialTheme.colorScheme.error.takeIf {
+                                        registerUsernameError != null ||
+                                            registerEmailError != null ||
+                                            registerPasswordError != null
+                                    } ?: MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                        }
                     }
                 }
-            }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            text = "Need a quick overview?",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "View your latest entries, mood trends, and reminders once you log in.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                if (isCompact) {
+                    Column(verticalArrangement = Arrangement.spacedBy(cardSpacing)) {
+                        loginCard()
+                        registerCard()
                     }
-                    OutlinedButton(onClick = onNavigateToEntries) {
-                        Text("See entries")
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(520.dp),
+                        horizontalArrangement = Arrangement.spacedBy(cardSpacing)
+                    ) {
+                        loginCard()
+                        registerCard()
                     }
                 }
             }
@@ -450,7 +429,7 @@ fun HomePage(
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Support: support@moodtracker.app · Version 1.0",
+            text = "Version 1.0",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
