@@ -19,8 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
-import dto.CreateEntryRequest
 import kotlinx.coroutines.launch
+import model.CreateEntryInput
+import model.CreateEntryModel
+import model.CreateEntryPreparation
+import model.CreateEntryResult
 
 @Composable
 fun CreateEntryPage(
@@ -35,6 +38,7 @@ fun CreateEntryPage(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val createEntryModel = remember(client) { CreateEntryModel(client) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(onClick = onNavigateBack) {
@@ -64,57 +68,42 @@ fun CreateEntryPage(
 
         Button(
             onClick = {
-                val trimmedTitle = title.trim()
-                val trimmedContent = content.trim()
-                val trimmedMood = moodRatingInput.trim()
-
-                if (trimmedTitle.isBlank() || trimmedContent.isBlank()) {
-                    errorMessage = "Bitte Title und Content ausfüllen."
-                    statusMessage = null
-                    return@Button
-                }
-
-                val moodRating = if (trimmedMood.isBlank()) {
-                    null
-                } else {
-                    trimmedMood.toIntOrNull()
-                }
-
-                if (trimmedMood.isNotBlank() && moodRating == null) {
-                    errorMessage = "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-                    statusMessage = null
-                    return@Button
-                }
-
-                if (moodRating != null && moodRating !in 1..10) {
-                    errorMessage = "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-                    statusMessage = null
-                    return@Button
+                val input = CreateEntryInput(
+                    title = title,
+                    content = content,
+                    moodRatingInput = moodRatingInput
+                )
+                when (val prepared = createEntryModel.prepare(input)) {
+                    is CreateEntryPreparation.ValidationError -> {
+                        errorMessage = createEntryModel.validationMessage(prepared.validation)
+                            ?: "Bitte Eingaben prüfen."
+                        statusMessage = null
+                        return@Button
+                    }
+                    is CreateEntryPreparation.Ready -> Unit
                 }
 
                 isLoading = true
                 statusMessage = null
                 errorMessage = null
                 scope.launch {
-                    try {
-                        client.createEntry(
-                            userId = userId,
-                            request = CreateEntryRequest(
-                                title = trimmedTitle,
-                                content = trimmedContent,
-                                moodRating = moodRating
-                            )
-                        )
-                        statusMessage = "Eintrag wurde erstellt."
-                        title = ""
-                        content = ""
-                        moodRatingInput = ""
-                        onNavigateBack()
-                    } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Eintrag konnte nicht erstellt werden."
-                    } finally {
-                        isLoading = false
+                    when (val result = createEntryModel.createEntry(userId, input)) {
+                        is CreateEntryResult.Success -> {
+                            statusMessage = "Eintrag wurde erstellt."
+                            title = ""
+                            content = ""
+                            moodRatingInput = ""
+                            onNavigateBack()
+                        }
+                        is CreateEntryResult.ValidationError -> {
+                            errorMessage = createEntryModel.validationMessage(result.validation)
+                                ?: "Bitte Eingaben prüfen."
+                        }
+                        is CreateEntryResult.Failure -> {
+                            errorMessage = result.message ?: "Eintrag konnte nicht erstellt werden."
+                        }
                     }
+                    isLoading = false
                 }
             },
             enabled = !isLoading
