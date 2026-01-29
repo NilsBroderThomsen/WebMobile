@@ -29,8 +29,8 @@ import model.LoginValidation
 @Composable
 fun LoginPage(
     client: MoodTrackerClient,
-    onNavigateBack: () -> Unit,
-    onNavigateToEntries: (Long) -> Unit
+    onNavigateToEntries: (Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val loginModel = remember(client) { LoginModel(client) }
     val scope = rememberCoroutineScope()
@@ -62,11 +62,8 @@ fun LoginPage(
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
-        Button(onClick = onNavigateBack) {
-            Text("Back")
-        }
 
         TextField(
             value = username,

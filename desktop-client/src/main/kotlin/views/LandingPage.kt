@@ -6,24 +6,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import api.MoodTrackerClient
 
 @Composable
-fun HomePage(
-    onNavigateToEntries: () -> Unit,
-    onLogout: () -> Unit
+fun LandingPage(
+    client: MoodTrackerClient,
+    onLoginSuccess: (Long) -> Unit,
+    onRegisterSuccess: (Long) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -34,19 +35,21 @@ fun HomePage(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Welcome back",
+                    text = "Mood Tracker",
                     style = MaterialTheme.typography.displaySmall
                 )
                 Text(
-                    text = "Track your mood, review your history, and keep your streak going.",
+                    text = "Welcome! Sign in or create an account to get started.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 420.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 Card(
                     modifier = Modifier.weight(1f),
@@ -55,23 +58,31 @@ fun HomePage(
                     )
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "My entries",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Login",
+                            style = MaterialTheme.typography.titleLarge
                         )
                         Text(
-                            text = "View, filter, and update your mood entries.",
+                            text = "Access your mood history and keep tracking.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Button(onClick = onNavigateToEntries) {
-                            Text("Open entries")
-                        }
+                        LoginPage(
+                            client = client,
+                            onNavigateToEntries = onLoginSuccess
+                        )
                     }
                 }
+
+                VerticalDivider(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .heightIn(min = 360.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
 
                 Card(
                     modifier = Modifier.weight(1f),
@@ -80,40 +91,33 @@ fun HomePage(
                     )
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Stay on track",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Register",
+                            style = MaterialTheme.typography.titleLarge
                         )
                         Text(
-                            text = "Capture today’s mood in just a few clicks.",
+                            text = "Create an account to start tracking your mood.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Button(onClick = onNavigateToEntries) {
-                            Text("Create a new entry")
-                        }
+                        RegisterPage(
+                            client = client,
+                            onNavigateToEntries = onRegisterSuccess
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Need to switch accounts?",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                OutlinedButton(onClick = onLogout) {
-                    Text("Logout")
-                }
-            }
+            Text(
+                text = "Your data stays private. Sign in to continue.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
