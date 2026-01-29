@@ -57,6 +57,18 @@ class EntryDetailActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<Button>(R.id.entryDetailEdit).setOnClickListener {
+            startActivity(
+                EditEntryActivity.newIntent(
+                    this@EntryDetailActivity,
+                    entryId = entryId,
+                    title = title,
+                    content = content,
+                    moodRating = if (moodRating == MOOD_UNKNOWN) null else moodRating
+                )
+            )
+        }
+
         findViewById<TextView>(R.id.entryDetailTitle).text = title
         findViewById<TextView>(R.id.entryDetailContent).text = content
         findViewById<TextView>(R.id.entryDetailMood).text = if (moodRating == MOOD_UNKNOWN) {
