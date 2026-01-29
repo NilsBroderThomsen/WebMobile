@@ -49,6 +49,9 @@ fun App() {
                         onNavigateToEntries = {
                             currentScreen = Screen.Entries
                         },
+                        onNavigateToCreateEntry = {
+                            currentScreen = Screen.CreateEntry
+                        },
                         onLogout = {
                             client.logout()
                             authUserId = null

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomePage(
     onNavigateToEntries: () -> Unit,
+    onNavigateToCreateEntry: () -> Unit,
     onLogout: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -92,7 +93,7 @@ fun HomePage(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Button(onClick = onNavigateToEntries) {
+                        Button(onClick = onNavigateToCreateEntry) {
                             Text("Create a new entry")
                         }
                     }
