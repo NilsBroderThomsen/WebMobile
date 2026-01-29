@@ -1,5 +1,6 @@
 package de.hsflensburg.moodtracker.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -40,9 +41,18 @@ class EntriesActivity : AppCompatActivity() {
         loadingView = findViewById(R.id.entriesLoading)
         sortToggle = findViewById(R.id.entriesSortToggle)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
+        val logoutButton = findViewById<Button>(R.id.entriesLogoutButton)
 
         createButton.setOnClickListener {
             startActivity(CreateEntryActivity.newIntent(this, userId))
+        }
+
+        logoutButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+            finish()
         }
 
         sortToggle.setOnClickListener {
