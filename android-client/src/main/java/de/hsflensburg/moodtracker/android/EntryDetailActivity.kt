@@ -14,12 +14,20 @@ import kotlinx.coroutines.launch
 
 class EntryDetailActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
+    private var entryId: Long = INVALID_ID
+    private var currentEntry: EntryDto? = null
+    private lateinit var titleView: TextView
+    private lateinit var contentView: TextView
+    private lateinit var moodView: TextView
+    private lateinit var createdAtView: TextView
+    private lateinit var updatedAtView: TextView
+    private lateinit var tagsView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entry_detail)
 
-        val entryId = intent.getLongExtra(EXTRA_ID, INVALID_ID)
+        entryId = intent.getLongExtra(EXTRA_ID, INVALID_ID)
         val title = intent.getStringExtra(EXTRA_TITLE)
         val content = intent.getStringExtra(EXTRA_CONTENT)
         val createdAt = intent.getStringExtra(EXTRA_CREATED_AT)
@@ -32,6 +40,13 @@ class EntryDetailActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        titleView = findViewById(R.id.entryDetailTitle)
+        contentView = findViewById(R.id.entryDetailContent)
+        moodView = findViewById(R.id.entryDetailMood)
+        createdAtView = findViewById(R.id.entryDetailCreatedAt)
+        updatedAtView = findViewById(R.id.entryDetailUpdatedAt)
+        tagsView = findViewById(R.id.entryDetailTags)
 
         findViewById<Button>(R.id.entryDetailBack).setOnClickListener {
             finish()
@@ -58,31 +73,78 @@ class EntryDetailActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.entryDetailEdit).setOnClickListener {
+            val entry = currentEntry
+            val editTitle = entry?.title ?: title
+            val editContent = entry?.content ?: content
+            val editMoodRating = entry?.moodRating ?: if (moodRating == MOOD_UNKNOWN) null else moodRating
+            if (editTitle.isNullOrBlank() || editContent.isNullOrBlank()) {
+                Toast.makeText(
+                    this@EntryDetailActivity,
+                    getString(R.string.entry_detail_missing),
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
             startActivity(
                 EditEntryActivity.newIntent(
                     this@EntryDetailActivity,
                     entryId = entryId,
-                    title = title,
-                    content = content,
-                    moodRating = if (moodRating == MOOD_UNKNOWN) null else moodRating
+                    title = editTitle,
+                    content = editContent,
+                    moodRating = editMoodRating
                 )
             )
         }
 
-        findViewById<TextView>(R.id.entryDetailTitle).text = title
-        findViewById<TextView>(R.id.entryDetailContent).text = content
-        findViewById<TextView>(R.id.entryDetailMood).text = if (moodRating == MOOD_UNKNOWN) {
+        titleView.text = title
+        contentView.text = content
+        moodView.text = if (moodRating == MOOD_UNKNOWN) {
             getString(R.string.entries_mood_unknown)
         } else {
             "${getString(R.string.entries_mood_format, moodRating)} ${moodRating.toEmoji()}"
         }
-        findViewById<TextView>(R.id.entryDetailCreatedAt).text = createdAt
-        findViewById<TextView>(R.id.entryDetailUpdatedAt).text = updatedAt
+        createdAtView.text = createdAt
+        updatedAtView.text = updatedAt
             ?: getString(R.string.entry_detail_not_updated)
-        findViewById<TextView>(R.id.entryDetailTags).text = if (tags.isNullOrEmpty()) {
+        tagsView.text = if (tags.isNullOrEmpty()) {
             getString(R.string.entry_detail_no_tags)
         } else {
             tags.joinToString(", ")
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadEntryDetails()
+    }
+
+    private fun loadEntryDetails() {
+        if (entryId == INVALID_ID) {
+            return
+        }
+        lifecycleScope.launch {
+            try {
+                val entry = client.getEntryDetails(entryId)
+                currentEntry = entry
+                titleView.text = entry.title
+                contentView.text = entry.content
+                moodView.text = entry.moodRating?.let { rating ->
+                    "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
+                } ?: getString(R.string.entries_mood_unknown)
+                createdAtView.text = entry.createdAt
+                updatedAtView.text = entry.updatedAt ?: getString(R.string.entry_detail_not_updated)
+                tagsView.text = if (entry.tags.isEmpty()) {
+                    getString(R.string.entry_detail_no_tags)
+                } else {
+                    entry.tags.joinToString(", ")
+                }
+            } catch (ex: Exception) {
+                Toast.makeText(
+                    this@EntryDetailActivity,
+                    ex.message ?: getString(R.string.entries_load_failed),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
