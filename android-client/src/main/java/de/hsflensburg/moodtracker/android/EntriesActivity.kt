@@ -82,6 +82,11 @@ class EntriesActivity : AppCompatActivity() {
             android.R.layout.simple_list_item_1,
             sortedEntries.map { entry -> formatEntry(entry) }
         )
+        listView.setOnItemClickListener { _, _, position, _ ->
+            val entry = sortedEntries[position]
+            val intent = EntryDetailActivity.newIntent(this, entry)
+            startActivity(intent)
+        }
     }
 
     private fun updateSortToggle(sortToggle: Button) {

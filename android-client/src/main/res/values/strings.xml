@@ -26,4 +26,12 @@
     <string name="entries_item_format">%1$s · %2$s · %3$s</string>
     <string name="entries_sort_newest">Sortierung: Neueste zuerst</string>
     <string name="entries_sort_oldest">Sortierung: Älteste zuerst</string>
+    <string name="entry_detail_content_label">Content</string>
+    <string name="entry_detail_meta_label">Details</string>
+    <string name="entry_detail_created_label">Created</string>
+    <string name="entry_detail_updated_label">Last updated</string>
+    <string name="entry_detail_tags_label">Tags</string>
+    <string name="entry_detail_no_tags">No tags</string>
+    <string name="entry_detail_not_updated">Not updated</string>
+    <string name="entry_detail_missing">Unable to load entry details.</string>
 </resources>
