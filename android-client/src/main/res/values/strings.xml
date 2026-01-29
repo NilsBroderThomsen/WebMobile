@@ -28,6 +28,7 @@
     <string name="entries_sort_oldest">Sortierung: Älteste zuerst</string>
     <string name="entry_detail_content_label">Content</string>
     <string name="entry_detail_meta_label">Details</string>
+    <string name="entry_detail_back">Back</string>
     <string name="entry_detail_created_label">Created</string>
     <string name="entry_detail_updated_label">Last updated</string>
     <string name="entry_detail_tags_label">Tags</string>

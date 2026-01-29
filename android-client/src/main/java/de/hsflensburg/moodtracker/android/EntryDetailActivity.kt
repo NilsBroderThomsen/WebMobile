@@ -3,6 +3,7 @@ package de.hsflensburg.moodtracker.android
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,10 @@ class EntryDetailActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.entry_detail_missing), Toast.LENGTH_LONG).show()
             finish()
             return
+        }
+
+        findViewById<Button>(R.id.entryDetailBack).setOnClickListener {
+            finish()
         }
 
         findViewById<TextView>(R.id.entryDetailTitle).text = title
