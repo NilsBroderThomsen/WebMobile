@@ -15,6 +15,13 @@
             android:layout_height="wrap_content"
             android:text="@string/entry_detail_back" />
 
+        <Button
+            android:id="@+id/entryDetailDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/entry_detail_delete" />
+
         <TextView
             android:id="@+id/entryDetailTitle"
             android:layout_width="match_parent"

@@ -7,14 +7,19 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
 import extension.toEmoji
+import kotlinx.coroutines.launch
 
 class EntryDetailActivity : AppCompatActivity() {
+    private val client = MoodTrackerClientProvider.client
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entry_detail)
 
+        val entryId = intent.getLongExtra(EXTRA_ID, INVALID_ID)
         val title = intent.getStringExtra(EXTRA_TITLE)
         val content = intent.getStringExtra(EXTRA_CONTENT)
         val createdAt = intent.getStringExtra(EXTRA_CREATED_AT)
@@ -22,7 +27,7 @@ class EntryDetailActivity : AppCompatActivity() {
         val moodRating = intent.getIntExtra(EXTRA_MOOD_RATING, MOOD_UNKNOWN)
         val tags = intent.getStringArrayListExtra(EXTRA_TAGS)
 
-        if (title.isNullOrBlank() || content.isNullOrBlank() || createdAt.isNullOrBlank()) {
+        if (entryId == INVALID_ID || title.isNullOrBlank() || content.isNullOrBlank() || createdAt.isNullOrBlank()) {
             Toast.makeText(this, getString(R.string.entry_detail_missing), Toast.LENGTH_LONG).show()
             finish()
             return
@@ -30,6 +35,26 @@ class EntryDetailActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.entryDetailBack).setOnClickListener {
             finish()
+        }
+
+        findViewById<Button>(R.id.entryDetailDelete).setOnClickListener {
+            lifecycleScope.launch {
+                try {
+                    client.deleteEntry(entryId)
+                    Toast.makeText(
+                        this@EntryDetailActivity,
+                        getString(R.string.entry_detail_delete_success),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    finish()
+                } catch (ex: Exception) {
+                    Toast.makeText(
+                        this@EntryDetailActivity,
+                        ex.message ?: getString(R.string.entry_detail_delete_failed),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
         findViewById<TextView>(R.id.entryDetailTitle).text = title
@@ -50,6 +75,7 @@ class EntryDetailActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val EXTRA_ID = "extra_entry_id"
         private const val EXTRA_TITLE = "extra_entry_title"
         private const val EXTRA_CONTENT = "extra_entry_content"
         private const val EXTRA_MOOD_RATING = "extra_entry_mood_rating"
@@ -57,9 +83,11 @@ class EntryDetailActivity : AppCompatActivity() {
         private const val EXTRA_UPDATED_AT = "extra_entry_updated_at"
         private const val EXTRA_TAGS = "extra_entry_tags"
         private const val MOOD_UNKNOWN = -1
+        private const val INVALID_ID = -1L
 
         fun newIntent(context: Context, entry: EntryDto): Intent {
             return Intent(context, EntryDetailActivity::class.java).apply {
+                putExtra(EXTRA_ID, entry.id)
                 putExtra(EXTRA_TITLE, entry.title)
                 putExtra(EXTRA_CONTENT, entry.content)
                 putExtra(EXTRA_MOOD_RATING, entry.moodRating ?: MOOD_UNKNOWN)
