@@ -41,5 +41,7 @@
     <string name="create_entry_content_hint">Content</string>
     <string name="create_entry_mood_hint">Mood (1-10)</string>
     <string name="create_entry_save">Eintrag speichern</string>
-    <string name="create_entry_placeholder">Eintragserstellung ist noch nicht implementiert.</string>
+    <string name="create_entry_success">Eintrag wurde erstellt.</string>
+    <string name="create_entry_validation_failed">Bitte Eingaben prüfen.</string>
+    <string name="create_entry_failed">Eintrag konnte nicht erstellt werden.</string>
 </resources>
