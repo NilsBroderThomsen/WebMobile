@@ -20,6 +20,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import kotlinx.coroutines.launch
+import model.LoginInput
+import model.LoginModel
+import model.LoginResult
 
 @Composable
 fun LoginPage(
@@ -27,6 +30,7 @@ fun LoginPage(
     onNavigateBack: () -> Unit,
     onNavigateToEntries: (Long) -> Unit
 ) {
+    val loginModel = remember(client) { LoginModel(client) }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var statusMessage by remember { mutableStateOf<String?>(null) }
@@ -55,29 +59,31 @@ fun LoginPage(
 
         Button (
             onClick = {
-                if (username.isBlank() || password.isBlank()) {
-                    errorMessage = "Bitte alle Felder ausfüllen."
-                    statusMessage = null
-                    return@Button
-                }
-
                 isLoading = true
                 statusMessage = null
                 errorMessage = null
 
                 scope.launch {
-                    try {
-                        val loginResponse = client.login(
-                            username = username,
-                            password = password
+                    when (
+                        val result = loginModel.login(
+                            LoginInput(
+                                username = username,
+                                password = password
+                            )
                         )
-                        statusMessage = "Login erfolgreich. Willkommen, $username!"
-                        onNavigateToEntries(loginResponse.userId)
-                    } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Login fehlgeschlagen."
-                    } finally {
-                        isLoading = false
+                    ) {
+                        is LoginResult.ValidationError -> {
+                            errorMessage = "Bitte alle Felder ausfüllen."
+                        }
+                        is LoginResult.Success -> {
+                            statusMessage = "Login erfolgreich. Willkommen, $username!"
+                            onNavigateToEntries(result.loginResponse.userId)
+                        }
+                        is LoginResult.Failure -> {
+                            errorMessage = result.message ?: "Login fehlgeschlagen."
+                        }
                     }
+                    isLoading = false
                 }
             },
             enabled = !isLoading
