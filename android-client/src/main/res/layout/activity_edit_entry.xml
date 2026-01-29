@@ -1,50 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="24dp">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/editEntryTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/edit_entry_title"
-            android:textAppearance="?attr/textAppearanceHeadline6" />
+            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
 
-        <EditText
-            android:id="@+id/editEntryName"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/editEntrySubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/edit_entry_subtitle"
+            android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editEntryNameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:hint="@string/create_entry_name_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editEntryName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editEntryContentLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="@string/create_entry_name_hint"
-            android:inputType="textPersonName" />
+            android:hint="@string/create_entry_content_hint">
 
-        <EditText
-            android:id="@+id/editEntryContent"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editEntryContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="4" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/editEntryMoodLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/create_entry_content_hint"
-            android:inputType="textMultiLine"
-            android:minLines="4" />
+            android:layout_marginTop="16dp"
+            android:hint="@string/create_entry_mood_hint">
 
-        <EditText
-            android:id="@+id/editEntryMood"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/create_entry_mood_hint"
-            android:inputType="number" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editEntryMood"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/editEntrySave"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
             android:text="@string/edit_entry_save" />
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
