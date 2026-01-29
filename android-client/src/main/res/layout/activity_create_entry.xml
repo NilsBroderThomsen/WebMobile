@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_entry_title"
+            android:textAppearance="?attr/textAppearanceHeadline6" />
+
+        <EditText
+            android:id="@+id/createEntryName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/create_entry_name_hint"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/createEntryContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_entry_content_hint"
+            android:inputType="textMultiLine"
+            android:minLines="4" />
+
+        <EditText
+            android:id="@+id/createEntryMood"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/create_entry_mood_hint"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/createEntrySave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/create_entry_save" />
+    </LinearLayout>
+</ScrollView>

@@ -34,6 +34,11 @@ class EntriesActivity : AppCompatActivity() {
         val emptyView = findViewById<TextView>(R.id.entriesEmpty)
         val loadingView = findViewById<ProgressBar>(R.id.entriesLoading)
         val sortToggle = findViewById<Button>(R.id.entriesSortToggle)
+        val createButton = findViewById<Button>(R.id.entriesCreateButton)
+
+        createButton.setOnClickListener {
+            startActivity(CreateEntryActivity.newIntent(this, userId))
+        }
 
         loadingView.visibility = View.VISIBLE
         listView.visibility = View.GONE

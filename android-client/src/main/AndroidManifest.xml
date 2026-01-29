@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".EntriesActivity" />
         <activity android:name=".EntryDetailActivity" />
+        <activity android:name=".CreateEntryActivity" />
     </application>
 
 </manifest>
