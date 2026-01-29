@@ -28,15 +28,19 @@ class LoginModel(private val client: MoodTrackerClient) {
     }
 
     suspend fun login(input: LoginInput): LoginResult {
-        val validation = validate(input)
+        val trimmedInput = input.copy(
+            username = input.username.trim(),
+            password = input.password.trim()
+        )
+        val validation = validate(trimmedInput)
         if (validation.hasErrors) {
             return LoginResult.ValidationError(validation)
         }
 
         return try {
             val loginResponse = client.login(
-                username = input.username,
-                password = input.password
+                username = trimmedInput.username,
+                password = trimmedInput.password
             )
             LoginResult.Success(loginResponse = loginResponse)
         } catch (ex: Exception) {
