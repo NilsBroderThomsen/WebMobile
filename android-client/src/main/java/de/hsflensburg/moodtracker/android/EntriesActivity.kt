@@ -18,28 +18,46 @@ class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
     private var currentEntries: List<EntryDto> = emptyList()
     private var isAscending = true
+    private var userId: Long = -1L
+    private lateinit var listView: ListView
+    private lateinit var emptyView: TextView
+    private lateinit var loadingView: ProgressBar
+    private lateinit var sortToggle: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entries)
 
-        val userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
+        userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
         if (userId <= 0L) {
             Toast.makeText(this, getString(R.string.entries_missing_user), Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        val listView = findViewById<ListView>(R.id.entriesList)
-        val emptyView = findViewById<TextView>(R.id.entriesEmpty)
-        val loadingView = findViewById<ProgressBar>(R.id.entriesLoading)
-        val sortToggle = findViewById<Button>(R.id.entriesSortToggle)
+        listView = findViewById(R.id.entriesList)
+        emptyView = findViewById(R.id.entriesEmpty)
+        loadingView = findViewById(R.id.entriesLoading)
+        sortToggle = findViewById(R.id.entriesSortToggle)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
 
         createButton.setOnClickListener {
             startActivity(CreateEntryActivity.newIntent(this, userId))
         }
 
+        sortToggle.setOnClickListener {
+            isAscending = !isAscending
+            updateSortToggle(sortToggle)
+            renderEntries(listView, currentEntries, isAscending)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadEntries()
+    }
+
+    private fun loadEntries() {
         loadingView.visibility = View.VISIBLE
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
@@ -68,12 +86,6 @@ class EntriesActivity : AppCompatActivity() {
             } finally {
                 loadingView.visibility = View.GONE
             }
-        }
-
-        sortToggle.setOnClickListener {
-            isAscending = !isAscending
-            updateSortToggle(sortToggle)
-            renderEntries(listView, currentEntries, isAscending)
         }
     }
 
