@@ -20,7 +20,7 @@ class UpdateEntryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_entry)
+        setContentView(R.layout.activity_update_entry)
 
         val entryId = intent.getLongExtra(EXTRA_ID, INVALID_ID)
         val title = intent.getStringExtra(EXTRA_TITLE)
@@ -33,10 +33,10 @@ class UpdateEntryActivity : AppCompatActivity() {
             return
         }
 
-        val titleInput = findViewById<EditText>(R.id.editEntryName)
-        val contentInput = findViewById<EditText>(R.id.editEntryContent)
-        val moodInput = findViewById<EditText>(R.id.editEntryMood)
-        val saveButton = findViewById<Button>(R.id.editEntrySave)
+        val titleInput = findViewById<EditText>(R.id.updateEntryName)
+        val contentInput = findViewById<EditText>(R.id.updateEntryContent)
+        val moodInput = findViewById<EditText>(R.id.updateEntryMood)
+        val saveButton = findViewById<Button>(R.id.updateEntrySave)
 
         fun clearFieldErrors() {
             titleInput.error = null

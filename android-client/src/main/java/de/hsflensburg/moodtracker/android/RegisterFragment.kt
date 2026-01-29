@@ -3,6 +3,7 @@ package de.hsflensburg.moodtracker.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -35,10 +36,22 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         val registerButton = view.findViewById<MaterialButton>(R.id.registerButton)
         val loginButton = view.findViewById<View>(R.id.registerLoginButton)
 
-        fun clearErrors() {
+        val errorText = view.findViewById<TextView>(R.id.registerErrorText)
+
+        fun clearFieldErrors() {
             usernameLayout.error = null
             emailLayout.error = null
             passwordLayout.error = null
+        }
+
+        fun showGeneralError(message: String?) {
+            errorText.text = message ?: getString(R.string.register_failed)
+            errorText.visibility = View.VISIBLE
+        }
+
+        fun clearGeneralError() {
+            errorText.text = ""
+            errorText.visibility = View.GONE
         }
 
         fun applyValidation(validation: RegisterValidation) {
@@ -61,14 +74,24 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
         }
 
-        usernameInput.addTextChangedListener { usernameLayout.error = null }
-        emailInput.addTextChangedListener { emailLayout.error = null }
-        passwordInput.addTextChangedListener { passwordLayout.error = null }
+        usernameInput.addTextChangedListener {
+            usernameLayout.error = null
+            clearGeneralError()
+        }
+        emailInput.addTextChangedListener {
+            emailLayout.error = null
+            clearGeneralError()
+        }
+        passwordInput.addTextChangedListener {
+            passwordLayout.error = null
+            clearGeneralError()
+        }
 
         registerButton.setOnClickListener {
             if (!registerButton.isEnabled) return@setOnClickListener
 
-            clearErrors()
+            clearFieldErrors()
+            clearGeneralError()
 
             val input = RegisterInput(
                 username = usernameInput.text?.toString().orEmpty(),
@@ -77,7 +100,6 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             )
 
             registerButton.isEnabled = false
-
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     when (val result = registerModel.register(input)) {
@@ -95,7 +117,10 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                             ).show()
 
                             val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
-                                putExtra(EntriesActivity.EXTRA_USER_ID, result.loginResponse.userId)
+                                putExtra(
+                                    EntriesActivity.EXTRA_USER_ID,
+                                    result.loginResponse.userId
+                                )
                             }
                             startActivity(intent)
                             activity?.finish()
@@ -103,12 +128,9 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
                         is RegisterResult.Failure -> {
                             if (!isAdded) return@launch
-
-                            Toast.makeText(
-                                requireContext(),
-                                result.message ?: getString(R.string.register_failed),
-                                Toast.LENGTH_LONG
-                            ).show()
+                            showGeneralError(
+                                result.message ?: getString(R.string.register_failed)
+                            )
                         }
                     }
                 } finally {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -12,43 +11,43 @@
         android:padding="24dp">
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/editEntryTitle"
+            android:id="@+id/updateEntryTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/edit_entry_title"
+            android:text="@string/update_entry_title"
             android:textAppearance="?attr/textAppearanceHeadlineSmall" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/editEntrySubtitle"
+            android:id="@+id/updateEntrySubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="@string/edit_entry_subtitle"
+            android:text="@string/update_entry_subtitle"
             android:textAppearance="?attr/textAppearanceBodyMedium" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/editEntryNameLayout"
+            android:id="@+id/updateEntryNameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:hint="@string/create_entry_name_hint">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editEntryName"
+                android:id="@+id/updateEntryName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/editEntryContentLayout"
+            android:id="@+id/updateEntryContentLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="@string/create_entry_content_hint">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editEntryContent"
+                android:id="@+id/updateEntryContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
@@ -56,24 +55,24 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/editEntryMoodLayout"
+            android:id="@+id/updateEntryMoodLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="@string/create_entry_mood_hint">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editEntryMood"
+                android:id="@+id/updateEntryMood"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/editEntrySave"
+            android:id="@+id/updateEntrySave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/edit_entry_save" />
+            android:text="@string/update_entry_save" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
