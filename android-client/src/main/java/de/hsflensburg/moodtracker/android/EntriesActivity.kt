@@ -3,7 +3,6 @@ package de.hsflensburg.moodtracker.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
@@ -105,11 +104,7 @@ class EntriesActivity : AppCompatActivity() {
         } else {
             entries.sortedByDescending { it.createdAt }
         }
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            sortedEntries.map { entry -> formatEntry(entry) }
-        )
+        listView.adapter = EntriesAdapter(this, sortedEntries)
         listView.setOnItemClickListener { _, _, position, _ ->
             val entry = sortedEntries[position]
             val intent = EntryDetailActivity.newIntent(this, entry)
@@ -123,16 +118,32 @@ class EntriesActivity : AppCompatActivity() {
         )
     }
 
-    private fun formatEntry(entry: EntryDto): String {
-        val mood = entry.moodRating?.let { rating ->
+    private fun formatMood(entry: EntryDto): String {
+        return entry.moodRating?.let { rating ->
             "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
         } ?: getString(R.string.entries_mood_unknown)
-        return getString(
-            R.string.entries_item_format,
-            entry.title,
-            mood,
-            entry.createdAt
-        )
+    }
+
+    private class EntriesAdapter(
+        activity: EntriesActivity,
+        entries: List<EntryDto>
+    ) : android.widget.ArrayAdapter<EntryDto>(activity, R.layout.list_item_entry, entries) {
+        private val inflater = activity.layoutInflater
+
+        override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+            val view = convertView ?: inflater.inflate(R.layout.list_item_entry, parent, false)
+            val entry = getItem(position) ?: return view
+            val titleView = view.findViewById<TextView>(R.id.entryTitle)
+            val timestampView = view.findViewById<TextView>(R.id.entryTimestamp)
+            val mood = (context as EntriesActivity).formatMood(entry)
+            titleView.text = context.getString(
+                R.string.entries_item_title_format,
+                entry.title,
+                mood
+            )
+            timestampView.text = entry.createdAt
+            return view
+        }
     }
 
     companion object {
