@@ -19,6 +19,8 @@
     <string name="register_success">Registration successful.</string>
     <string name="register_failed">Registration failed.</string>
     <string name="entries_empty">No entries yet.</string>
+    <string name="entries_title">Your journal</string>
+    <string name="entries_subtitle">Track your mood and review past moments.</string>
     <string name="entries_missing_user">Missing user details.</string>
     <string name="entries_load_failed">Unable to load entries.</string>
     <string name="entries_mood_format">Mood: %1$d</string>
@@ -42,6 +44,7 @@
     <string name="entry_detail_not_updated">Not updated</string>
     <string name="entry_detail_missing">Unable to load entry details.</string>
     <string name="create_entry_title">Neuer Eintrag</string>
+    <string name="create_entry_subtitle">Halte fest, wie du dich gerade fühlst.</string>
     <string name="create_entry_name_hint">Name</string>
     <string name="create_entry_content_hint">Content</string>
     <string name="create_entry_mood_hint">Mood (1-10)</string>
@@ -50,6 +53,7 @@
     <string name="create_entry_validation_failed">Bitte Eingaben prüfen.</string>
     <string name="create_entry_failed">Eintrag konnte nicht erstellt werden.</string>
     <string name="edit_entry_title">Eintrag bearbeiten</string>
+    <string name="edit_entry_subtitle">Aktualisiere Details und halte sie aktuell.</string>
     <string name="edit_entry_save">Änderungen speichern</string>
     <string name="edit_entry_success">Eintrag wurde aktualisiert.</string>
     <string name="edit_entry_validation_failed">Bitte Eingaben prüfen.</string>
