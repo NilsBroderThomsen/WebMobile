@@ -38,21 +38,26 @@ sealed class UpdateEntryResult {
 }
 
 class UpdateEntryModel(private val client: MoodTrackerClient) {
+
+    companion object {
+        private val MOOD_RANGE = 1..10
+    }
+
     fun prepare(input: UpdateEntryInput): UpdateEntryPreparation {
         val trimmedTitle = input.title.trim()
         val trimmedContent = input.content.trim()
         val trimmedMood = input.moodRatingInput.trim()
-        val moodRating = if (trimmedMood.isBlank()) {
-            null
-        } else {
-            trimmedMood.toIntOrNull()
+
+        val moodRating = when {
+            trimmedMood.isBlank() -> null
+            else -> trimmedMood.toIntOrNull()
         }
 
         val validation = UpdateEntryValidation(
             missingTitle = trimmedTitle.isBlank(),
             missingContent = trimmedContent.isBlank(),
             invalidMoodFormat = trimmedMood.isNotBlank() && moodRating == null,
-            moodOutOfRange = moodRating != null && moodRating !in 1..10
+            moodOutOfRange = moodRating != null && moodRating !in MOOD_RANGE
         )
 
         return if (validation.hasErrors) {
@@ -68,20 +73,11 @@ class UpdateEntryModel(private val client: MoodTrackerClient) {
         }
     }
 
-    fun validationMessage(validation: UpdateEntryValidation): String? {
-        return when {
-            validation.missingTitle || validation.missingContent ->
-                "Bitte Title und Content ausfüllen."
-            validation.invalidMoodFormat || validation.moodOutOfRange ->
-                "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-            else -> null
-        }
-    }
-
     suspend fun updateEntry(entryId: Long, input: UpdateEntryInput): UpdateEntryResult {
         return when (val prepared = prepare(input)) {
             is UpdateEntryPreparation.ValidationError ->
                 UpdateEntryResult.ValidationError(prepared.validation)
+
             is UpdateEntryPreparation.Ready ->
                 try {
                     val entry = client.updateEntry(
@@ -94,7 +90,7 @@ class UpdateEntryModel(private val client: MoodTrackerClient) {
                     )
                     UpdateEntryResult.Success(entry)
                 } catch (ex: Exception) {
-                    UpdateEntryResult.Failure(ex.message)
+                    UpdateEntryResult.Failure(ex.message ?: "Eintrag konnte nicht aktualisiert werden.")
                 }
         }
     }

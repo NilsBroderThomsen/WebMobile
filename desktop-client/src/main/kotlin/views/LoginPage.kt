@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 import model.LoginInput
 import model.LoginModel
 import model.LoginResult
+import model.LoginValidation
 
 @Composable
 fun LoginPage(
@@ -31,62 +33,107 @@ fun LoginPage(
     onNavigateToEntries: (Long) -> Unit
 ) {
     val loginModel = remember(client) { LoginModel(client) }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var statusMessage by remember { mutableStateOf<String?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
+    var statusMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+
+    fun clearErrors() {
+        usernameError = null
+        passwordError = null
+    }
+
+    fun applyValidation(validation: LoginValidation) {
+        usernameError = when {
+            validation.missingUsername -> "Username erforderlich"
+            else -> null
+        }
+        passwordError = when {
+            validation.missingPassword -> "Passwort erforderlich"
+            else -> null
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Button(onClick = onNavigateBack) {
             Text("Back")
         }
 
         TextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                usernameError = null
+            },
             label = { Text("Username") },
+            isError = usernameError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        usernameError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
         TextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                passwordError = null
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = passwordError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        passwordError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
 
-        Button (
+        Button(
+            enabled = !isLoading,
             onClick = {
-                isLoading = true
+                if (isLoading) return@Button
+
+                clearErrors()
                 statusMessage = null
-                errorMessage = null
+                isLoading = true
 
                 scope.launch {
-                    when (
-                        val result = loginModel.login(
-                            LoginInput(
-                                username = username,
-                                password = password
+                    try {
+                        when (
+                            val result = loginModel.login(
+                                LoginInput(
+                                    username = username,
+                                    password = password
+                                )
                             )
-                        )
-                    ) {
-                        is LoginResult.ValidationError -> {
-                            errorMessage = "Bitte alle Felder ausfüllen."
+                        ) {
+                            is LoginResult.ValidationError -> {
+                                applyValidation(result.validation)
+                            }
+
+                            is LoginResult.Success -> {
+                                statusMessage = "Login erfolgreich. Willkommen, ${username.trim()}!"
+                                onNavigateToEntries(result.loginResponse.userId)
+                            }
+
+                            is LoginResult.Failure -> {
+                                statusMessage = result.message ?: "Login fehlgeschlagen."
+                            }
                         }
-                        is LoginResult.Success -> {
-                            statusMessage = "Login erfolgreich. Willkommen, $username!"
-                            onNavigateToEntries(result.loginResponse.userId)
-                        }
-                        is LoginResult.Failure -> {
-                            errorMessage = result.message ?: "Login fehlgeschlagen."
-                        }
+                    } finally {
+                        isLoading = false
                     }
-                    isLoading = false
                 }
-            },
-            enabled = !isLoading
+            }
         ) {
             Text("Login")
         }
@@ -96,12 +143,8 @@ fun LoginPage(
             CircularProgressIndicator()
         }
 
-        statusMessage?.let { message ->
-            Text(message)
-        }
-
-        errorMessage?.let { message ->
-            Text(message, color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+        statusMessage?.let { msg ->
+            Text(msg, color = MaterialTheme.colorScheme.error.takeIf { usernameError != null || passwordError != null } ?: MaterialTheme.colorScheme.onBackground)
         }
     }
 }

@@ -12,9 +12,11 @@ import kotlinx.coroutines.launch
 import model.UpdateEntryInput
 import model.UpdateEntryModel
 import model.UpdateEntryResult
+import model.UpdateEntryValidation
 
-class EditEntryActivity : AppCompatActivity() {
+class UpdateEntryActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
+    private val updateEntryModel by lazy { UpdateEntryModel(client) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +28,7 @@ class EditEntryActivity : AppCompatActivity() {
         val moodRating = intent.getIntExtra(EXTRA_MOOD_RATING, MOOD_UNKNOWN)
 
         if (entryId == INVALID_ID || title == null || content == null) {
-            Toast.makeText(this, getString(R.string.edit_entry_missing), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.update_entry_missing), Toast.LENGTH_LONG).show()
             finish()
             return
         }
@@ -35,7 +37,28 @@ class EditEntryActivity : AppCompatActivity() {
         val contentInput = findViewById<EditText>(R.id.editEntryContent)
         val moodInput = findViewById<EditText>(R.id.editEntryMood)
         val saveButton = findViewById<Button>(R.id.editEntrySave)
-        val updateEntryModel = UpdateEntryModel(client)
+
+        fun clearFieldErrors() {
+            titleInput.error = null
+            contentInput.error = null
+            moodInput.error = null
+        }
+
+        fun applyValidationErrors(v: UpdateEntryValidation) {
+            titleInput.error = when {
+                v.missingTitle -> getString(R.string.error_required_field)
+                else -> null
+            }
+            contentInput.error = when {
+                v.missingContent -> getString(R.string.error_required_field)
+                else -> null
+            }
+            moodInput.error = when {
+                v.invalidMoodFormat -> getString(R.string.error_invalid_mood_format) // musst du ggf. anlegen
+                v.moodOutOfRange -> getString(R.string.error_invalid_mood_range)     // musst du ggf. anlegen
+                else -> null
+            }
+        }
 
         titleInput.setText(title)
         contentInput.setText(content)
@@ -44,36 +67,49 @@ class EditEntryActivity : AppCompatActivity() {
         }
 
         saveButton.setOnClickListener {
+            if (!saveButton.isEnabled) return@setOnClickListener
+
+            clearFieldErrors()
+
             val input = UpdateEntryInput(
                 title = titleInput.text.toString(),
                 content = contentInput.text.toString(),
                 moodRatingInput = moodInput.text.toString()
             )
+
             saveButton.isEnabled = false
             lifecycleScope.launch {
-                when (val result = updateEntryModel.updateEntry(entryId, input)) {
-                    is UpdateEntryResult.Success -> {
-                        Toast.makeText(
-                            this@EditEntryActivity,
-                            getString(R.string.edit_entry_success),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        finish()
+                try {
+                    when (val result = updateEntryModel.updateEntry(entryId, input)) {
+                        is UpdateEntryResult.Success -> {
+                            Toast.makeText(
+                                this@UpdateEntryActivity,
+                                getString(R.string.update_entry_success),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            finish()
+                        }
+
+                        is UpdateEntryResult.ValidationError -> {
+                            applyValidationErrors(result.validation)
+                            Toast.makeText(
+                                this@UpdateEntryActivity,
+                                getString(R.string.update_entry_validation_failed),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+
+                        is UpdateEntryResult.Failure -> {
+                            Toast.makeText(
+                                this@UpdateEntryActivity,
+                                result.message ?: getString(R.string.update_entry_failed),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
-                    is UpdateEntryResult.ValidationError -> {
-                        val message = updateEntryModel.validationMessage(result.validation)
-                            ?: getString(R.string.edit_entry_validation_failed)
-                        Toast.makeText(this@EditEntryActivity, message, Toast.LENGTH_LONG).show()
-                    }
-                    is UpdateEntryResult.Failure -> {
-                        Toast.makeText(
-                            this@EditEntryActivity,
-                            result.message ?: getString(R.string.edit_entry_failed),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                } finally {
+                    saveButton.isEnabled = true
                 }
-                saveButton.isEnabled = true
             }
         }
     }
@@ -93,7 +129,7 @@ class EditEntryActivity : AppCompatActivity() {
             content: String,
             moodRating: Int?
         ): Intent {
-            return Intent(context, EditEntryActivity::class.java).apply {
+            return Intent(context, UpdateEntryActivity::class.java).apply {
                 putExtra(EXTRA_ID, entryId)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_CONTENT, content)

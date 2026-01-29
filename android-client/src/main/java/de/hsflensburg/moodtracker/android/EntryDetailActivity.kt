@@ -86,7 +86,7 @@ class EntryDetailActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             startActivity(
-                EditEntryActivity.newIntent(
+                UpdateEntryActivity.newIntent(
                     this@EntryDetailActivity,
                     entryId = entryId,
                     title = editTitle,

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -14,26 +15,60 @@ import kotlinx.coroutines.launch
 import model.RegisterInput
 import model.RegisterModel
 import model.RegisterResult
+import model.RegisterValidation
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
     private val client = MoodTrackerClientProvider.client
+    private val registerModel by lazy { RegisterModel(client) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val registerModel = RegisterModel(client)
         val usernameLayout = view.findViewById<TextInputLayout>(R.id.registerUsernameLayout)
         val emailLayout = view.findViewById<TextInputLayout>(R.id.registerEmailLayout)
         val passwordLayout = view.findViewById<TextInputLayout>(R.id.registerPasswordLayout)
+
         val usernameInput = view.findViewById<TextInputEditText>(R.id.registerUsername)
         val emailInput = view.findViewById<TextInputEditText>(R.id.registerEmail)
         val passwordInput = view.findViewById<TextInputEditText>(R.id.registerPassword)
-        val registerButton = view.findViewById<MaterialButton>(R.id.registerButton)
 
-        registerButton.setOnClickListener {
+        val registerButton = view.findViewById<MaterialButton>(R.id.registerButton)
+        val loginButton = view.findViewById<View>(R.id.registerLoginButton)
+
+        fun clearErrors() {
             usernameLayout.error = null
             emailLayout.error = null
             passwordLayout.error = null
+        }
+
+        fun applyValidation(validation: RegisterValidation) {
+            usernameLayout.error = when {
+                validation.missingUsername -> getString(R.string.error_required_field)
+                validation.invalidUsername -> getString(R.string.error_username_length)
+                else -> null
+            }
+
+            emailLayout.error = when {
+                validation.missingEmail -> getString(R.string.error_required_field)
+                validation.invalidEmail -> getString(R.string.error_invalid_email)
+                else -> null
+            }
+
+            passwordLayout.error = when {
+                validation.missingPassword -> getString(R.string.error_required_field)
+                validation.invalidPassword -> getString(R.string.error_password_length)
+                else -> null
+            }
+        }
+
+        usernameInput.addTextChangedListener { usernameLayout.error = null }
+        emailInput.addTextChangedListener { emailLayout.error = null }
+        passwordInput.addTextChangedListener { passwordLayout.error = null }
+
+        registerButton.setOnClickListener {
+            if (!registerButton.isEnabled) return@setOnClickListener
+
+            clearErrors()
 
             val input = RegisterInput(
                 username = usernameInput.text?.toString().orEmpty(),
@@ -41,59 +76,48 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 password = passwordInput.text?.toString().orEmpty()
             )
 
-            val validation = registerModel.validate(input)
-            if (validation.hasErrors) {
-                if (validation.missingUsername) {
-                    usernameLayout.error = getString(R.string.error_required_field)
-                }
-                if (validation.missingEmail) {
-                    emailLayout.error = getString(R.string.error_required_field)
-                }
-                if (validation.missingPassword) {
-                    passwordLayout.error = getString(R.string.error_required_field)
-                }
-                return@setOnClickListener
-            }
-
             registerButton.isEnabled = false
+
             viewLifecycleOwner.lifecycleScope.launch {
-                when (val result = registerModel.register(input)) {
-                    is RegisterResult.ValidationError -> {
-                        if (result.validation.missingUsername) {
-                            usernameLayout.error = getString(R.string.error_required_field)
+                try {
+                    when (val result = registerModel.register(input)) {
+                        is RegisterResult.ValidationError -> {
+                            applyValidation(result.validation)
                         }
-                        if (result.validation.missingEmail) {
-                            emailLayout.error = getString(R.string.error_required_field)
+
+                        is RegisterResult.Success -> {
+                            if (!isAdded) return@launch
+
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.register_success),
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
+                                putExtra(EntriesActivity.EXTRA_USER_ID, result.loginResponse.userId)
+                            }
+                            startActivity(intent)
+                            activity?.finish()
                         }
-                        if (result.validation.missingPassword) {
-                            passwordLayout.error = getString(R.string.error_required_field)
+
+                        is RegisterResult.Failure -> {
+                            if (!isAdded) return@launch
+
+                            Toast.makeText(
+                                requireContext(),
+                                result.message ?: getString(R.string.register_failed),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
-                    is RegisterResult.Success -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.register_success),
-                            Toast.LENGTH_LONG
-                        ).show()
-                        val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
-                            putExtra(EntriesActivity.EXTRA_USER_ID, result.loginResponse.userId)
-                        }
-                        startActivity(intent)
-                        activity?.finish()
-                    }
-                    is RegisterResult.Failure -> {
-                        Toast.makeText(
-                            requireContext(),
-                            result.message ?: getString(R.string.register_failed),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                } finally {
+                    registerButton.isEnabled = true
                 }
-                registerButton.isEnabled = true
             }
         }
 
-        view.findViewById<View>(R.id.registerLoginButton).setOnClickListener {
+        loginButton.setOnClickListener {
             activity?.findViewById<ViewPager2>(R.id.authPager)?.currentItem = 0
         }
     }

@@ -5,12 +5,6 @@ import model.EntryId
 import model.UserId
 import kotlin.time.Instant
 
-val String.isValidEmail: Boolean
-    get() = this.contains("@") && this.contains(".")
-
-val String.isValidUsername: Boolean
-    get() = this.matches(Regex("^[A-Za-z0-9_]{3,20}$"))
-
 fun String.normalizeTag(): String =
     trim()
         .lowercase()

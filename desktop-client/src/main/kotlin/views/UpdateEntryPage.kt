@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -17,11 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
-import dto.UpdateEntryRequest
 import kotlinx.coroutines.launch
+import model.UpdateEntryInput
+import model.UpdateEntryModel
+import model.UpdateEntryResult
+import model.UpdateEntryValidation
 
 @Composable
 fun UpdateEntryPage(
@@ -29,96 +34,121 @@ fun UpdateEntryPage(
     entryDto: EntryDto,
     onNavigateBack: () -> Unit
 ) {
-    var title by remember { mutableStateOf("${entryDto.title}") }
-    var content by remember { mutableStateOf("${entryDto.content}") }
-    var moodRatingInput by remember { mutableStateOf("${entryDto.moodRating}") }
+    var title by remember(entryDto.id) { mutableStateOf(entryDto.title) }
+    var content by remember(entryDto.id) { mutableStateOf(entryDto.content) }
+    var moodRatingInput by remember(entryDto.id) { mutableStateOf(entryDto.moodRating?.toString() ?: "") }
+
+    var titleError by remember { mutableStateOf<String?>(null) }
+    var contentError by remember { mutableStateOf<String?>(null) }
+    var moodError by remember { mutableStateOf<String?>(null) }
+
     var statusMessage by remember { mutableStateOf<String?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var generalError by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
+    val updateEntryModel = remember(client) { UpdateEntryModel(client) }
+
+    fun clearErrors() {
+        titleError = null
+        contentError = null
+        moodError = null
+        generalError = null
+    }
+
+    fun applyValidation(v: UpdateEntryValidation) {
+        titleError = if (v.missingTitle) "Titel erforderlich" else null
+        contentError = if (v.missingContent) "Content erforderlich" else null
+
+        moodError = when {
+            v.invalidMoodFormat -> "Mood Rating muss eine Zahl sein"
+            v.moodOutOfRange -> "Mood Rating muss zwischen 1 und 10 sein"
+            else -> null
+        }
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(onClick = onNavigateBack) {
+        Button(onClick = onNavigateBack, enabled = !isLoading) {
             Text("Back")
         }
 
         TextField(
             value = title,
-            onValueChange = { title = it },
+            onValueChange = {
+                title = it
+                titleError = null
+                generalError = null
+            },
             label = { Text("Title") },
+            isError = titleError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        titleError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         TextField(
             value = content,
-            onValueChange = { content = it },
+            onValueChange = {
+                content = it
+                contentError = null
+                generalError = null
+            },
             label = { Text("Content") },
+            isError = contentError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        contentError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         TextField(
             value = moodRatingInput,
-            onValueChange = { moodRatingInput = it },
+            onValueChange = {
+                moodRatingInput = it
+                moodError = null
+                generalError = null
+            },
             label = { Text("Mood Rating (1-10, optional)") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = moodError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        moodError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         Button(
+            enabled = !isLoading,
             onClick = {
-                val trimmedTitle = title.trim()
-                val trimmedContent = content.trim()
-                val trimmedMood = moodRatingInput.trim()
+                if (isLoading) return@Button
 
-                if (trimmedTitle.isBlank() || trimmedContent.isBlank()) {
-                    errorMessage = "Bitte Title und Content ausfüllen."
-                    statusMessage = null
-                    return@Button
-                }
+                clearErrors()
+                statusMessage = null
 
-                val moodRating = if (trimmedMood.isBlank()) {
-                    null
-                } else {
-                    trimmedMood.toIntOrNull()
-                }
-
-                if (trimmedMood.isNotBlank() && moodRating == null) {
-                    errorMessage = "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-                    statusMessage = null
-                    return@Button
-                }
-
-                if (moodRating != null && moodRating !in 1..10) {
-                    errorMessage = "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-                    statusMessage = null
-                    return@Button
-                }
+                val input = UpdateEntryInput(
+                    title = title,
+                    content = content,
+                    moodRatingInput = moodRatingInput
+                )
 
                 isLoading = true
-                statusMessage = null
-                errorMessage = null
                 scope.launch {
                     try {
-                        client.updateEntry(
-                            entryId = entryDto.id,
-                            request = UpdateEntryRequest(
-                                title = trimmedTitle,
-                                content = trimmedContent,
-                                moodRating = moodRating
-                            )
-                        )
-                        statusMessage = "Eintrag erfolgreich aktualisiert."
-                        title = ""
-                        content = ""
-                        moodRatingInput = ""
-                        onNavigateBack()
-                    } catch (ex: Exception) {
-                        errorMessage = ex.message ?: "Fehler beim Aktualisieren des Eintrags."
+                        when (val result = updateEntryModel.updateEntry(entryDto.id, input)) {
+                            is UpdateEntryResult.Success -> {
+                                statusMessage = "Eintrag erfolgreich aktualisiert."
+                                onNavigateBack()
+                            }
+
+                            is UpdateEntryResult.ValidationError -> {
+                                applyValidation(result.validation)
+                                generalError = "Bitte Eingaben prüfen."
+                            }
+
+                            is UpdateEntryResult.Failure -> {
+                                generalError = result.message ?: "Fehler beim Aktualisieren des Eintrags."
+                            }
+                        }
                     } finally {
                         isLoading = false
                     }
                 }
-            },
-            enabled = !isLoading
+            }
         ) {
             Text("Eintrag aktualisieren")
         }
@@ -128,12 +158,7 @@ fun UpdateEntryPage(
             CircularProgressIndicator()
         }
 
-        statusMessage?.let { message ->
-            Text(message)
-        }
-
-        errorMessage?.let { message ->
-            Text(message, color = MaterialTheme.colorScheme.error)
-        }
+        statusMessage?.let { Text(it) }
+        generalError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }

@@ -38,21 +38,26 @@ sealed class CreateEntryResult {
 }
 
 class CreateEntryModel(private val client: MoodTrackerClient) {
+
+    companion object {
+        private val MOOD_RANGE = 1..10
+    }
+
     fun prepare(input: CreateEntryInput): CreateEntryPreparation {
         val trimmedTitle = input.title.trim()
         val trimmedContent = input.content.trim()
         val trimmedMood = input.moodRatingInput.trim()
-        val moodRating = if (trimmedMood.isBlank()) {
-            null
-        } else {
-            trimmedMood.toIntOrNull()
+
+        val moodRating = when {
+            trimmedMood.isBlank() -> null
+            else -> trimmedMood.toIntOrNull()
         }
 
         val validation = CreateEntryValidation(
             missingTitle = trimmedTitle.isBlank(),
             missingContent = trimmedContent.isBlank(),
             invalidMoodFormat = trimmedMood.isNotBlank() && moodRating == null,
-            moodOutOfRange = moodRating != null && moodRating !in 1..10
+            moodOutOfRange = moodRating != null && moodRating !in MOOD_RANGE
         )
 
         return if (validation.hasErrors) {
@@ -68,20 +73,11 @@ class CreateEntryModel(private val client: MoodTrackerClient) {
         }
     }
 
-    fun validationMessage(validation: CreateEntryValidation): String? {
-        return when {
-            validation.missingTitle || validation.missingContent ->
-                "Bitte Title und Content ausfüllen."
-            validation.invalidMoodFormat || validation.moodOutOfRange ->
-                "Mood Rating muss eine Zahl zwischen 1 und 10 sein."
-            else -> null
-        }
-    }
-
     suspend fun createEntry(userId: Long, input: CreateEntryInput): CreateEntryResult {
         return when (val prepared = prepare(input)) {
             is CreateEntryPreparation.ValidationError ->
                 CreateEntryResult.ValidationError(prepared.validation)
+
             is CreateEntryPreparation.Ready ->
                 try {
                     val entry = client.createEntry(
@@ -94,7 +90,7 @@ class CreateEntryModel(private val client: MoodTrackerClient) {
                     )
                     CreateEntryResult.Success(entry)
                 } catch (ex: Exception) {
-                    CreateEntryResult.Failure(ex.message)
+                    CreateEntryResult.Failure(ex.message ?: "Eintrag konnte nicht erstellt werden.")
                 }
         }
     }

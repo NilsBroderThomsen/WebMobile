@@ -4,16 +4,22 @@ import api.MoodTrackerClient
 import dto.CreateUserRequest
 import dto.LoginResponse
 import dto.UserDto
+import extension.isValidEmail
+import extension.isValidUsername
 
 data class RegisterInput(val username: String, val email: String, val password: String)
 
 data class RegisterValidation(
     val missingUsername: Boolean,
     val missingEmail: Boolean,
-    val missingPassword: Boolean
+    val missingPassword: Boolean,
+    val invalidEmail: Boolean,
+    val invalidUsername: Boolean,
+    val invalidPassword: Boolean
 ) {
     val hasErrors: Boolean
-        get() = missingUsername || missingEmail || missingPassword
+        get() =
+            missingUsername || missingEmail || missingPassword || invalidEmail || invalidUsername || invalidPassword
 }
 
 sealed class RegisterResult {
@@ -24,10 +30,18 @@ sealed class RegisterResult {
 
 class RegisterModel(private val client: MoodTrackerClient) {
     fun validate(input: RegisterInput): RegisterValidation {
+        val missingUsername = input.username.isBlank()
+        val missingEmail = input.email.isBlank()
+        val missingPassword = input.password.isBlank()
+
         return RegisterValidation(
-            missingUsername = input.username.isBlank(),
-            missingEmail = input.email.isBlank(),
-            missingPassword = input.password.isBlank()
+            missingUsername = missingUsername,
+            missingEmail = missingEmail,
+            missingPassword = missingPassword,
+
+            invalidEmail = !missingEmail && !input.email.isValidEmail,
+            invalidUsername = !missingUsername && !input.username.isValidUsername,
+            invalidPassword = !missingPassword && input.password.length < 8
         )
     }
 
@@ -56,7 +70,7 @@ class RegisterModel(private val client: MoodTrackerClient) {
             )
             RegisterResult.Success(user = user, loginResponse = loginResponse)
         } catch (ex: Exception) {
-            RegisterResult.Failure(ex.message)
+            RegisterResult.Failure(ex.message ?: "Registrierung fehlgeschlagen.")
         }
     }
 }

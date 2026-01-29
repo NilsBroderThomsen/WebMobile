@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 import model.RegisterInput
 import model.RegisterModel
 import model.RegisterResult
+import model.RegisterValidation
 
 @Composable
 fun RegisterPage(
@@ -33,67 +35,134 @@ fun RegisterPage(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
     var statusMessage by remember { mutableStateOf<String?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+
     val scope = rememberCoroutineScope()
     val registerModel = remember(client) { RegisterModel(client) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    fun clearErrors() {
+        usernameError = null
+        emailError = null
+        passwordError = null
+    }
+
+    fun applyValidation(validation: RegisterValidation) {
+        usernameError = when {
+            validation.missingUsername -> "Username erforderlich"
+            validation.invalidUsername -> "Username zu kurz oder ungültig"
+            else -> null
+        }
+
+        emailError = when {
+            validation.missingEmail -> "E-Mail erforderlich"
+            validation.invalidEmail -> "Ungültige E-Mail-Adresse"
+            else -> null
+        }
+
+        passwordError = when {
+            validation.missingPassword -> "Passwort erforderlich"
+            validation.invalidPassword -> "Passwort muss mindestens 8 Zeichen haben"
+            else -> null
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Button(onClick = onNavigateBack) {
             Text("Back")
         }
 
         TextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                usernameError = null
+            },
             label = { Text("Username") },
+            isError = usernameError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        usernameError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = null
+            },
             label = { Text("Email") },
+            isError = emailError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        emailError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
         TextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                passwordError = null
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = passwordError != null,
             modifier = Modifier.fillMaxWidth()
         )
+        passwordError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
 
         Button(
+            enabled = !isLoading,
             onClick = {
-                isLoading = true
+                if (isLoading) return@Button
+
+                clearErrors()
                 statusMessage = null
-                errorMessage = null
+                isLoading = true
+
                 scope.launch {
-                    when (
-                        val result = registerModel.register(
-                            RegisterInput(
-                                username = username,
-                                email = email,
-                                password = password
+                    try {
+                        when (
+                            val result = registerModel.register(
+                                RegisterInput(
+                                    username = username,
+                                    email = email,
+                                    password = password
+                                )
                             )
-                        )
-                    ) {
-                        is RegisterResult.ValidationError -> {
-                            errorMessage = "Bitte alle Felder ausfüllen."
+                        ) {
+                            is RegisterResult.ValidationError -> {
+                                applyValidation(result.validation)
+                            }
+
+                            is RegisterResult.Success -> {
+                                statusMessage =
+                                    "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
+                                onNavigateToEntries(result.loginResponse.userId)
+                            }
+
+                            is RegisterResult.Failure -> {
+                                statusMessage =
+                                    result.message ?: "Registrierung fehlgeschlagen."
+                            }
                         }
-                        is RegisterResult.Success -> {
-                            statusMessage = "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
-                            onNavigateToEntries(result.loginResponse.userId)
-                        }
-                        is RegisterResult.Failure -> {
-                            errorMessage = result.message ?: "Registrierung fehlgeschlagen."
-                        }
+                    } finally {
+                        isLoading = false
                     }
-                    isLoading = false
                 }
-            },
-            enabled = !isLoading
+            }
         ) {
             Text("Register")
         }
@@ -103,12 +172,8 @@ fun RegisterPage(
             CircularProgressIndicator()
         }
 
-        statusMessage?.let { message ->
-            Text(message)
-        }
-
-        errorMessage?.let { message ->
-            Text(message, color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+        statusMessage?.let {
+            Text(it)
         }
     }
 }
