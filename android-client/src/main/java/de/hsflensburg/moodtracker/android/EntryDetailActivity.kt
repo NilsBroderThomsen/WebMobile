@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import dto.EntryDto
+import extension.toEmoji
 
 class EntryDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +37,7 @@ class EntryDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.entryDetailMood).text = if (moodRating == MOOD_UNKNOWN) {
             getString(R.string.entries_mood_unknown)
         } else {
-            getString(R.string.entries_mood_format, moodRating)
+            "${getString(R.string.entries_mood_format, moodRating)} ${moodRating.toEmoji()}"
         }
         findViewById<TextView>(R.id.entryDetailCreatedAt).text = createdAt
         findViewById<TextView>(R.id.entryDetailUpdatedAt).text = updatedAt

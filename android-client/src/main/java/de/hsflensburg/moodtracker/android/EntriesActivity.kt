@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
+import extension.toEmoji
 import kotlinx.coroutines.launch
 
 class EntriesActivity : AppCompatActivity() {
@@ -96,8 +97,9 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun formatEntry(entry: EntryDto): String {
-        val mood = entry.moodRating?.let { getString(R.string.entries_mood_format, it) }
-            ?: getString(R.string.entries_mood_unknown)
+        val mood = entry.moodRating?.let { rating ->
+            "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
+        } ?: getString(R.string.entries_mood_unknown)
         return getString(
             R.string.entries_item_format,
             entry.title,
