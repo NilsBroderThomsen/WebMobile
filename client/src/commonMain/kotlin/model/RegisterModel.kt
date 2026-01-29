@@ -32,7 +32,12 @@ class RegisterModel(private val client: MoodTrackerClient) {
     }
 
     suspend fun register(input: RegisterInput): RegisterResult {
-        val validation = validate(input)
+        val trimmedInput = input.copy(
+            username = input.username.trim(),
+            email = input.email.trim(),
+            password = input.password.trim()
+        )
+        val validation = validate(trimmedInput)
         if (validation.hasErrors) {
             return RegisterResult.ValidationError(validation)
         }
@@ -40,14 +45,14 @@ class RegisterModel(private val client: MoodTrackerClient) {
         return try {
             val user = client.register(
                 CreateUserRequest(
-                    username = input.username,
-                    email = input.email,
-                    password = input.password
+                    username = trimmedInput.username,
+                    email = trimmedInput.email,
+                    password = trimmedInput.password
                 )
             )
             val loginResponse = client.login(
-                username = input.username,
-                password = input.password
+                username = trimmedInput.username,
+                password = trimmedInput.password
             )
             RegisterResult.Success(user = user, loginResponse = loginResponse)
         } catch (ex: Exception) {

@@ -36,9 +36,9 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             passwordLayout.error = null
 
             val input = RegisterInput(
-                username = usernameInput.text?.toString()?.trim().orEmpty(),
-                email = emailInput.text?.toString()?.trim().orEmpty(),
-                password = passwordInput.text?.toString()?.trim().orEmpty()
+                username = usernameInput.text?.toString().orEmpty(),
+                email = emailInput.text?.toString().orEmpty(),
+                password = passwordInput.text?.toString().orEmpty()
             )
 
             val validation = registerModel.validate(input)
