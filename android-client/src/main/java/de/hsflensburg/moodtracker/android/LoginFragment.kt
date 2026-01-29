@@ -32,16 +32,13 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             usernameLayout.error = null
             passwordLayout.error = null
 
-            val username = usernameInput.text?.toString()?.trim().orEmpty()
-            val password = passwordInput.text?.toString()?.trim().orEmpty()
-
             loginButton.isEnabled = false
             viewLifecycleOwner.lifecycleScope.launch {
                 when (
                     val result = loginModel.login(
                         LoginInput(
-                            username = username,
-                            password = password
+                            username = usernameInput.text?.toString().orEmpty(),
+                            password = passwordInput.text?.toString().orEmpty()
                         )
                     )
                 ) {
