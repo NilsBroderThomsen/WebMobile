@@ -1,8 +1,11 @@
 package de.hsflensburg.moodtracker.android
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +26,9 @@ class EntryDetailActivity : AppCompatActivity() {
     private lateinit var createdAtView: TextView
     private lateinit var updatedAtView: TextView
     private lateinit var tagsView: TextView
+    private lateinit var contentContainer: View
+    private lateinit var skeletonContainer: View
+    private var skeletonAnimator: ObjectAnimator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +54,8 @@ class EntryDetailActivity : AppCompatActivity() {
         createdAtView = findViewById(R.id.entryDetailCreatedAt)
         updatedAtView = findViewById(R.id.entryDetailUpdatedAt)
         tagsView = findViewById(R.id.entryDetailTags)
+        contentContainer = findViewById(R.id.entryDetailContentContainer)
+        skeletonContainer = findViewById(R.id.entryDetailSkeleton)
 
         findViewById<Button>(R.id.entryDetailBack).setOnClickListener {
             finish()
@@ -123,6 +131,7 @@ class EntryDetailActivity : AppCompatActivity() {
         if (entryId == INVALID_ID) {
             return
         }
+        setLoading(true)
         lifecycleScope.launch {
             try {
                 val entry = client.getEntryDetails(entryId)
@@ -146,7 +155,29 @@ class EntryDetailActivity : AppCompatActivity() {
                     ex.message ?: getString(R.string.entries_load_failed),
                     Toast.LENGTH_LONG
                 ).show()
+            } finally {
+                setLoading(false)
             }
+        }
+    }
+
+    private fun setLoading(isLoading: Boolean) {
+        if (isLoading) {
+            contentContainer.visibility = View.INVISIBLE
+            skeletonContainer.visibility = View.VISIBLE
+            if (skeletonAnimator == null) {
+                skeletonAnimator = ObjectAnimator.ofFloat(skeletonContainer, View.ALPHA, 0.4f, 1f).apply {
+                    duration = 800
+                    repeatMode = ValueAnimator.REVERSE
+                    repeatCount = ValueAnimator.INFINITE
+                }
+            }
+            skeletonAnimator?.start()
+        } else {
+            contentContainer.visibility = View.VISIBLE
+            skeletonContainer.visibility = View.GONE
+            skeletonAnimator?.cancel()
+            skeletonContainer.alpha = 1f
         }
     }
 
