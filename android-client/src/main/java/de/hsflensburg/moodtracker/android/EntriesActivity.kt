@@ -16,6 +16,7 @@ import extension.EntrySortOrder
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class EntriesActivity : AppCompatActivity() {
@@ -83,6 +84,7 @@ class EntriesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                delay(350)
                 val entries = client.getEntries(userId)
                 if (entries.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
