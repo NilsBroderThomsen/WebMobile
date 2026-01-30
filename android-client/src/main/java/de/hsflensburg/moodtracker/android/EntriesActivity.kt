@@ -3,7 +3,6 @@ package de.hsflensburg.moodtracker.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.ProgressBar
@@ -14,6 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
 import extension.toEmoji
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
@@ -105,11 +108,7 @@ class EntriesActivity : AppCompatActivity() {
         } else {
             entries.sortedByDescending { it.createdAt }
         }
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            sortedEntries.map { entry -> formatEntry(entry) }
-        )
+        listView.adapter = EntriesAdapter(this, sortedEntries)
         listView.setOnItemClickListener { _, _, position, _ ->
             val entry = sortedEntries[position]
             val intent = EntryDetailActivity.newIntent(this, entry)
@@ -123,16 +122,64 @@ class EntriesActivity : AppCompatActivity() {
         )
     }
 
-    private fun formatEntry(entry: EntryDto): String {
-        val mood = entry.moodRating?.let { rating ->
+    private fun formatMood(entry: EntryDto): String {
+        return entry.moodRating?.let { rating ->
             "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
         } ?: getString(R.string.entries_mood_unknown)
-        return getString(
-            R.string.entries_item_format,
-            entry.title,
-            mood,
-            entry.createdAt
-        )
+    }
+
+    private fun formatTimestamp(rawTimestamp: String): String {
+        val normalized = rawTimestamp.replace("T ", "T")
+        return runCatching {
+            val localDateTime = Instant.parse(normalized)
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+            val date = localDateTime.date
+            val time = localDateTime.time
+            val weekday = when (date.dayOfWeek) {
+                DayOfWeek.MONDAY -> "Mo"
+                DayOfWeek.TUESDAY -> "Di"
+                DayOfWeek.WEDNESDAY -> "Mi"
+                DayOfWeek.THURSDAY -> "Do"
+                DayOfWeek.FRIDAY -> "Fr"
+                DayOfWeek.SATURDAY -> "Sa"
+                DayOfWeek.SUNDAY -> "So"
+            }
+            buildString {
+                append(weekday)
+                append(", ")
+                append(date.dayOfMonth.toString().padStart(2, '0'))
+                append('.')
+                append(date.monthNumber.toString().padStart(2, '0'))
+                append('.')
+                append(date.year)
+                append(" • ")
+                append(time.hour.toString().padStart(2, '0'))
+                append(':')
+                append(time.minute.toString().padStart(2, '0'))
+            }
+        }.getOrElse { rawTimestamp }
+    }
+
+    private class EntriesAdapter(
+        activity: EntriesActivity,
+        entries: List<EntryDto>
+    ) : android.widget.ArrayAdapter<EntryDto>(activity, R.layout.list_item_entry, entries) {
+        private val inflater = activity.layoutInflater
+
+        override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+            val view = convertView ?: inflater.inflate(R.layout.list_item_entry, parent, false)
+            val entry = getItem(position) ?: return view
+            val titleView = view.findViewById<TextView>(R.id.entryTitle)
+            val timestampView = view.findViewById<TextView>(R.id.entryTimestamp)
+            val mood = (context as EntriesActivity).formatMood(entry)
+            titleView.text = context.getString(
+                R.string.entries_item_title_format,
+                entry.title,
+                mood
+            )
+            timestampView.text = (context as EntriesActivity).formatTimestamp(entry.createdAt)
+            return view
+        }
     }
 
     companion object {
