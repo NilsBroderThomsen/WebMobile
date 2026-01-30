@@ -14,8 +14,9 @@ import dto.EntryDto
 import extension.toEmoji
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
 class EntriesActivity : AppCompatActivity() {
@@ -147,9 +148,9 @@ class EntriesActivity : AppCompatActivity() {
             buildString {
                 append(weekday)
                 append(", ")
-                append(date.dayOfMonth.toString().padStart(2, '0'))
+                append(date.day.toString().padStart(2, '0'))
                 append('.')
-                append(date.monthNumber.toString().padStart(2, '0'))
+                append(date.month.number.toString().padStart(2, '0'))
                 append('.')
                 append(date.year)
                 append(" • ")
