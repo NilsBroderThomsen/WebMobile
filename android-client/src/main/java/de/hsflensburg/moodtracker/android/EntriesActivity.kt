@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
+import extension.EntrySortOrder
+import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
 import extension.toEmoji
 import kotlinx.coroutines.launch
@@ -100,11 +102,9 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun renderEntries(listView: ListView, entries: List<EntryDto>, ascending: Boolean) {
-        val sortedEntries = if (ascending) {
-            entries.sortedBy { it.createdAt }
-        } else {
-            entries.sortedByDescending { it.createdAt }
-        }
+        val sortOrder = if (ascending) EntrySortOrder.ASC else EntrySortOrder.DESC
+        val sortedEntries = entries.sortedByCreatedAt(sortOrder)
+
         listView.adapter = EntriesAdapter(this, sortedEntries)
         listView.setOnItemClickListener { _, _, position, _ ->
             val entry = sortedEntries[position]

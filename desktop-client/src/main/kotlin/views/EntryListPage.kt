@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
+import extension.EntrySortOrder
+import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
 import extension.toEmoji
 import kotlinx.coroutines.launch
@@ -116,12 +118,9 @@ fun EntryListPage(
                 )
             }
 
-            val sortedEntries = remember(entries, isAscending) {
-                if (isAscending) {
-                    entries.sortedBy { it.createdAt }
-                } else {
-                    entries.sortedByDescending { it.createdAt }
-                }
+            val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
+            val sortedEntries = remember(entries, sortOrder) {
+                entries.sortedByCreatedAt(sortOrder)
             }
 
             if (!isLoading && sortedEntries.isEmpty()) {
