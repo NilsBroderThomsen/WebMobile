@@ -39,6 +39,8 @@
         android:layout_height="0dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
+        android:divider="?attr/colorOutline"
+        android:dividerHeight="1dp"
         app:layout_constraintBottom_toTopOf="@id/entriesCreateBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,6 +73,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/entriesToolbarBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="entriesLogoutButton,entriesSortToggle" />
+
     <View
         android:id="@+id/entriesListDivider"
         android:layout_width="0dp"
@@ -79,7 +88,7 @@
         android:background="?attr/colorOutline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/entriesSortToggle" />
+        app:layout_constraintTop_toBottomOf="@id/entriesToolbarBarrier" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/entriesCreateBar"
