@@ -1,14 +1,20 @@
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import api.MoodTrackerClient
 import config.AppConfig
 import dto.EntryDto
 import views.*
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "Mood Tracker") {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Mood Tracker",
+        state = rememberWindowState(size = DpSize(800.dp, 700.dp))) {
         App()
     }
 }
