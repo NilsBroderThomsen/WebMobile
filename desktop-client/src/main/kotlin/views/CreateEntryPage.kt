@@ -77,7 +77,7 @@ fun CreateEntryPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -91,6 +91,63 @@ fun CreateEntryPage(
                 )
             }
 
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(onClick = onNavigateBack, enabled = !isLoading) {
+                    Text("Back")
+                }
+                Button(
+                    enabled = !isLoading,
+                    onClick = {
+                        if (isLoading) return@Button
+
+                        clearErrors()
+                        statusMessage = null
+
+                        val input = CreateEntryInput(
+                            title = title,
+                            content = content,
+                            moodRatingInput = moodRatingInput
+                        )
+
+                        isLoading = true
+                        scope.launch {
+                            try {
+                                when (val result = createEntryModel.createEntry(userId, input)) {
+                                    is CreateEntryResult.Success -> {
+                                        statusMessage = "Eintrag wurde erstellt."
+                                        title = ""
+                                        content = ""
+                                        moodRatingInput = ""
+                                        onNavigateBack()
+                                    }
+
+                                    is CreateEntryResult.ValidationError -> {
+                                        applyValidation(result.validation)
+                                        generalError = "Bitte Eingaben prüfen."
+                                    }
+
+                                    is CreateEntryResult.Failure -> {
+                                        generalError =
+                                            result.message ?: "Eintrag konnte nicht erstellt werden."
+                                    }
+                                }
+                            } finally {
+                                isLoading = false
+                            }
+                        }
+                    }
+                ) {
+                    Text("Save entry")
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (isLoading) {
+                    CircularProgressIndicator()
+                }
+            }
+
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -99,7 +156,7 @@ fun CreateEntryPage(
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
@@ -120,7 +177,7 @@ fun CreateEntryPage(
                                 if (titleError != null) {
                                     Text(titleError ?: "")
                                 } else {
-                                    Text("Keep it short and descriptive.")
+                                    Text("Short and descriptive works best.")
                                 }
                             }
                         )
@@ -139,7 +196,7 @@ fun CreateEntryPage(
                                 if (contentError != null) {
                                     Text(contentError ?: "")
                                 } else {
-                                    Text("What stood out today?")
+                                    Text("Capture the highlights from today.")
                                 }
                             }
                         )
@@ -150,6 +207,11 @@ fun CreateEntryPage(
                             text = "Mood rating",
                             style = MaterialTheme.typography.titleMedium
                         )
+                        Text(
+                            text = "Optional: rate how you felt from 1 to 10.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         OutlinedTextField(
                             value = moodRatingInput,
                             onValueChange = {
@@ -157,15 +219,13 @@ fun CreateEntryPage(
                                 moodError = null
                                 generalError = null
                             },
-                            label = { Text("Rating (1-10, optional)") },
+                            label = { Text("Rating (1-10)") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             isError = moodError != null,
                             modifier = Modifier.fillMaxWidth(),
                             supportingText = {
                                 if (moodError != null) {
                                     Text(moodError ?: "")
-                                } else {
-                                    Text("Leave blank if you prefer to skip.")
                                 }
                             }
                         )
@@ -184,63 +244,6 @@ fun CreateEntryPage(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        OutlinedButton(onClick = onNavigateBack, enabled = !isLoading) {
-                            Text("Back")
-                        }
-                        Button(
-                            enabled = !isLoading,
-                            onClick = {
-                                if (isLoading) return@Button
-
-                                clearErrors()
-                                statusMessage = null
-
-                                val input = CreateEntryInput(
-                                    title = title,
-                                    content = content,
-                                    moodRatingInput = moodRatingInput
-                                )
-
-                                isLoading = true
-                                scope.launch {
-                                    try {
-                                        when (val result = createEntryModel.createEntry(userId, input)) {
-                                            is CreateEntryResult.Success -> {
-                                                statusMessage = "Eintrag wurde erstellt."
-                                                title = ""
-                                                content = ""
-                                                moodRatingInput = ""
-                                                onNavigateBack()
-                                            }
-
-                                            is CreateEntryResult.ValidationError -> {
-                                                applyValidation(result.validation)
-                                                generalError = "Bitte Eingaben prüfen."
-                                            }
-
-                                            is CreateEntryResult.Failure -> {
-                                                generalError =
-                                                    result.message ?: "Eintrag konnte nicht erstellt werden."
-                                            }
-                                        }
-                                    } finally {
-                                        isLoading = false
-                                    }
-                                }
-                            }
-                        ) {
-                            Text("Save entry")
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        if (isLoading) {
-                            CircularProgressIndicator()
-                        }
                     }
                 }
             }
