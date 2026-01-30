@@ -152,7 +152,7 @@ class EntriesActivity : AppCompatActivity() {
                 append(date.monthNumber.toString().padStart(2, '0'))
                 append('.')
                 append(date.year)
-                append(' ')
+                append(" • ")
                 append(time.hour.toString().padStart(2, '0'))
                 append(':')
                 append(time.minute.toString().padStart(2, '0'))
