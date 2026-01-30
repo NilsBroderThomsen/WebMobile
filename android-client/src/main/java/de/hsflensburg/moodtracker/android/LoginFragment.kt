@@ -20,6 +20,7 @@ import model.LoginValidation
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
     private val client = MoodTrackerClientProvider.client
+    private val session = MoodTrackerClientProvider.session
     private val loginModel by lazy { LoginModel(client) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -99,9 +100,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
-                                putExtra(EntriesActivity.EXTRA_USER_ID, result.loginResponse.userId)
-                            }
+                            session.requireAuthenticatedUserId()
+                            val intent = Intent(requireContext(), EntriesActivity::class.java)
                             startActivity(intent)
                             activity?.finish()
                         }

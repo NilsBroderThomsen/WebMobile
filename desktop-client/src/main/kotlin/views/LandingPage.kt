@@ -23,8 +23,8 @@ import api.MoodTrackerClient
 @Composable
 fun LandingPage(
     client: MoodTrackerClient,
-    onLoginSuccess: (Long) -> Unit,
-    onRegisterSuccess: (Long) -> Unit
+    onLoginSuccess: () -> Unit,
+    onRegisterSuccess: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
