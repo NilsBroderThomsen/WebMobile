@@ -27,6 +27,7 @@ class EntriesActivity : AppCompatActivity() {
     private var userId: Long = -1L
     private lateinit var listView: ListView
     private lateinit var emptyView: TextView
+    private lateinit var skeletonView: LinearLayout
     private lateinit var loadingContainer: LinearLayout
     private lateinit var loadingView: ProgressBar
     private lateinit var sortToggle: Button
@@ -44,6 +45,7 @@ class EntriesActivity : AppCompatActivity() {
 
         listView = findViewById(R.id.entriesList)
         emptyView = findViewById(R.id.entriesEmpty)
+        skeletonView = findViewById(R.id.entriesSkeleton)
         loadingContainer = findViewById(R.id.entriesLoadingContainer)
         loadingView = findViewById(R.id.entriesLoading)
         sortToggle = findViewById(R.id.entriesSortToggle)
@@ -78,6 +80,7 @@ class EntriesActivity : AppCompatActivity() {
     private fun loadEntries() {
         loadingContainer.visibility = View.VISIBLE
         loadingView.visibility = View.VISIBLE
+        skeletonView.visibility = View.VISIBLE
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
         sortToggle.visibility = View.GONE
@@ -106,6 +109,7 @@ class EntriesActivity : AppCompatActivity() {
             } finally {
                 loadingView.visibility = View.GONE
                 loadingContainer.visibility = View.GONE
+                skeletonView.visibility = View.GONE
             }
         }
     }
