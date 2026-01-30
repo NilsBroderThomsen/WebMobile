@@ -20,6 +20,7 @@ import model.RegisterValidation
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
     private val client = MoodTrackerClientProvider.client
+    private val session = MoodTrackerClientProvider.session
     private val registerModel by lazy { RegisterModel(client) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -116,12 +117,8 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            val intent = Intent(requireContext(), EntriesActivity::class.java).apply {
-                                putExtra(
-                                    EntriesActivity.EXTRA_USER_ID,
-                                    result.loginResponse.userId
-                                )
-                            }
+                            session.requireAuthenticatedUserId()
+                            val intent = Intent(requireContext(), EntriesActivity::class.java)
                             startActivity(intent)
                             activity?.finish()
                         }

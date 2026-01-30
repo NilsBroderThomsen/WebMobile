@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
+    private val session = MoodTrackerClientProvider.session
     private var currentEntries: List<EntryDto> = emptyList()
     private var isAscending = true
     private var userId: Long = -1L
@@ -31,7 +32,7 @@ class EntriesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entries)
 
-        userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
+        userId = session.authenticatedUserId ?: -1L
         if (userId <= 0L) {
             Toast.makeText(this, getString(R.string.entries_missing_user), Toast.LENGTH_LONG).show()
             finish()
@@ -46,10 +47,11 @@ class EntriesActivity : AppCompatActivity() {
         val logoutButton = findViewById<Button>(R.id.entriesLogoutButton)
 
         createButton.setOnClickListener {
-            startActivity(CreateEntryActivity.newIntent(this, userId))
+            startActivity(CreateEntryActivity.newIntent(this))
         }
 
         logoutButton.setOnClickListener {
+            session.logout()
             val intent = Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             }
@@ -148,7 +150,4 @@ class EntriesActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        const val EXTRA_USER_ID = "extra_user_id"
-    }
 }

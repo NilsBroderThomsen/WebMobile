@@ -29,7 +29,7 @@ import model.RegisterValidation
 @Composable
 fun RegisterPage(
     client: MoodTrackerClient,
-    onNavigateToEntries: (Long) -> Unit,
+    onNavigateToEntries: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var username by remember { mutableStateOf("") }
@@ -147,7 +147,7 @@ fun RegisterPage(
                             is RegisterResult.Success -> {
                                 statusMessage =
                                     "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
-                                onNavigateToEntries(result.loginResponse.userId)
+                                onNavigateToEntries()
                             }
 
                             is RegisterResult.Failure -> {

@@ -17,12 +17,13 @@ import model.CreateEntryResult
 
 class CreateEntryActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
+    private val session = MoodTrackerClientProvider.session
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_entry)
 
-        val userId = intent.getLongExtra(EXTRA_USER_ID, -1L)
+        val userId = session.authenticatedUserId ?: -1L
         if (userId <= 0L) {
             Toast.makeText(this, getString(R.string.entries_missing_user), Toast.LENGTH_LONG).show()
             finish()
@@ -119,12 +120,8 @@ class CreateEntryActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val EXTRA_USER_ID = "extra_user_id"
-
-        fun newIntent(context: Context, userId: Long): Intent {
-            return Intent(context, CreateEntryActivity::class.java).apply {
-                putExtra(EXTRA_USER_ID, userId)
-            }
+        fun newIntent(context: Context): Intent {
+            return Intent(context, CreateEntryActivity::class.java)
         }
     }
 }

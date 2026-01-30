@@ -8,6 +8,7 @@ import androidx.compose.ui.window.rememberWindowState
 import api.MoodTrackerClient
 import config.AppConfig
 import dto.EntryDto
+import session.AuthSession
 import views.*
 
 fun main() = application {
@@ -22,8 +23,8 @@ fun main() = application {
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
-    var authUserId by remember { mutableStateOf<Long?>(null) }
     val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
+    val session = remember(client) { AuthSession(client) }
     DisposableEffect(Unit) {
         onDispose {
             client.close()
@@ -34,18 +35,16 @@ fun App() {
             Screen.Landing -> {
                 LandingPage(
                     client = client,
-                    onLoginSuccess = { userId ->
-                        authUserId = userId
+                    onLoginSuccess = {
                         currentScreen = Screen.Entries
                     },
-                    onRegisterSuccess = { userId ->
-                        authUserId = userId
+                    onRegisterSuccess = {
                         currentScreen = Screen.Entries
                     }
                 )
             }
             Screen.Home -> {
-                val userId = authUserId
+                val userId = session.authenticatedUserId
                 if (userId == null) {
                     LaunchedEffect(Unit) {
                         currentScreen = Screen.Landing
@@ -59,15 +58,14 @@ fun App() {
                             currentScreen = Screen.CreateEntry
                         },
                         onLogout = {
-                            client.logout()
-                            authUserId = null
+                            session.logout()
                             currentScreen = Screen.Landing
                         }
                     )
                 }
             }
             Screen.Entries -> {
-                val userId = authUserId
+                val userId = session.authenticatedUserId
                 if (userId == null) {
                     LaunchedEffect(Unit) {
                         currentScreen = Screen.Landing
@@ -92,7 +90,7 @@ fun App() {
                 }
             }
             Screen.CreateEntry -> {
-                val userId = authUserId
+                val userId = session.authenticatedUserId
                 if (userId == null) {
                     LaunchedEffect(Unit) {
                         currentScreen = Screen.Landing

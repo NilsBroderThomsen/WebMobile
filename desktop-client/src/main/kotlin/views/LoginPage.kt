@@ -29,7 +29,7 @@ import model.LoginValidation
 @Composable
 fun LoginPage(
     client: MoodTrackerClient,
-    onNavigateToEntries: (Long) -> Unit,
+    onNavigateToEntries: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val loginModel = remember(client) { LoginModel(client) }
@@ -119,7 +119,7 @@ fun LoginPage(
 
                             is LoginResult.Success -> {
                                 statusMessage = "Login erfolgreich. Willkommen, ${username.trim()}!"
-                                onNavigateToEntries(result.loginResponse.userId)
+                                onNavigateToEntries()
                             }
 
                             is LoginResult.Failure -> {
