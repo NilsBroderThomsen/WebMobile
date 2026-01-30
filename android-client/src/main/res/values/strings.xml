@@ -34,6 +34,7 @@
     <string name="entries_sort_oldest">Sortierung: Älteste zuerst</string>
     <string name="entries_create_button">Neuen Eintrag erstellen</string>
     <string name="entries_logout_button">Logout</string>
+    <string name="entries_loading_text">Einträge werden geladen…</string>
     <string name="entry_detail_content_label">Content</string>
     <string name="entry_detail_meta_label">Details</string>
     <string name="entry_detail_back">Back</string>

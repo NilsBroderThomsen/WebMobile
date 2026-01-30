@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ListView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -25,6 +26,7 @@ class EntriesActivity : AppCompatActivity() {
     private var userId: Long = -1L
     private lateinit var listView: ListView
     private lateinit var emptyView: TextView
+    private lateinit var loadingContainer: LinearLayout
     private lateinit var loadingView: ProgressBar
     private lateinit var sortToggle: Button
 
@@ -41,6 +43,7 @@ class EntriesActivity : AppCompatActivity() {
 
         listView = findViewById(R.id.entriesList)
         emptyView = findViewById(R.id.entriesEmpty)
+        loadingContainer = findViewById(R.id.entriesLoadingContainer)
         loadingView = findViewById(R.id.entriesLoading)
         sortToggle = findViewById(R.id.entriesSortToggle)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
@@ -72,6 +75,7 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun loadEntries() {
+        loadingContainer.visibility = View.VISIBLE
         loadingView.visibility = View.VISIBLE
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
@@ -99,6 +103,7 @@ class EntriesActivity : AppCompatActivity() {
                 emptyView.visibility = View.VISIBLE
             } finally {
                 loadingView.visibility = View.GONE
+                loadingContainer.visibility = View.GONE
             }
         }
     }

@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 class MoodTrackerClient(private val baseUrl: String) {
@@ -74,6 +75,8 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
+        delay(750)
+
         if (authToken == null) {
             throw IllegalStateException("Login erforderlich.")
         }
@@ -101,6 +104,8 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntryDetails(entryId: Long): EntryDto {
+        delay(750)
+
         val url = "$baseUrl/api/entries/$entryId"
         try {
             val response = client.get(url)
