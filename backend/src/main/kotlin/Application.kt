@@ -13,7 +13,6 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
-import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.calllogging.*
@@ -34,8 +33,6 @@ import org.kodein.di.ktor.closestDI
 import org.kodein.di.ktor.di
 import org.slf4j.event.Level
 import security.PasswordHasher
-import service.ExportService
-import service.ImportService
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -107,8 +104,6 @@ fun Application.configureRouting() {
     }
 
     routing {
-        staticResources("/static", "static")
-
         getUserEntries(repository)
         getEntryDetails(repository)
         postCreateUser(repository)
@@ -116,11 +111,6 @@ fun Application.configureRouting() {
         postCreateEntry(repository)
         putUpdateEntry(repository)
         deleteEntry(repository)
-
-        exportJson(repository)
-        exportCsv(repository)
-        importJson(repository)
-        importCsv(repository)
     }
 }
 
@@ -551,99 +541,4 @@ private fun validateUserPayload(
     }
 
     return errors
-}
-
-private fun Route.exportJson(repository: MoodTrackerDatabaseRepository) {
-    val exportService = ExportService(repository)
-    get("/api/users/{userId}/export/json") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
-                )
-            )
-            return@get
-        }
-
-        val exportJson = exportService.exportToJson(UserId(userId))
-        call.respondText(
-            exportJson,
-            ContentType.Application.Json
-        )
-    }
-}
-
-private fun Route.exportCsv(repository: MoodTrackerDatabaseRepository) {
-    val exportService = ExportService(repository)
-    get("/api/users/{userId}/export/csv") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-        if (userId == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid userId"
-                )
-            )
-            return@get
-        }
-
-        val exportCsv = exportService.exportToCsv(UserId(userId))
-        val filename = "moodtracker-entries-$userId.csv"
-        call.response.headers.append(
-            HttpHeaders.ContentDisposition,
-            ContentDisposition.Attachment.withParameter(ContentDisposition.Parameters.FileName, filename).toString()
-        )
-        call.respondText(
-            exportCsv,
-            ContentType.Text.CSV
-        )
-    }
-}
-
-private fun Route.importJson(repository: MoodTrackerDatabaseRepository) {
-    post("/api/users/{userId}/import/json") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-            ?: return@post call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse("Bad Request", "Invalid userId")
-            )
-
-        val jsonPayload = call.receiveText()
-        val importService = ImportService(repository)
-        val result = importService.importFromJson(jsonPayload, UserId(userId))
-
-        val status = if (result.failed > 0) {
-            HttpStatusCode.PartialContent
-        } else {
-            HttpStatusCode.OK
-        }
-
-        call.respond(status, result)
-    }
-}
-
-private fun Route.importCsv(repository: MoodTrackerDatabaseRepository) {
-    post("/api/users/{userId}/import/csv") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-            ?: return@post call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse("Bad Request", "Invalid userId")
-            )
-
-        val csvPayload = call.receiveText()
-        val importService = ImportService(repository)
-        val result = importService.importFromCsv(csvPayload, UserId(userId))
-
-        val status = if (result.failed > 0) {
-            HttpStatusCode.PartialContent
-        } else {
-            HttpStatusCode.OK
-        }
-
-        call.respond(status, result)
-    }
 }
