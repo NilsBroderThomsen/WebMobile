@@ -11,12 +11,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
+import extension.formatEntryTimestamp
 import extension.toEmoji
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
@@ -128,38 +125,6 @@ class EntriesActivity : AppCompatActivity() {
         } ?: getString(R.string.entries_mood_unknown)
     }
 
-    private fun formatTimestamp(rawTimestamp: String): String {
-        val normalized = rawTimestamp.replace("T ", "T")
-        return runCatching {
-            val localDateTime = Instant.parse(normalized)
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-            val date = localDateTime.date
-            val time = localDateTime.time
-            val weekday = when (date.dayOfWeek) {
-                DayOfWeek.MONDAY -> "Mo"
-                DayOfWeek.TUESDAY -> "Di"
-                DayOfWeek.WEDNESDAY -> "Mi"
-                DayOfWeek.THURSDAY -> "Do"
-                DayOfWeek.FRIDAY -> "Fr"
-                DayOfWeek.SATURDAY -> "Sa"
-                DayOfWeek.SUNDAY -> "So"
-            }
-            buildString {
-                append(weekday)
-                append(", ")
-                append(date.dayOfMonth.toString().padStart(2, '0'))
-                append('.')
-                append(date.monthNumber.toString().padStart(2, '0'))
-                append('.')
-                append(date.year)
-                append(" • ")
-                append(time.hour.toString().padStart(2, '0'))
-                append(':')
-                append(time.minute.toString().padStart(2, '0'))
-            }
-        }.getOrElse { rawTimestamp }
-    }
-
     private class EntriesAdapter(
         activity: EntriesActivity,
         entries: List<EntryDto>
@@ -177,7 +142,7 @@ class EntriesActivity : AppCompatActivity() {
                 entry.title,
                 mood
             )
-            timestampView.text = (context as EntriesActivity).formatTimestamp(entry.createdAt)
+            timestampView.text = entry.createdAt.formatEntryTimestamp()
             return view
         }
     }
