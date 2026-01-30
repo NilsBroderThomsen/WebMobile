@@ -13,6 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
 import extension.toEmoji
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
@@ -124,6 +128,16 @@ class EntriesActivity : AppCompatActivity() {
         } ?: getString(R.string.entries_mood_unknown)
     }
 
+    private fun formatTimestamp(rawTimestamp: String): String {
+        val formatter = DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy HH:mm", Locale.GERMANY)
+        val normalized = rawTimestamp.replace("T ", "T")
+        return runCatching {
+            Instant.parse(normalized)
+                .atZone(ZoneId.systemDefault())
+                .format(formatter)
+        }.getOrElse { rawTimestamp }
+    }
+
     private class EntriesAdapter(
         activity: EntriesActivity,
         entries: List<EntryDto>
@@ -141,7 +155,7 @@ class EntriesActivity : AppCompatActivity() {
                 entry.title,
                 mood
             )
-            timestampView.text = entry.createdAt
+            timestampView.text = (context as EntriesActivity).formatTimestamp(entry.createdAt)
             return view
         }
     }
