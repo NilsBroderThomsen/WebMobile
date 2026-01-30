@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ListView
-import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,9 +23,8 @@ class EntriesActivity : AppCompatActivity() {
     private var isAscending = true
     private var userId: Long = -1L
     private lateinit var listView: ListView
+    private lateinit var loadingListView: ListView
     private lateinit var emptyView: TextView
-    private lateinit var loadingContainer: LinearLayout
-    private lateinit var loadingView: ProgressBar
     private lateinit var sortToggle: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,12 +39,13 @@ class EntriesActivity : AppCompatActivity() {
         }
 
         listView = findViewById(R.id.entriesList)
+        loadingListView = findViewById(R.id.entriesLoadingContainer)
         emptyView = findViewById(R.id.entriesEmpty)
-        loadingContainer = findViewById(R.id.entriesLoadingContainer)
-        loadingView = findViewById(R.id.entriesLoading)
         sortToggle = findViewById(R.id.entriesSortToggle)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
         val logoutButton = findViewById<Button>(R.id.entriesLogoutButton)
+        val skeletonRows = List(6) { it }
+        loadingListView.adapter = SkeletonEntriesAdapter(this, skeletonRows)
 
         createButton.setOnClickListener {
             startActivity(CreateEntryActivity.newIntent(this))
@@ -75,8 +73,7 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun loadEntries() {
-        loadingContainer.visibility = View.VISIBLE
-        loadingView.visibility = View.VISIBLE
+        loadingListView.visibility = View.VISIBLE
         listView.visibility = View.GONE
         emptyView.visibility = View.GONE
         sortToggle.visibility = View.GONE
@@ -102,8 +99,7 @@ class EntriesActivity : AppCompatActivity() {
                 ).show()
                 emptyView.visibility = View.VISIBLE
             } finally {
-                loadingView.visibility = View.GONE
-                loadingContainer.visibility = View.GONE
+                loadingListView.visibility = View.GONE
             }
         }
     }
@@ -152,6 +148,17 @@ class EntriesActivity : AppCompatActivity() {
             )
             timestampView.text = entry.createdAt.toDisplayTimestamp()
             return view
+        }
+    }
+
+    private class SkeletonEntriesAdapter(
+        activity: EntriesActivity,
+        entries: List<Int>
+    ) : android.widget.ArrayAdapter<Int>(activity, R.layout.list_item_entry_skeleton, entries) {
+        private val inflater = activity.layoutInflater
+
+        override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+            return convertView ?: inflater.inflate(R.layout.list_item_entry_skeleton, parent, false)
         }
     }
 
