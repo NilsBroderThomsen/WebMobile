@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
+import extension.displayMood
 import extension.toDisplayTimestamp
-import extension.toEmoji
 
 @Composable
 fun EntryDetailsPage(
@@ -131,11 +131,8 @@ fun EntryDetailsPage(
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                val moodText = entry.moodRating?.let { rating ->
-                                    "$rating ${rating.toEmoji()}"
-                                } ?: "—"
                                 Text(
-                                    text = moodText.trim(),
+                                    text = entry.displayMood(unknownText = "—"),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }

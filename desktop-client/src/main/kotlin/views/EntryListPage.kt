@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
-import extension.toEmoji
 import kotlinx.coroutines.launch
 
 @Composable
@@ -175,7 +175,7 @@ fun EntryListPage(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = "${entry.moodRating ?: "—"} ${entry.moodRating?.toEmoji() ?: ""}".trim(),
+                                        text = entry.displayMood(unknownText = "—"),
                                         style = MaterialTheme.typography.titleLarge
                                     )
                                 }
