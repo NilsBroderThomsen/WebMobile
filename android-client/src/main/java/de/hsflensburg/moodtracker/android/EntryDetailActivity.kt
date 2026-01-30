@@ -1,6 +1,5 @@
 package de.hsflensburg.moodtracker.android
 
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
@@ -26,9 +25,14 @@ class EntryDetailActivity : AppCompatActivity() {
     private lateinit var createdAtView: TextView
     private lateinit var updatedAtView: TextView
     private lateinit var tagsView: TextView
-    private lateinit var contentContainer: View
-    private lateinit var skeletonContainer: View
-    private var skeletonAnimator: ObjectAnimator? = null
+    private lateinit var titleSkeleton: View
+    private lateinit var moodSkeleton: View
+    private lateinit var contentSkeleton: View
+    private lateinit var createdAtSkeleton: View
+    private lateinit var updatedAtSkeleton: View
+    private lateinit var tagsSkeleton: View
+    private val skeletonViews = mutableListOf<View>()
+    private var skeletonAnimator: ValueAnimator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +58,23 @@ class EntryDetailActivity : AppCompatActivity() {
         createdAtView = findViewById(R.id.entryDetailCreatedAt)
         updatedAtView = findViewById(R.id.entryDetailUpdatedAt)
         tagsView = findViewById(R.id.entryDetailTags)
-        contentContainer = findViewById(R.id.entryDetailContentContainer)
-        skeletonContainer = findViewById(R.id.entryDetailSkeleton)
+        titleSkeleton = findViewById(R.id.entryDetailTitleSkeleton)
+        moodSkeleton = findViewById(R.id.entryDetailMoodSkeleton)
+        contentSkeleton = findViewById(R.id.entryDetailContentSkeleton)
+        createdAtSkeleton = findViewById(R.id.entryDetailCreatedAtSkeleton)
+        updatedAtSkeleton = findViewById(R.id.entryDetailUpdatedAtSkeleton)
+        tagsSkeleton = findViewById(R.id.entryDetailTagsSkeleton)
+        skeletonViews.clear()
+        skeletonViews.addAll(
+            listOf(
+                titleSkeleton,
+                moodSkeleton,
+                contentSkeleton,
+                createdAtSkeleton,
+                updatedAtSkeleton,
+                tagsSkeleton
+            )
+        )
 
         findViewById<Button>(R.id.entryDetailBack).setOnClickListener {
             finish()
@@ -163,21 +182,37 @@ class EntryDetailActivity : AppCompatActivity() {
 
     private fun setLoading(isLoading: Boolean) {
         if (isLoading) {
-            contentContainer.visibility = View.INVISIBLE
-            skeletonContainer.visibility = View.VISIBLE
+            titleView.visibility = View.INVISIBLE
+            moodView.visibility = View.INVISIBLE
+            contentView.visibility = View.INVISIBLE
+            createdAtView.visibility = View.INVISIBLE
+            updatedAtView.visibility = View.INVISIBLE
+            tagsView.visibility = View.INVISIBLE
+            skeletonViews.forEach { it.visibility = View.VISIBLE }
             if (skeletonAnimator == null) {
-                skeletonAnimator = ObjectAnimator.ofFloat(skeletonContainer, View.ALPHA, 0.4f, 1f).apply {
+                skeletonAnimator = ValueAnimator.ofFloat(0.4f, 1f).apply {
                     duration = 800
                     repeatMode = ValueAnimator.REVERSE
                     repeatCount = ValueAnimator.INFINITE
+                    addUpdateListener { animator ->
+                        val alphaValue = animator.animatedValue as Float
+                        skeletonViews.forEach { it.alpha = alphaValue }
+                    }
                 }
             }
             skeletonAnimator?.start()
         } else {
-            contentContainer.visibility = View.VISIBLE
-            skeletonContainer.visibility = View.GONE
+            titleView.visibility = View.VISIBLE
+            moodView.visibility = View.VISIBLE
+            contentView.visibility = View.VISIBLE
+            createdAtView.visibility = View.VISIBLE
+            updatedAtView.visibility = View.VISIBLE
+            tagsView.visibility = View.VISIBLE
             skeletonAnimator?.cancel()
-            skeletonContainer.alpha = 1f
+            skeletonViews.forEach {
+                it.visibility = View.GONE
+                it.alpha = 1f
+            }
         }
     }
 
