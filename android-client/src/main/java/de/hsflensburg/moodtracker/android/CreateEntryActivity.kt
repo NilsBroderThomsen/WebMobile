@@ -37,6 +37,7 @@ class CreateEntryActivity : AppCompatActivity() {
         val contentInput = findViewById<EditText>(R.id.createEntryContent)
         val moodInput = findViewById<EditText>(R.id.createEntryMood)
 
+        val backButton = findViewById<Button>(R.id.createEntryBack)
         val saveButton = findViewById<Button>(R.id.createEntrySave)
 
         val createEntryModel = CreateEntryModel(client)
@@ -57,16 +58,17 @@ class CreateEntryActivity : AppCompatActivity() {
                 else -> null
             }
             moodLayout.error = when {
-                validation.invalidMoodFormat -> getString(R.string.error_invalid_mood_format) // z.B. "Bitte Zahl eingeben"
-                validation.moodOutOfRange -> getString(R.string.error_invalid_mood_range) // z.B. "1 bis 10"
+                validation.invalidMoodFormat -> getString(R.string.error_invalid_mood_format)
+                validation.moodOutOfRange -> getString(R.string.error_invalid_mood_range)
                 else -> null
             }
         }
 
-        // Fehler weg, sobald User tippt (UX = nicht sad)
         titleInput.addTextChangedListener { titleLayout.error = null }
         contentInput.addTextChangedListener { contentLayout.error = null }
         moodInput.addTextChangedListener { moodLayout.error = null }
+
+        backButton.setOnClickListener { finish() }
 
         saveButton.setOnClickListener {
             if (!saveButton.isEnabled) return@setOnClickListener
