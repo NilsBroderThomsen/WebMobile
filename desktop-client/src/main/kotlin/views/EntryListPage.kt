@@ -31,6 +31,8 @@ import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
 import kotlinx.coroutines.launch
+import state.LoadState
+import state.fetchLoadState
 
 @Composable
 fun EntryListPage(
@@ -41,22 +43,18 @@ fun EntryListPage(
     onEntrySelected: (Long) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var entries by remember { mutableStateOf<List<EntryDto>>(emptyList()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var entriesState by remember { mutableStateOf<LoadState<List<EntryDto>>>(LoadState.Loading) }
+    var actionErrorMessage by remember { mutableStateOf<String?>(null) }
+    var isMutating by remember { mutableStateOf(false) }
     var isAscending by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
     suspend fun refreshEntries() {
-        isLoading = true
-        errorMessage = null
-        try {
-            entries = client.getEntries(userId)
-        } catch (ex: Exception) {
-            errorMessage = ex.message ?: "Einträge konnten nicht geladen werden."
-        } finally {
-            isLoading = false
+        entriesState = LoadState.Loading
+        actionErrorMessage = null
+        entriesState = fetchLoadState("Einträge konnten nicht geladen werden.") {
+            client.getEntries(userId)
         }
     }
 
@@ -106,9 +104,12 @@ fun EntryListPage(
                 }
             }
 
+            val isLoading = entriesState is LoadState.Loading || isMutating
             if (isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+
+            val errorMessage = (entriesState as? LoadState.Error)?.message ?: actionErrorMessage
 
             errorMessage?.let { message ->
                 Text(
@@ -119,6 +120,7 @@ fun EntryListPage(
             }
 
             val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
+            val entries = (entriesState as? LoadState.Success)?.data.orEmpty()
             val sortedEntries = remember(entries, sortOrder) {
                 entries.sortedByCreatedAt(sortOrder)
             }
@@ -194,16 +196,21 @@ fun EntryListPage(
                                 OutlinedButton(
                                     onClick = {
                                         scope.launch {
-                                            isLoading = true
-                                            errorMessage = null
+                                            isMutating = true
+                                            actionErrorMessage = null
                                             try {
                                                 client.deleteEntry(entry.id)
-                                                entries = entries.filterNot { it.id == entry.id }
+                                                entriesState = when (val state = entriesState) {
+                                                    is LoadState.Success -> {
+                                                        state.copy(data = state.data.filterNot { it.id == entry.id })
+                                                    }
+                                                    else -> state
+                                                }
                                             } catch (ex: Exception) {
-                                                errorMessage =
+                                                actionErrorMessage =
                                                     ex.message ?: "Eintrag konnte nicht gelöscht werden."
                                             } finally {
-                                                isLoading = false
+                                                isMutating = false
                                             }
                                         }
                                     },

@@ -12,11 +12,14 @@ import dto.EntryDto
 import extension.displayMood
 import extension.toDisplayTimestamp
 import kotlinx.coroutines.launch
+import state.LoadState
+import state.fetchLoadState
 
 class EntryDetailActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
     private var entryId: Long = INVALID_ID
     private var currentEntry: EntryDto? = null
+    private var entryState: LoadState<EntryDto> = LoadState.Loading
     private lateinit var titleView: TextView
     private lateinit var contentView: TextView
     private lateinit var moodView: TextView
@@ -123,9 +126,21 @@ class EntryDetailActivity : AppCompatActivity() {
         if (entryId == INVALID_ID) {
             return
         }
+        entryState = LoadState.Loading
         lifecycleScope.launch {
-            try {
-                val entry = client.getEntryDetails(entryId)
+            val state = fetchLoadState(getString(R.string.entries_load_failed)) {
+                client.getEntryDetails(entryId)
+            }
+            entryState = state
+            renderEntryState(state)
+        }
+    }
+
+    private fun renderEntryState(state: LoadState<EntryDto>) {
+        when (state) {
+            is LoadState.Loading -> Unit
+            is LoadState.Success -> {
+                val entry = state.data
                 currentEntry = entry
                 titleView.text = entry.title
                 contentView.text = entry.content
@@ -134,18 +149,16 @@ class EntryDetailActivity : AppCompatActivity() {
                     formatRating = { rating -> getString(R.string.entries_mood_format, rating) }
                 )
                 createdAtView.text = entry.createdAt.toDisplayTimestamp()
-                updatedAtView.text = entry.updatedAt?.toDisplayTimestamp() ?: getString(R.string.entry_detail_not_updated)
+                updatedAtView.text =
+                    entry.updatedAt?.toDisplayTimestamp() ?: getString(R.string.entry_detail_not_updated)
                 tagsView.text = if (entry.tags.isEmpty()) {
                     getString(R.string.entry_detail_no_tags)
                 } else {
                     entry.tags.joinToString(", ")
                 }
-            } catch (ex: Exception) {
-                Toast.makeText(
-                    this@EntryDetailActivity,
-                    ex.message ?: getString(R.string.entries_load_failed),
-                    Toast.LENGTH_LONG
-                ).show()
+            }
+            is LoadState.Error -> {
+                Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
             }
         }
     }

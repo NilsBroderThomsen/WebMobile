@@ -16,12 +16,15 @@ import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
 import kotlinx.coroutines.launch
+import state.LoadState
+import state.fetchLoadState
 
 class EntriesActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
     private var currentEntries: List<EntryDto> = emptyList()
     private var isAscending = true
     private var userId: Long = -1L
+    private var entriesState: LoadState<List<EntryDto>> = LoadState.Loading
     private lateinit var listView: ListView
     private lateinit var emptyView: TextView
     private lateinit var loadingView: ProgressBar
@@ -70,33 +73,47 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun loadEntries() {
-        loadingView.visibility = View.VISIBLE
-        listView.visibility = View.GONE
-        emptyView.visibility = View.GONE
-        sortToggle.visibility = View.GONE
+        renderEntriesState(LoadState.Loading)
 
         lifecycleScope.launch {
-            try {
-                val entries = client.getEntries(userId)
-                if (entries.isEmpty()) {
+            val state = fetchLoadState(getString(R.string.entries_load_failed)) {
+                client.getEntries(userId)
+            }
+            entriesState = state
+            renderEntriesState(state)
+        }
+    }
+
+    private fun renderEntriesState(state: LoadState<List<EntryDto>>) {
+        when (state) {
+            is LoadState.Loading -> {
+                loadingView.visibility = View.VISIBLE
+                listView.visibility = View.GONE
+                emptyView.visibility = View.GONE
+                sortToggle.visibility = View.GONE
+            }
+            is LoadState.Success -> {
+                loadingView.visibility = View.GONE
+                if (state.data.isEmpty()) {
                     emptyView.visibility = View.VISIBLE
+                    listView.visibility = View.GONE
+                    sortToggle.visibility = View.GONE
                 } else {
-                    currentEntries = entries
+                    currentEntries = state.data
                     isAscending = true
                     updateSortToggle(sortToggle)
                     sortToggle.visibility = View.VISIBLE
                     renderEntries(listView, currentEntries, isAscending)
                     listView.visibility = View.VISIBLE
+                    emptyView.visibility = View.GONE
                 }
-            } catch (ex: Exception) {
-                Toast.makeText(
-                    this@EntriesActivity,
-                    ex.message ?: getString(R.string.entries_load_failed),
-                    Toast.LENGTH_LONG
-                ).show()
-                emptyView.visibility = View.VISIBLE
-            } finally {
+            }
+            is LoadState.Error -> {
                 loadingView.visibility = View.GONE
+                Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                emptyView.visibility = View.VISIBLE
+                listView.visibility = View.GONE
+                sortToggle.visibility = View.GONE
             }
         }
     }

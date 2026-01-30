@@ -27,6 +27,8 @@ import api.MoodTrackerClient
 import dto.EntryDto
 import extension.displayMood
 import extension.toDisplayTimestamp
+import state.LoadState
+import state.fetchLoadState
 
 @Composable
 fun EntryDetailsPage(
@@ -34,17 +36,12 @@ fun EntryDetailsPage(
     entryId: Long,
     onNavigateBack: () -> Unit
 ) {
-    var entryDetails by remember { mutableStateOf<EntryDto?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var entryState by remember { mutableStateOf<LoadState<EntryDto>>(LoadState.Loading) }
 
     LaunchedEffect(entryId) {
-        try {
-            entryDetails = client.getEntryDetails(entryId)
-        } catch (ex: Exception) {
-            errorMessage = ex.message ?: "Eintrag konnte nicht geladen werden."
-        } finally {
-            isLoading = false
+        entryState = LoadState.Loading
+        entryState = fetchLoadState("Eintrag konnte nicht geladen werden.") {
+            client.getEntryDetails(entryId)
         }
     }
 
@@ -76,10 +73,12 @@ fun EntryDetailsPage(
                 }
             }
 
+            val isLoading = entryState is LoadState.Loading
             if (isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
+            val errorMessage = (entryState as? LoadState.Error)?.message
             errorMessage?.let { message ->
                 Text(
                     text = message,
@@ -88,7 +87,7 @@ fun EntryDetailsPage(
                 )
             }
 
-            entryDetails?.let { entry ->
+            (entryState as? LoadState.Success)?.data?.let { entry ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -164,7 +163,7 @@ fun EntryDetailsPage(
                 }
             }
 
-            if (entryDetails == null && !isLoading && errorMessage == null) {
+            if (entryState !is LoadState.Success && !isLoading && errorMessage == null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "No entry data available.",
