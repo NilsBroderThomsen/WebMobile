@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
+import extension.toDisplayTimestamp
 import extension.toEmoji
 import kotlinx.coroutines.launch
 
@@ -77,7 +78,7 @@ class EntryDetailActivity : AppCompatActivity() {
             val editTitle = entry?.title ?: title
             val editContent = entry?.content ?: content
             val editMoodRating = entry?.moodRating ?: if (moodRating == MOOD_UNKNOWN) null else moodRating
-            if (editTitle.isNullOrBlank() || editContent.isNullOrBlank()) {
+            if (editTitle.isBlank() || editContent.isBlank()) {
                 Toast.makeText(
                     this@EntryDetailActivity,
                     getString(R.string.entry_detail_missing),
@@ -103,8 +104,8 @@ class EntryDetailActivity : AppCompatActivity() {
         } else {
             "${getString(R.string.entries_mood_format, moodRating)} ${moodRating.toEmoji()}"
         }
-        createdAtView.text = createdAt
-        updatedAtView.text = updatedAt
+        createdAtView.text = createdAt.toDisplayTimestamp()
+        updatedAtView.text = updatedAt?.toDisplayTimestamp()
             ?: getString(R.string.entry_detail_not_updated)
         tagsView.text = if (tags.isNullOrEmpty()) {
             getString(R.string.entry_detail_no_tags)
@@ -131,8 +132,8 @@ class EntryDetailActivity : AppCompatActivity() {
                 moodView.text = entry.moodRating?.let { rating ->
                     "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
                 } ?: getString(R.string.entries_mood_unknown)
-                createdAtView.text = entry.createdAt
-                updatedAtView.text = entry.updatedAt ?: getString(R.string.entry_detail_not_updated)
+                createdAtView.text = entry.createdAt.toDisplayTimestamp()
+                updatedAtView.text = entry.updatedAt?.toDisplayTimestamp() ?: getString(R.string.entry_detail_not_updated)
                 tagsView.text = if (entry.tags.isEmpty()) {
                     getString(R.string.entry_detail_no_tags)
                 } else {

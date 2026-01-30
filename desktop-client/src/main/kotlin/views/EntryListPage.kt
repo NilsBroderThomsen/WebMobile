@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
+import extension.toDisplayTimestamp
 import extension.toEmoji
 import kotlinx.coroutines.launch
 
@@ -154,7 +155,7 @@ fun EntryListPage(
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
-                                    text = "Created ${entry.createdAt}",
+                                    text = "Created ${entry.createdAt.toDisplayTimestamp()}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
+import extension.toDisplayTimestamp
 
 @Composable
 fun EntryDetailsPage(
@@ -57,8 +58,8 @@ fun EntryDetailsPage(
             Text("Title: ${entry.title}")
             Text("Content: ${entry.content}")
             Text("Mood: ${entry.moodRating ?: "—"}")
-            Text("Created: ${entry.createdAt}")
-            Text("Updated: ${entry.updatedAt ?: "—"}")
+            Text("Created: ${entry.createdAt.toDisplayTimestamp()}")
+            Text("Updated: ${entry.updatedAt?.toDisplayTimestamp() ?: "—"}")
             Text("Tags: ${entry.tags.joinToString().ifBlank { "—" }}")
         }
     }

@@ -20,6 +20,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.datetime)
 }
 
 compose.desktop {
