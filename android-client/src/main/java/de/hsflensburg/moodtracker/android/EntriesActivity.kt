@@ -12,9 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
-import extension.toEmoji
 import kotlinx.coroutines.launch
 
 class EntriesActivity : AppCompatActivity() {
@@ -120,9 +120,10 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun formatMood(entry: EntryDto): String {
-        return entry.moodRating?.let { rating ->
-            "${getString(R.string.entries_mood_format, rating)} ${rating.toEmoji()}"
-        } ?: getString(R.string.entries_mood_unknown)
+        return entry.displayMood(
+            unknownText = getString(R.string.entries_mood_unknown),
+            formatRating = { rating -> getString(R.string.entries_mood_format, rating) }
+        )
     }
 
     private class EntriesAdapter(
