@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ fun EntryListPage(
     var isLoading by remember { mutableStateOf(true) }
     var isAscending by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
     suspend fun refreshEntries() {
         isLoading = true
@@ -88,7 +90,14 @@ fun EntryListPage(
                     Text("Create new entry")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                FilledTonalButton(onClick = { isAscending = !isAscending }) {
+                FilledTonalButton(
+                    onClick = {
+                        isAscending = !isAscending
+                        scope.launch {
+                            listState.animateScrollToItem(0)
+                        }
+                    }
+                ) {
                     Text(if (isAscending) "Oldest first" else "Newest first")
                 }
             }
@@ -123,6 +132,7 @@ fun EntryListPage(
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(sortedEntries, key = { it.id }) { entry ->
