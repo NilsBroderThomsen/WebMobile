@@ -37,6 +37,7 @@ class CreateEntryActivity : AppCompatActivity() {
         val contentInput = findViewById<EditText>(R.id.createEntryContent)
         val moodInput = findViewById<EditText>(R.id.createEntryMood)
 
+        val backButton = findViewById<Button>(R.id.createEntryBack)
         val saveButton = findViewById<Button>(R.id.createEntrySave)
 
         val createEntryModel = CreateEntryModel(client)
@@ -67,6 +68,8 @@ class CreateEntryActivity : AppCompatActivity() {
         titleInput.addTextChangedListener { titleLayout.error = null }
         contentInput.addTextChangedListener { contentLayout.error = null }
         moodInput.addTextChangedListener { moodLayout.error = null }
+
+        backButton.setOnClickListener { finish() }
 
         saveButton.setOnClickListener {
             if (!saveButton.isEnabled) return@setOnClickListener

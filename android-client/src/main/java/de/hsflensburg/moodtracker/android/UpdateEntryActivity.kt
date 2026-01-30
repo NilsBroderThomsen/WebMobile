@@ -36,6 +36,7 @@ class UpdateEntryActivity : AppCompatActivity() {
         val titleInput = findViewById<EditText>(R.id.updateEntryName)
         val contentInput = findViewById<EditText>(R.id.updateEntryContent)
         val moodInput = findViewById<EditText>(R.id.updateEntryMood)
+        val backButton = findViewById<Button>(R.id.updateEntryBack)
         val saveButton = findViewById<Button>(R.id.updateEntrySave)
 
         fun clearFieldErrors() {
@@ -65,6 +66,8 @@ class UpdateEntryActivity : AppCompatActivity() {
         if (moodRating != MOOD_UNKNOWN) {
             moodInput.setText(moodRating.toString())
         }
+
+        backButton.setOnClickListener { finish() }
 
         saveButton.setOnClickListener {
             if (!saveButton.isEnabled) return@setOnClickListener
