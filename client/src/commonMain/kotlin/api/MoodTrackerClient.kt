@@ -75,7 +75,7 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
-        delay(750)
+        delay(1250)     // Simuliere Netzwerkverzögerung
 
         if (authToken == null) {
             throw IllegalStateException("Login erforderlich.")
@@ -104,7 +104,7 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntryDetails(entryId: Long): EntryDto {
-        delay(750)
+        delay(1250)     // Simuliere Netzwerkverzögerung
 
         val url = "$baseUrl/api/entries/$entryId"
         try {
