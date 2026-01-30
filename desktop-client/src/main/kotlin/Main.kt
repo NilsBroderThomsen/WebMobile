@@ -14,7 +14,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Mood Tracker",
-        state = rememberWindowState(size = DpSize(800.dp, 700.dp))) {
+        state = rememberWindowState(size = DpSize(850.dp, 700.dp))) {
         App()
     }
 }
