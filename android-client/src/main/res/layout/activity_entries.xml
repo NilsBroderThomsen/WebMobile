@@ -6,28 +6,46 @@
 
     <LinearLayout
         android:id="@+id/entriesLoadingContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="8dp"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/entriesCreateBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/entriesListDivider">
 
-        <ProgressBar
-            android:id="@+id/entriesLoading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/entriesLoadingText"
-            android:layout_width="wrap_content"
+        <include
+            layout="@layout/list_item_entry_skeleton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/entries_loading_text"
-            android:textAppearance="?attr/textAppearanceBodyMedium" />
+            android:layout_marginBottom="16dp" />
+
+        <include
+            layout="@layout/list_item_entry_skeleton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <include
+            layout="@layout/list_item_entry_skeleton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <include
+            layout="@layout/list_item_entry_skeleton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <include
+            layout="@layout/list_item_entry_skeleton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
