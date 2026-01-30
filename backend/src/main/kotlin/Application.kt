@@ -245,32 +245,58 @@ private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
 }
 
 private fun Route.getEntryDetails(repository: MoodTrackerDatabaseRepository) {
-    get("/api/entries/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        if (id == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid entry id"
+    authenticate("jwt-auth") {
+        get("/api/entries/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull()
+            if (id == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid entry id"
+                    )
                 )
-            )
-            return@get
-        }
+                return@get
+            }
 
-        val entry = repository.findEntryById(EntryId(id))
-        if (entry == null) {
-            call.respond(
-                HttpStatusCode.NotFound,
-                ErrorResponse(
-                    error = "Not Found",
-                    message = "Entry with id $id not found"
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Authentication required"
+                    )
                 )
-            )
-            return@get
-        }
+                return@get
+            }
 
-        call.respond(HttpStatusCode.OK, entry.toDto())
+            val entry = repository.findEntryById(EntryId(id))
+            if (entry == null) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    ErrorResponse(
+                        error = "Not Found",
+                        message = "Entry with id $id not found"
+                    )
+                )
+                return@get
+            }
+
+            if (entry.userId.value != tokenUserId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User can only access their own entries"
+                    )
+                )
+                return@get
+            }
+
+            call.respond(HttpStatusCode.OK, entry.toDto())
+        }
     }
 }
 
@@ -345,151 +371,241 @@ private fun Route.postCreateUser(repository: MoodTrackerDatabaseRepository) {
 
 
 private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
-    post("/api/users/{userId}/entries") {
-        val userId = call.parameters["userId"]?.toLongOrNull()
-            ?: return@post call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse("Bad Request", "Invalid userId")
-            )
-
-        val request = try {
-            call.receive<CreateEntryRequest>()
-        } catch (ex: ContentTransformationException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Request body is not valid JSON"
+    authenticate("jwt-auth") {
+        post("/api/users/{userId}/entries") {
+            val userId = call.parameters["userId"]?.toLongOrNull()
+                ?: return@post call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse("Bad Request", "Invalid userId")
                 )
-            )
-            return@post
-        }
 
-        val title = request.title.trim()
-        val content = request.content.trim()
-        val moodRating = request.moodRating
-
-        val errors = validateEntryPayload(title, content, moodRating)
-        if (errors.isNotEmpty()) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Validation Error",
-                    message = errors.joinToString(" ")
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Authentication required"
+                    )
                 )
+                return@post
+            }
+
+            if (tokenUserId != userId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User can only access their own entries"
+                    )
+                )
+                return@post
+            }
+
+            val request = try {
+                call.receive<CreateEntryRequest>()
+            } catch (ex: ContentTransformationException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Request body is not valid JSON"
+                    )
+                )
+                return@post
+            }
+
+            val title = request.title.trim()
+            val content = request.content.trim()
+            val moodRating = request.moodRating
+
+            val errors = validateEntryPayload(title, content, moodRating)
+            if (errors.isNotEmpty()) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Validation Error",
+                        message = errors.joinToString(" ")
+                    )
+                )
+                return@post
+            }
+
+            val entry = Entry(
+                id = EntryId(System.currentTimeMillis()),
+                userId = UserId(userId),
+                title = title,
+                content = content,
+                moodRating = moodRating,
+                createdAt = Clock.System.now(),
+                updatedAt = null,
+                tags = emptySet()
             )
-            return@post
+
+            val savedEntry = repository.createEntry(entry)
+
+            call.respond(HttpStatusCode.Created, savedEntry.toDto())
         }
-
-        val entry = Entry(
-            id = EntryId(System.currentTimeMillis()),
-            userId = UserId(userId),
-            title = title,
-            content = content,
-            moodRating = moodRating,
-            createdAt = Clock.System.now(),
-            updatedAt = null,
-            tags = emptySet()
-        )
-
-        val savedEntry = repository.createEntry(entry)
-
-        call.respond(HttpStatusCode.Created, savedEntry.toDto())
     }
 }
 
 private fun Route.deleteEntry(repository: MoodTrackerDatabaseRepository) {
-    delete("/api/entries/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-        if (id == null) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid entry id"
+    authenticate("jwt-auth") {
+        delete("/api/entries/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull()
+            if (id == null) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid entry id"
+                    )
                 )
-            )
-            return@delete
-        }
+                return@delete
+            }
 
-        val deleted = repository.deleteEntry(EntryId(id))
-        if (!deleted) {
-            call.respond(
-                HttpStatusCode.NotFound,
-                ErrorResponse(
-                    error = "Not Found",
-                    message = "Entry with id $id not found"
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Authentication required"
+                    )
                 )
-            )
-            return@delete
-        }
+                return@delete
+            }
 
-        call.respond(
-            HttpStatusCode.OK,
-            SuccessResponse(message = "Entry deleted successfully")
-        )
+            val entry = repository.findEntryById(EntryId(id))
+            if (entry == null) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    ErrorResponse(
+                        error = "Not Found",
+                        message = "Entry with id $id not found"
+                    )
+                )
+                return@delete
+            }
+
+            if (entry.userId.value != tokenUserId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User can only access their own entries"
+                    )
+                )
+                return@delete
+            }
+
+            val deleted = repository.deleteEntry(EntryId(id))
+            if (!deleted) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    ErrorResponse(
+                        error = "Not Found",
+                        message = "Entry with id $id not found"
+                    )
+                )
+                return@delete
+            }
+
+            call.respond(
+                HttpStatusCode.OK,
+                SuccessResponse(message = "Entry deleted successfully")
+            )
+        }
     }
 }
 
 private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
-    put("/api/entries/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
-            ?: return@put call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Invalid entry id"
+    authenticate("jwt-auth") {
+        put("/api/entries/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull()
+                ?: return@put call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Invalid entry id"
+                    )
                 )
+
+            val principal = call.principal<JWTPrincipal>()
+            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+            if (tokenUserId == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ErrorResponse(
+                        error = "Unauthorized",
+                        message = "Authentication required"
+                    )
+                )
+                return@put
+            }
+
+            val existingEntry = repository.findEntryById(EntryId(id))
+                ?: return@put call.respond(
+                    HttpStatusCode.NotFound,
+                    ErrorResponse(
+                        error = "Not Found",
+                        message = "Entry with id $id not found"
+                    )
+                )
+
+            if (existingEntry.userId.value != tokenUserId) {
+                call.respond(
+                    HttpStatusCode.Forbidden,
+                    ErrorResponse(
+                        error = "Forbidden",
+                        message = "User can only access their own entries"
+                    )
+                )
+                return@put
+            }
+
+            val request = try {
+                call.receive<UpdateEntryRequest>()
+            } catch (ex: ContentTransformationException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Bad Request",
+                        message = "Request body is not valid JSON"
+                    )
+                )
+                return@put
+            }
+
+            val title = request.title.trim()
+            val content = request.content.trim()
+            val moodRating = request.moodRating
+            val errors = validateEntryPayload(title, content, moodRating)
+
+            if (errors.isNotEmpty()) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(
+                        error = "Validation Error",
+                        message = errors.joinToString(" ")
+                    )
+                )
+                return@put
+            }
+
+            val updatedEntry = existingEntry.copy(
+                title = title,
+                content = content,
+                moodRating = moodRating,
+                updatedAt = Clock.System.now()
             )
 
-        val existingEntry = repository.findEntryById(EntryId(id))
-            ?: return@put call.respond(
-                HttpStatusCode.NotFound,
-                ErrorResponse(
-                    error = "Not Found",
-                    message = "Entry with id $id not found"
-                )
-            )
+            val savedEntry = repository.updateEntry(updatedEntry)
 
-        val request = try {
-            call.receive<UpdateEntryRequest>()
-        } catch (ex: ContentTransformationException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Bad Request",
-                    message = "Request body is not valid JSON"
-                )
-            )
-            return@put
+            call.respond(HttpStatusCode.OK, savedEntry.toDto())
         }
-
-        val title = request.title.trim()
-        val content = request.content.trim()
-        val moodRating = request.moodRating
-        val errors = validateEntryPayload(title, content, moodRating)
-
-        if (errors.isNotEmpty()) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                ErrorResponse(
-                    error = "Validation Error",
-                    message = errors.joinToString(" ")
-                )
-            )
-            return@put
-        }
-
-        val updatedEntry = existingEntry.copy(
-            title = title,
-            content = content,
-            moodRating = moodRating,
-            updatedAt = Clock.System.now()
-        )
-
-        val savedEntry = repository.updateEntry(updatedEntry)
-
-        call.respond(HttpStatusCode.OK, savedEntry.toDto())
     }
 }
 
