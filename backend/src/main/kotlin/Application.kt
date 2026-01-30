@@ -51,6 +51,22 @@ private data class RateLimitState(var windowStart: Instant, var attempts: Int)
 private val loginRateLimitState = mutableMapOf<String, RateLimitState>()
 private val loginRateLimitLock = Any()
 
+private suspend fun ApplicationCall.requireAuthenticatedUserId(): Long? {
+    val principal = principal<JWTPrincipal>()
+    val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
+    if (tokenUserId == null) {
+        respond(
+            HttpStatusCode.Unauthorized,
+            ErrorResponse(
+                error = "Unauthorized",
+                message = "Authentication required"
+            )
+        )
+        return null
+    }
+    return tokenUserId
+}
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         configureDI()
@@ -213,18 +229,7 @@ private fun Route.getUserEntries(repository: MoodTrackerDatabaseRepository) {
                 return@get
             }
 
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Authentication required"
-                    )
-                )
-                return@get
-            }
+            val tokenUserId = call.requireAuthenticatedUserId() ?: return@get
 
             if (tokenUserId != userId) {
                 call.respond(
@@ -259,18 +264,7 @@ private fun Route.getEntryDetails(repository: MoodTrackerDatabaseRepository) {
                 return@get
             }
 
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Authentication required"
-                    )
-                )
-                return@get
-            }
+            val tokenUserId = call.requireAuthenticatedUserId() ?: return@get
 
             val entry = repository.findEntryById(EntryId(id))
             if (entry == null) {
@@ -379,18 +373,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
                     ErrorResponse("Bad Request", "Invalid userId")
                 )
 
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Authentication required"
-                    )
-                )
-                return@post
-            }
+            val tokenUserId = call.requireAuthenticatedUserId() ?: return@post
 
             if (tokenUserId != userId) {
                 call.respond(
@@ -465,18 +448,7 @@ private fun Route.deleteEntry(repository: MoodTrackerDatabaseRepository) {
                 return@delete
             }
 
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Authentication required"
-                    )
-                )
-                return@delete
-            }
+            val tokenUserId = call.requireAuthenticatedUserId() ?: return@delete
 
             val entry = repository.findEntryById(EntryId(id))
             if (entry == null) {
@@ -533,18 +505,7 @@ private fun Route.putUpdateEntry(repository: MoodTrackerDatabaseRepository) {
                     )
                 )
 
-            val principal = call.principal<JWTPrincipal>()
-            val tokenUserId = principal?.payload?.getClaim("userId")?.asLong()
-            if (tokenUserId == null) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    ErrorResponse(
-                        error = "Unauthorized",
-                        message = "Authentication required"
-                    )
-                )
-                return@put
-            }
+            val tokenUserId = call.requireAuthenticatedUserId() ?: return@put
 
             val existingEntry = repository.findEntryById(EntryId(id))
                 ?: return@put call.respond(
