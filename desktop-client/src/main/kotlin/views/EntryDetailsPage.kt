@@ -99,21 +99,46 @@ fun EntryDetailsPage(
                         modifier = Modifier.padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                text = entry.title,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Text(
-                                text = "Created ${entry.createdAt.toDisplayTimestamp()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Updated ${entry.updatedAt?.toDisplayTimestamp() ?: "—"}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = entry.title,
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Text(
+                                    text = "Created ${entry.createdAt.toDisplayTimestamp()}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "Updated ${entry.updatedAt?.toDisplayTimestamp() ?: "—"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Column(
+                                horizontalAlignment = androidx.compose.ui.Alignment.End
+                            ) {
+                                Text(
+                                    text = "Mood rating",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                val moodText = entry.moodRating?.let { rating ->
+                                    "$rating ${rating.toEmoji()}"
+                                } ?: "—"
+                                Text(
+                                    text = moodText.trim(),
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                            }
                         }
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -123,20 +148,6 @@ fun EntryDetailsPage(
                             )
                             Text(
                                 text = entry.content,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "Mood rating",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            val moodText = entry.moodRating?.let { rating ->
-                                "$rating ${rating.toEmoji()}"
-                            } ?: "—"
-                            Text(
-                                text = moodText.trim(),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
