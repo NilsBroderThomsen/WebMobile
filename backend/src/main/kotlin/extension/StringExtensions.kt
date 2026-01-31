@@ -5,11 +5,6 @@ import model.EntryId
 import model.UserId
 import kotlin.time.Instant
 
-fun String.normalizeTag(): String =
-    trim()
-        .lowercase()
-        .replace(Regex("\\s+"), " ")
-
 fun String.sanitizeForCsv(): String =
     this.replace(",", "")
         .replace("\n", " ")
@@ -45,7 +40,6 @@ fun String.parseEntryFromCsv(targetUserId: UserId): Entry {
         content = content,
         moodRating = moodRating,
         createdAt = Instant.parse(createdAtValue),
-        updatedAt = null,
-        tags = emptySet()
+        updatedAt = null
     )
 }

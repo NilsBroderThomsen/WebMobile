@@ -18,8 +18,7 @@ data class Entry (
     val content: String,
     val moodRating: Int? = null,
     val createdAt: Instant,
-    val updatedAt: Instant? = null,
-    val tags: Set<String> = emptySet()
+    val updatedAt: Instant? = null
 ) {
 
     val wordCount: Int
@@ -44,24 +43,6 @@ data class Entry (
 
     fun updateMood(newRating: Int): Entry {
         return copy(moodRating = newRating, updatedAt = Clock.System.now())
-    }
-
-    fun addTag(tag: String): Entry {
-        require(tag.isNotBlank()) { "Tag must not be blank" }
-        return copy(tags = tags + tag)
-    }
-
-    fun removeTag(tag: String): Entry {
-        require(tag.isNotBlank()) { "Tag must not be blank" }
-        return copy(tags = tags - tag)
-    }
-
-    fun similarity(other: Entry): Double {
-        if (tags == other.tags) return 1.0
-        if (tags.isEmpty() || other.tags.isEmpty()) return 0.0
-        val intersection = tags.intersect(other.tags).size
-        val union = tags.union(other.tags).size
-        return intersection / union.toDouble()
     }
 }
 

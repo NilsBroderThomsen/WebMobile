@@ -422,8 +422,7 @@ private fun Route.postCreateEntry(repository: MoodTrackerDatabaseRepository) {
                 content = content,
                 moodRating = moodRating,
                 createdAt = Clock.System.now(),
-                updatedAt = null,
-                tags = emptySet()
+                updatedAt = null
             )
 
             val savedEntry = repository.createEntry(entry)

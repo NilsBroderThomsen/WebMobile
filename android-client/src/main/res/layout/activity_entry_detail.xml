@@ -176,33 +176,6 @@
                                 android:background="@drawable/skeleton_placeholder"
                                 android:visibility="gone" />
                     </FrameLayout>
-
-                    <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/entryDetailTagsLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/entry_detail_tags_label"
-                            android:textAppearance="?attr/textAppearanceLabelMedium" />
-
-                    <FrameLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp">
-
-                        <com.google.android.material.textview.MaterialTextView
-                                android:id="@+id/entryDetailTags"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-                        <View
-                                android:id="@+id/entryDetailTagsSkeleton"
-                                android:layout_width="200dp"
-                                android:layout_height="16dp"
-                                android:background="@drawable/skeleton_placeholder"
-                                android:visibility="gone" />
-                    </FrameLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
