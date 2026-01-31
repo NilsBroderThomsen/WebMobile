@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.filterByMoodRange
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -136,15 +137,8 @@ fun EntryListPage(
 
             val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
             val sortedEntries = remember(entries, sortOrder, minMoodFilter, maxMoodFilter) {
-                val filtered = if (minMoodFilter != null && maxMoodFilter != null) {
-                    entries.filter { entry ->
-                        val rating = entry.moodRating
-                        rating != null && rating in minMoodFilter!!..maxMoodFilter!!
-                    }
-                } else {
-                    entries
-                }
-                filtered.sortedByCreatedAt(sortOrder)
+                entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
+                    .sortedByCreatedAt(sortOrder)
             }
 
             if (!isLoading && sortedEntries.isEmpty()) {
@@ -295,14 +289,14 @@ fun EntryListPage(
                         onClick = {
                             val minMood = minMoodInput.toIntOrNull()
                             val maxMood = maxMoodInput.toIntOrNull()
-                            if (minMood != null && maxMood != null && minMood <= maxMood) {
-                                minMoodFilter = minMood
-                                maxMoodFilter = maxMood
-                            } else {
+                            if (minMood != null && maxMood != null && minMood > maxMood) {
                                 minMoodFilter = null
                                 maxMoodFilter = null
                                 minMoodInput = ""
                                 maxMoodInput = ""
+                            } else {
+                                minMoodFilter = minMood
+                                maxMoodFilter = maxMood
                             }
                             isAscending = dialogSortAscending
                             showFilterDialog = false

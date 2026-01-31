@@ -18,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.filterByMoodRange
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -126,15 +127,7 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun filterEntries(entries: List<EntryDto>): List<EntryDto> {
-        val minMood = minMoodFilter
-        val maxMood = maxMoodFilter
-        if (minMood == null || maxMood == null || minMood > maxMood) {
-            return entries
-        }
-        return entries.filter { entry ->
-            val rating = entry.moodRating
-            rating != null && rating in minMood..maxMood
-        }
+        return entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
     }
 
     private fun renderEntries(listView: ListView, entries: List<EntryDto>, ascending: Boolean) {
@@ -208,12 +201,12 @@ class EntriesActivity : AppCompatActivity() {
                 val minMood = minMoodText.toIntOrNull()
                 val maxMood = maxMoodText.toIntOrNull()
 
-                if (minMood != null && maxMood != null && minMood <= maxMood) {
-                    minMoodFilter = minMood
-                    maxMoodFilter = maxMood
-                } else {
+                if (minMood != null && maxMood != null && minMood > maxMood) {
                     minMoodFilter = null
                     maxMoodFilter = null
+                } else {
+                    minMoodFilter = minMood
+                    maxMoodFilter = maxMood
                 }
 
                 isAscending = sortGroup.checkedRadioButtonId == oldestFirst.id
