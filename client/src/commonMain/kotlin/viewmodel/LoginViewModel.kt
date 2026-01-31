@@ -1,0 +1,50 @@
+package viewmodel
+
+import api.MoodTrackerClient
+import dto.LoginResponse
+
+data class LoginInput(val username: String, val password: String)
+
+data class LoginValidation(
+    val missingUsername: Boolean,
+    val missingPassword: Boolean
+) {
+    val hasErrors: Boolean
+        get() = missingUsername || missingPassword
+}
+
+sealed class LoginResult {
+    data class ValidationError(val validation: LoginValidation) : LoginResult()
+    data class Success(val loginResponse: LoginResponse) : LoginResult()
+    data class Failure(val message: String?) : LoginResult()
+}
+
+class LoginViewModel(private val client: MoodTrackerClient) {
+    fun validate(input: LoginInput): LoginValidation {
+        return LoginValidation(
+            missingUsername = input.username.isBlank(),
+            missingPassword = input.password.isBlank()
+        )
+    }
+
+    suspend fun login(input: LoginInput): LoginResult {
+        val normalizedInput = input.copy(
+            username = input.username.trim()
+        )
+
+        val validation = validate(normalizedInput)
+        if (validation.hasErrors) {
+            return LoginResult.ValidationError(validation)
+        }
+
+        return try {
+            val loginResponse = client.login(
+                username = normalizedInput.username,
+                password = input.password
+            )
+            LoginResult.Success(loginResponse)
+        } catch (ex: Exception) {
+            LoginResult.Failure(ex.message ?: "Login failed.")
+        }
+    }
+}
