@@ -75,7 +75,7 @@ fun EntryListPage(
         try {
             entries = client.getEntries(userId)
         } catch (ex: Exception) {
-            errorMessage = ex.message ?: "Einträge konnten nicht geladen werden."
+            errorMessage = ex.message ?: "Unable to load entries."
         } finally {
             isLoading = false
         }
@@ -222,7 +222,7 @@ fun EntryListPage(
                                                     entries = entries.filterNot { it.id == entry.id }
                                                 } catch (ex: Exception) {
                                                     errorMessage =
-                                                        ex.message ?: "Eintrag konnte nicht gelöscht werden."
+                                                        ex.message ?: "Unable to delete entry."
                                                 } finally {
                                                     isLoading = false
                                                 }

@@ -90,7 +90,7 @@ class UpdateEntryModel(private val client: MoodTrackerClient) {
                     )
                     UpdateEntryResult.Success(entry)
                 } catch (ex: Exception) {
-                    UpdateEntryResult.Failure(ex.message ?: "Eintrag konnte nicht aktualisiert werden.")
+                    UpdateEntryResult.Failure(ex.message ?: "Unable to update entry.")
                 }
         }
     }

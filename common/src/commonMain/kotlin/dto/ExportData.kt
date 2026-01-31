@@ -2,7 +2,7 @@ package dto
 
 import kotlinx.serialization.*
 
-// DTO für Export
+// DTO for export
 @Serializable
 data class ExportData(
     val exportDate: String,

@@ -44,8 +44,7 @@ class LoginModel(private val client: MoodTrackerClient) {
             )
             LoginResult.Success(loginResponse)
         } catch (ex: Exception) {
-            LoginResult.Failure(ex.message ?: "Login fehlgeschlagen.")
+            LoginResult.Failure(ex.message ?: "Login failed.")
         }
     }
 }
-

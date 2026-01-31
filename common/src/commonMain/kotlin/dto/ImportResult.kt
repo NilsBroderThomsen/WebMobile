@@ -2,7 +2,7 @@ package dto
 
 import kotlinx.serialization.*
 
-// DTO für Import
+// DTO for import
 @Serializable
 data class ImportResult(
     val successful: Int,
