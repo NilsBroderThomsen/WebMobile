@@ -52,6 +52,7 @@ class EntriesActivity : AppCompatActivity() {
         loadingListView = findViewById(R.id.entriesLoadingContainer)
         emptyView = findViewById(R.id.entriesEmpty)
         sortToggle = findViewById(R.id.entriesSortToggle)
+        val themeToggleButton = findViewById<Button>(R.id.themeToggleButton)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
         val logoutButton = findViewById<Button>(R.id.entriesLogoutButton)
         val skeletonRows = List(6) { it }
@@ -72,6 +73,12 @@ class EntriesActivity : AppCompatActivity() {
 
         sortToggle.setOnClickListener {
             showFilterDialog()
+        }
+
+        ThemeToggleHelper.updateButtonText(themeToggleButton, this)
+        themeToggleButton.setOnClickListener {
+            ThemeToggleHelper.toggle(this)
+            ThemeToggleHelper.updateButtonText(themeToggleButton, this)
         }
     }
 
