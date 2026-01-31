@@ -20,22 +20,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.filterByMoodRange
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -54,6 +60,12 @@ fun EntryListPage(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var isAscending by remember { mutableStateOf(true) }
+    var minMoodFilter by remember { mutableStateOf<Int?>(null) }
+    var maxMoodFilter by remember { mutableStateOf<Int?>(null) }
+    var showFilterDialog by remember { mutableStateOf(false) }
+    var minMoodInput by remember { mutableStateOf("") }
+    var maxMoodInput by remember { mutableStateOf("") }
+    var dialogSortAscending by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -105,13 +117,13 @@ fun EntryListPage(
                 Spacer(modifier = Modifier.weight(1f))
                 FilledTonalButton(
                     onClick = {
-                        isAscending = !isAscending
-                        scope.launch {
-                            listState.animateScrollToItem(0)
-                        }
+                        minMoodInput = minMoodFilter?.toString().orEmpty()
+                        maxMoodInput = maxMoodFilter?.toString().orEmpty()
+                        dialogSortAscending = isAscending
+                        showFilterDialog = true
                     }
                 ) {
-                    Text(if (isAscending) "Oldest first" else "Newest first")
+                    Text("Sort & Filter")
                 }
             }
 
@@ -124,8 +136,9 @@ fun EntryListPage(
             }
 
             val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
-            val sortedEntries = remember(entries, sortOrder) {
-                entries.sortedByCreatedAt(sortOrder)
+            val sortedEntries = remember(entries, sortOrder, minMoodFilter, maxMoodFilter) {
+                entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
+                    .sortedByCreatedAt(sortOrder)
             }
 
             if (!isLoading && sortedEntries.isEmpty()) {
@@ -225,6 +238,82 @@ fun EntryListPage(
                     }
                 }
             }
+        }
+
+        if (showFilterDialog) {
+            AlertDialog(
+                onDismissRequest = { showFilterDialog = false },
+                title = { Text("Filter & sort") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = minMoodInput,
+                            onValueChange = { minMoodInput = it },
+                            label = { Text("Min mood rating") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        OutlinedTextField(
+                            value = maxMoodInput,
+                            onValueChange = { maxMoodInput = it },
+                            label = { Text("Max mood rating") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        Text(
+                            text = "Sort order",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            RadioButton(
+                                selected = dialogSortAscending,
+                                onClick = { dialogSortAscending = true }
+                            )
+                            Text("Oldest first")
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            RadioButton(
+                                selected = !dialogSortAscending,
+                                onClick = { dialogSortAscending = false }
+                            )
+                            Text("Newest first")
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val minMood = minMoodInput.toIntOrNull()
+                            val maxMood = maxMoodInput.toIntOrNull()
+                            if (minMood != null && maxMood != null && minMood > maxMood) {
+                                minMoodFilter = null
+                                maxMoodFilter = null
+                                minMoodInput = ""
+                                maxMoodInput = ""
+                            } else {
+                                minMoodFilter = minMood
+                                maxMoodFilter = maxMood
+                            }
+                            isAscending = dialogSortAscending
+                            showFilterDialog = false
+                            scope.launch {
+                                listState.animateScrollToItem(0)
+                            }
+                        }
+                    ) {
+                        Text("Apply")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { showFilterDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }

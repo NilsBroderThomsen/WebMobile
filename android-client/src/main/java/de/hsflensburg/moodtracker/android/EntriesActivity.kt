@@ -2,15 +2,23 @@ package de.hsflensburg.moodtracker.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import dto.EntryDto
 import extension.EntrySortOrder
+import extension.filterByMoodRange
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -21,6 +29,8 @@ class EntriesActivity : AppCompatActivity() {
     private val session = MoodTrackerClientProvider.session
     private var currentEntries: List<EntryDto> = emptyList()
     private var isAscending = true
+    private var minMoodFilter: Int? = null
+    private var maxMoodFilter: Int? = null
     private var userId: Long = -1L
     private lateinit var listView: ListView
     private lateinit var loadingListView: ListView
@@ -61,9 +71,7 @@ class EntriesActivity : AppCompatActivity() {
         }
 
         sortToggle.setOnClickListener {
-            isAscending = !isAscending
-            updateSortToggle(sortToggle)
-            renderEntries(listView, currentEntries, isAscending)
+            showFilterDialog()
         }
     }
 
@@ -86,9 +94,11 @@ class EntriesActivity : AppCompatActivity() {
                 } else {
                     currentEntries = entries
                     isAscending = true
+                    minMoodFilter = null
+                    maxMoodFilter = null
                     updateSortToggle(sortToggle)
                     sortToggle.visibility = View.VISIBLE
-                    renderEntries(listView, currentEntries, isAscending)
+                    applyFiltersAndRender()
                     listView.visibility = View.VISIBLE
                 }
             } catch (ex: Exception) {
@@ -102,6 +112,22 @@ class EntriesActivity : AppCompatActivity() {
                 loadingListView.visibility = View.GONE
             }
         }
+    }
+
+    private fun applyFiltersAndRender() {
+        val filteredEntries = filterEntries(currentEntries)
+        if (filteredEntries.isEmpty()) {
+            emptyView.visibility = View.VISIBLE
+            listView.visibility = View.GONE
+        } else {
+            emptyView.visibility = View.GONE
+            listView.visibility = View.VISIBLE
+            renderEntries(listView, filteredEntries, isAscending)
+        }
+    }
+
+    private fun filterEntries(entries: List<EntryDto>): List<EntryDto> {
+        return entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
     }
 
     private fun renderEntries(listView: ListView, entries: List<EntryDto>, ascending: Boolean) {
@@ -120,6 +146,75 @@ class EntriesActivity : AppCompatActivity() {
         sortToggle.setText(
             if (isAscending) R.string.entries_sort_oldest else R.string.entries_sort_newest
         )
+    }
+
+    private fun showFilterDialog() {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val padding = (resources.displayMetrics.density * 20).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
+
+        val minMoodLayout = TextInputLayout(this).apply {
+            hint = "Min mood rating"
+        }
+        val minMoodInput = TextInputEditText(minMoodLayout.context).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(minMoodFilter?.toString().orEmpty())
+        }
+        minMoodLayout.addView(minMoodInput)
+
+        val maxMoodLayout = TextInputLayout(this).apply {
+            hint = "Max mood rating"
+        }
+        val maxMoodInput = TextInputEditText(maxMoodLayout.context).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(maxMoodFilter?.toString().orEmpty())
+        }
+        maxMoodLayout.addView(maxMoodInput)
+
+        val sortGroup = RadioGroup(this).apply {
+            orientation = RadioGroup.VERTICAL
+        }
+        val newestFirst = RadioButton(this).apply {
+            text = getString(R.string.entries_sort_newest)
+            id = View.generateViewId()
+        }
+        val oldestFirst = RadioButton(this).apply {
+            text = getString(R.string.entries_sort_oldest)
+            id = View.generateViewId()
+        }
+        sortGroup.addView(newestFirst)
+        sortGroup.addView(oldestFirst)
+        sortGroup.check(if (isAscending) oldestFirst.id else newestFirst.id)
+
+        container.addView(minMoodLayout)
+        container.addView(maxMoodLayout)
+        container.addView(sortGroup)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Filter & Sort")
+            .setView(container)
+            .setPositiveButton("Apply") { _, _ ->
+                val minMoodText = minMoodInput.text?.toString().orEmpty()
+                val maxMoodText = maxMoodInput.text?.toString().orEmpty()
+                val minMood = minMoodText.toIntOrNull()
+                val maxMood = maxMoodText.toIntOrNull()
+
+                if (minMood != null && maxMood != null && minMood > maxMood) {
+                    minMoodFilter = null
+                    maxMoodFilter = null
+                } else {
+                    minMoodFilter = minMood
+                    maxMoodFilter = maxMood
+                }
+
+                isAscending = sortGroup.checkedRadioButtonId == oldestFirst.id
+                updateSortToggle(sortToggle)
+                applyFiltersAndRender()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun formatMood(entry: EntryDto): String {
