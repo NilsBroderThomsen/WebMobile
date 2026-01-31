@@ -32,6 +32,7 @@
     <string name="entries_item_title_format">%1$s · %2$s</string>
     <string name="entries_sort_newest">Sort: newest first</string>
     <string name="entries_sort_oldest">Sort: oldest first</string>
+    <string name="entries_search_hint">Search entries</string>
     <string name="entries_create_button">Create new entry</string>
     <string name="entries_logout_button">Logout</string>
     <string name="entry_detail_content_label">Content</string>
