@@ -23,6 +23,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -54,6 +57,8 @@ fun EntryListPage(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var isAscending by remember { mutableStateOf(true) }
+    var activeFilter by remember { mutableStateOf(EntryMoodFilter.NONE) }
+    var isMenuOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -103,15 +108,66 @@ fun EntryListPage(
                     Text("Create new entry")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                FilledTonalButton(
-                    onClick = {
-                        isAscending = !isAscending
-                        scope.launch {
-                            listState.animateScrollToItem(0)
-                        }
+                Box {
+                    FilledTonalButton(
+                        onClick = { isMenuOpen = true }
+                    ) {
+                        Text("${if (isAscending) "Oldest first" else "Newest first"} · ${activeFilter.label}")
                     }
-                ) {
-                    Text(if (isAscending) "Oldest first" else "Newest first")
+                    DropdownMenu(
+                        expanded = isMenuOpen,
+                        onDismissRequest = { isMenuOpen = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Newest first") },
+                            onClick = {
+                                isAscending = false
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Oldest first") },
+                            onClick = {
+                                isAscending = true
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                        Divider()
+                        DropdownMenuItem(
+                            text = { Text(EntryMoodFilter.NONE.label) },
+                            onClick = {
+                                activeFilter = EntryMoodFilter.NONE
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(EntryMoodFilter.HIGH.label) },
+                            onClick = {
+                                activeFilter = EntryMoodFilter.HIGH
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(EntryMoodFilter.MID.label) },
+                            onClick = {
+                                activeFilter = EntryMoodFilter.MID
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(EntryMoodFilter.LOW.label) },
+                            onClick = {
+                                activeFilter = EntryMoodFilter.LOW
+                                isMenuOpen = false
+                                scope.launch { listState.animateScrollToItem(0) }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -124,8 +180,11 @@ fun EntryListPage(
             }
 
             val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
-            val sortedEntries = remember(entries, sortOrder) {
-                entries.sortedByCreatedAt(sortOrder)
+            val filteredEntries = remember(entries, activeFilter) {
+                entries.filter { entry -> activeFilter.matches(entry.moodRating) }
+            }
+            val sortedEntries = remember(filteredEntries, sortOrder) {
+                filteredEntries.sortedByCreatedAt(sortOrder)
             }
 
             if (!isLoading && sortedEntries.isEmpty()) {
@@ -227,6 +286,16 @@ fun EntryListPage(
             }
         }
     }
+}
+
+private enum class EntryMoodFilter(
+    val label: String,
+    val matches: (Int?) -> Boolean
+) {
+    NONE("No filter", { true }),
+    HIGH("Mood ≥ 8", { rating -> rating != null && rating >= 8 }),
+    MID("Mood 5–7", { rating -> rating != null && rating in 5..7 }),
+    LOW("Mood ≤ 4", { rating -> rating != null && rating <= 4 });
 }
 
 @Composable

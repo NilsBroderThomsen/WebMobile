@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/entriesSortGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/entriesSortNewest"
+            android:title="@string/entries_sort_newest" />
+        <item
+            android:id="@+id/entriesSortOldest"
+            android:title="@string/entries_sort_oldest" />
+    </group>
+
+    <item android:title="@string/entries_filter_section" />
+
+    <group
+        android:id="@+id/entriesFilterGroup"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/entriesFilterNone"
+            android:title="@string/entries_filter_none" />
+        <item
+            android:id="@+id/entriesFilterHigh"
+            android:title="@string/entries_filter_high" />
+        <item
+            android:id="@+id/entriesFilterMid"
+            android:title="@string/entries_filter_mid" />
+        <item
+            android:id="@+id/entriesFilterLow"
+            android:title="@string/entries_filter_low" />
+    </group>
+</menu>
