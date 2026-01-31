@@ -13,15 +13,15 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-import model.LoginInput
-import model.LoginModel
-import model.LoginResult
-import model.LoginValidation
+import viewmodel.LoginInput
+import viewmodel.LoginViewModel
+import viewmodel.LoginResult
+import viewmodel.LoginValidation
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
     private val client = MoodTrackerClientProvider.client
     private val session = MoodTrackerClientProvider.session
-    private val loginModel by lazy { LoginModel(client) }
+    private val loginViewModel by lazy { LoginViewModel(client) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -86,7 +86,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             loginButton.isEnabled = false
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    when (val result = loginModel.login(input)) {
+                    when (val result = loginViewModel.login(input)) {
                         is LoginResult.ValidationError -> {
                             applyValidation(result.validation)
                         }

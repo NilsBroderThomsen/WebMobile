@@ -9,14 +9,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import model.UpdateEntryInput
-import model.UpdateEntryModel
-import model.UpdateEntryResult
-import model.UpdateEntryValidation
+import viewmodel.UpdateEntryInput
+import viewmodel.UpdateEntryViewModel
+import viewmodel.UpdateEntryResult
+import viewmodel.UpdateEntryValidation
 
 class UpdateEntryActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
-    private val updateEntryModel by lazy { UpdateEntryModel(client) }
+    private val updateEntryViewModel by lazy { UpdateEntryViewModel(client) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +84,7 @@ class UpdateEntryActivity : AppCompatActivity() {
             saveButton.isEnabled = false
             lifecycleScope.launch {
                 try {
-                    when (val result = updateEntryModel.updateEntry(entryId, input)) {
+                    when (val result = updateEntryViewModel.updateEntry(entryId, input)) {
                         is UpdateEntryResult.Success -> {
                             Toast.makeText(
                                 this@UpdateEntryActivity,

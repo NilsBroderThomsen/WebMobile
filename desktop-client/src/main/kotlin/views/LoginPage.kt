@@ -21,10 +21,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import kotlinx.coroutines.launch
-import model.LoginInput
-import model.LoginModel
-import model.LoginResult
-import model.LoginValidation
+import viewmodel.LoginInput
+import viewmodel.LoginViewModel
+import viewmodel.LoginResult
+import viewmodel.LoginValidation
 
 @Composable
 fun LoginPage(
@@ -32,7 +32,7 @@ fun LoginPage(
     onNavigateToEntries: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val loginModel = remember(client) { LoginModel(client) }
+    val loginViewModel = remember(client) { LoginViewModel(client) }
     val scope = rememberCoroutineScope()
 
     var username by remember { mutableStateOf("") }
@@ -106,7 +106,7 @@ fun LoginPage(
                 scope.launch {
                     try {
                         when (
-                            val result = loginModel.login(
+                            val result = loginViewModel.login(
                                 LoginInput(
                                     username = username,
                                     password = password

@@ -13,8 +13,4 @@ class AuthSession(private val client: MoodTrackerClient) {
     fun logout() {
         client.logout()
     }
-
-    fun reset() {
-        client.logout()
-    }
 }

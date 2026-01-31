@@ -11,9 +11,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-import model.CreateEntryInput
-import model.CreateEntryModel
-import model.CreateEntryResult
+import viewmodel.CreateEntryInput
+import viewmodel.CreateEntryViewModel
+import viewmodel.CreateEntryResult
+import viewmodel.CreateEntryValidation
 
 class CreateEntryActivity : AppCompatActivity() {
     private val client = MoodTrackerClientProvider.client
@@ -41,7 +42,7 @@ class CreateEntryActivity : AppCompatActivity() {
         val backButton = findViewById<Button>(R.id.createEntryBack)
         val saveButton = findViewById<Button>(R.id.createEntrySave)
 
-        val createEntryModel = CreateEntryModel(client)
+        val createEntryViewmodel = CreateEntryViewModel(client)
 
         fun clearErrors() {
             titleLayout.error = null
@@ -49,7 +50,7 @@ class CreateEntryActivity : AppCompatActivity() {
             moodLayout.error = null
         }
 
-        fun applyValidationErrors(validation: model.CreateEntryValidation) {
+        fun applyValidationErrors(validation: CreateEntryValidation) {
             titleLayout.error = when {
                 validation.missingTitle -> getString(R.string.error_required_field)
                 else -> null
@@ -85,7 +86,7 @@ class CreateEntryActivity : AppCompatActivity() {
             saveButton.isEnabled = false
             lifecycleScope.launch {
                 try {
-                    when (val result = createEntryModel.createEntry(userId, input)) {
+                    when (val result = createEntryViewmodel.createEntry(userId, input)) {
                         is CreateEntryResult.Success -> {
                             Toast.makeText(
                                 this@CreateEntryActivity,

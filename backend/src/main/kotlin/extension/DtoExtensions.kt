@@ -1,7 +1,6 @@
 package extension
 
 import dto.EntryDto
-import dto.EntryExportDto
 import dto.UserDto
 import model.Entry
 import model.User
@@ -14,15 +13,6 @@ fun Entry.toDto(): EntryDto = EntryDto(
     moodRating = this.moodRating,
     createdAt = this.createdAt.toString(),
     updatedAt = this.updatedAt.toString()
-)
-
-fun Entry.toExportDto(): EntryExportDto = EntryExportDto(
-    id = this.id.value,
-    title = this.title,
-    content = this.content,
-    moodRating = this.moodRating,
-    createdAt = this.createdAt.toString(),
-    updatedAt = this.updatedAt?.toString()
 )
 
 fun User.toDto(): UserDto = UserDto(

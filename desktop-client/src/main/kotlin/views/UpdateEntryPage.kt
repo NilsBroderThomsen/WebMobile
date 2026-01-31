@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import dto.EntryDto
 import kotlinx.coroutines.launch
-import model.UpdateEntryInput
-import model.UpdateEntryModel
-import model.UpdateEntryResult
-import model.UpdateEntryValidation
+import viewmodel.UpdateEntryInput
+import viewmodel.UpdateEntryViewModel
+import viewmodel.UpdateEntryResult
+import viewmodel.UpdateEntryValidation
 
 @Composable
 fun UpdateEntryPage(
@@ -53,7 +53,7 @@ fun UpdateEntryPage(
     var isLoading by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-    val updateEntryModel = remember(client) { UpdateEntryModel(client) }
+    val updateEntryViewModel = remember(client) { UpdateEntryViewModel(client) }
 
     fun clearErrors() {
         titleError = null
@@ -211,7 +211,7 @@ fun UpdateEntryPage(
                                 isLoading = true
                                 scope.launch {
                                     try {
-                                        when (val result = updateEntryModel.updateEntry(entryDto.id, input)) {
+                                        when (val result = updateEntryViewModel.updateEntry(entryDto.id, input)) {
                                             is UpdateEntryResult.Success -> {
                                                 statusMessage = "Entry updated successfully."
                                                 onNavigateBack()

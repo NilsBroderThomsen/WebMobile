@@ -13,15 +13,15 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.launch
-import model.RegisterInput
-import model.RegisterModel
-import model.RegisterResult
-import model.RegisterValidation
+import viewmodel.RegisterInput
+import viewmodel.RegisterViewModel
+import viewmodel.RegisterResult
+import viewmodel.RegisterValidation
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
     private val client = MoodTrackerClientProvider.client
     private val session = MoodTrackerClientProvider.session
-    private val registerModel by lazy { RegisterModel(client) }
+    private val registerViewModel by lazy { RegisterViewModel(client) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -103,7 +103,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             registerButton.isEnabled = false
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    when (val result = registerModel.register(input)) {
+                    when (val result = registerViewModel.register(input)) {
                         is RegisterResult.ValidationError -> {
                             applyValidation(result.validation)
                         }

@@ -21,10 +21,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import kotlinx.coroutines.launch
-import model.RegisterInput
-import model.RegisterModel
-import model.RegisterResult
-import model.RegisterValidation
+import viewmodel.RegisterInput
+import viewmodel.RegisterViewModel
+import viewmodel.RegisterResult
+import viewmodel.RegisterValidation
 
 @Composable
 fun RegisterPage(
@@ -44,7 +44,7 @@ fun RegisterPage(
     var isLoading by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-    val registerModel = remember(client) { RegisterModel(client) }
+    val registerViewModel = remember(client) { RegisterViewModel(client) }
 
     fun clearErrors() {
         usernameError = null
@@ -132,7 +132,7 @@ fun RegisterPage(
                 scope.launch {
                     try {
                         when (
-                            val result = registerModel.register(
+                            val result = registerViewModel.register(
                                 RegisterInput(
                                     username = username,
                                     email = email,

@@ -28,10 +28,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import api.MoodTrackerClient
 import kotlinx.coroutines.launch
-import model.CreateEntryInput
-import model.CreateEntryModel
-import model.CreateEntryResult
-import model.CreateEntryValidation
+import viewmodel.CreateEntryInput
+import viewmodel.CreateEntryViewModel
+import viewmodel.CreateEntryResult
+import viewmodel.CreateEntryValidation
 
 @Composable
 fun CreateEntryPage(
@@ -52,7 +52,7 @@ fun CreateEntryPage(
     var isLoading by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-    val createEntryModel = remember(client) { CreateEntryModel(client) }
+    val createEntryViewmodel = remember(client) { CreateEntryViewModel(client) }
 
     fun clearErrors() {
         titleError = null
@@ -210,7 +210,7 @@ fun CreateEntryPage(
                                 isLoading = true
                                 scope.launch {
                                     try {
-                                        when (val result = createEntryModel.createEntry(userId, input)) {
+                                        when (val result = createEntryViewmodel.createEntry(userId, input)) {
                                             is CreateEntryResult.Success -> {
                                                 statusMessage = "Entry created."
                                                 title = ""
