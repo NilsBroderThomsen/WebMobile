@@ -3,6 +3,7 @@ package de.hsflensburg.moodtracker.android
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -11,6 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val themeToggleButton = findViewById<MaterialButton>(R.id.themeToggleButton)
         val tabLayout = findViewById<TabLayout>(R.id.authTabs)
         val viewPager = findViewById<ViewPager2>(R.id.authPager)
 
@@ -25,5 +27,11 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }.attach()
+
+        ThemeToggleHelper.updateButtonText(themeToggleButton, this)
+        themeToggleButton.setOnClickListener {
+            ThemeToggleHelper.toggle(this)
+            ThemeToggleHelper.updateButtonText(themeToggleButton, this)
+        }
     }
 }

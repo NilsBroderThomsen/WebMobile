@@ -34,6 +34,8 @@
     <string name="entries_sort_oldest">Sort: oldest first</string>
     <string name="entries_create_button">Create new entry</string>
     <string name="entries_logout_button">Logout</string>
+    <string name="action_dark_mode">Dark mode</string>
+    <string name="action_light_mode">Light mode</string>
     <string name="entry_detail_content_label">Content</string>
     <string name="entry_detail_meta_label">Details</string>
     <string name="entry_detail_back">Back</string>

@@ -1,5 +1,16 @@
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -23,6 +34,7 @@ fun main() = application {
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Landing) }
+    var isDarkMode by remember { mutableStateOf(false) }
     val client = remember { MoodTrackerClient(AppConfig.BASE_URL) }
     val session = remember(client) { AuthSession(client) }
     DisposableEffect(Unit) {
@@ -30,98 +42,112 @@ fun App() {
             client.close()
         }
     }
-    MaterialTheme {
-        when (currentScreen) {
-            Screen.Landing -> {
-                LandingPage(
-                    client = client,
-                    onLoginSuccess = {
-                        currentScreen = Screen.Entries
-                    },
-                    onRegisterSuccess = {
-                        currentScreen = Screen.Entries
-                    }
-                )
-            }
-            Screen.Home -> {
-                val userId = session.authenticatedUserId
-                if (userId == null) {
-                    LaunchedEffect(Unit) {
-                        currentScreen = Screen.Landing
-                    }
-                } else {
-                    HomePage(
-                        onNavigateToEntries = {
-                            currentScreen = Screen.Entries
-                        },
-                        onNavigateToCreateEntry = {
-                            currentScreen = Screen.CreateEntry
-                        },
-                        onLogout = {
-                            session.logout()
-                            currentScreen = Screen.Landing
-                        }
-                    )
+    MaterialTheme(colorScheme = if (isDarkMode) darkColorScheme() else lightColorScheme()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { isDarkMode = !isDarkMode }) {
+                    androidx.compose.material3.Text(if (isDarkMode) "Light mode" else "Dark mode")
                 }
             }
-            Screen.Entries -> {
-                val userId = session.authenticatedUserId
-                if (userId == null) {
-                    LaunchedEffect(Unit) {
-                        currentScreen = Screen.Landing
+            Box(modifier = Modifier.weight(1f)) {
+                when (currentScreen) {
+                    Screen.Landing -> {
+                        LandingPage(
+                            client = client,
+                            onLoginSuccess = {
+                                currentScreen = Screen.Entries
+                            },
+                            onRegisterSuccess = {
+                                currentScreen = Screen.Entries
+                            }
+                        )
                     }
-                } else {
-                    EntryListPage(
-                        client = client,
-                        userId = userId,
-                        onNavigateBack = {
-                            currentScreen = Screen.Home
-                        },
-                        onCreateEntry = {
-                            currentScreen = Screen.CreateEntry
-                        },
-                        onUpdateEntry = { entryDto ->
-                            currentScreen = Screen.UpdateEntry(entryDto)
-                        },
-                        onEntrySelected = { entryId ->
-                            currentScreen = Screen.EntryDetails(entryId)
+                    Screen.Home -> {
+                        val userId = session.authenticatedUserId
+                        if (userId == null) {
+                            LaunchedEffect(Unit) {
+                                currentScreen = Screen.Landing
+                            }
+                        } else {
+                            HomePage(
+                                onNavigateToEntries = {
+                                    currentScreen = Screen.Entries
+                                },
+                                onNavigateToCreateEntry = {
+                                    currentScreen = Screen.CreateEntry
+                                },
+                                onLogout = {
+                                    session.logout()
+                                    currentScreen = Screen.Landing
+                                }
+                            )
                         }
-                    )
-                }
-            }
-            Screen.CreateEntry -> {
-                val userId = session.authenticatedUserId
-                if (userId == null) {
-                    LaunchedEffect(Unit) {
-                        currentScreen = Screen.Landing
                     }
-                } else {
-                    CreateEntryPage(
-                        client = client,
-                        userId = userId,
-                        onNavigateBack = {
-                            currentScreen = Screen.Entries
+                    Screen.Entries -> {
+                        val userId = session.authenticatedUserId
+                        if (userId == null) {
+                            LaunchedEffect(Unit) {
+                                currentScreen = Screen.Landing
+                            }
+                        } else {
+                            EntryListPage(
+                                client = client,
+                                userId = userId,
+                                onNavigateBack = {
+                                    currentScreen = Screen.Home
+                                },
+                                onCreateEntry = {
+                                    currentScreen = Screen.CreateEntry
+                                },
+                                onUpdateEntry = { entryDto ->
+                                    currentScreen = Screen.UpdateEntry(entryDto)
+                                },
+                                onEntrySelected = { entryId ->
+                                    currentScreen = Screen.EntryDetails(entryId)
+                                }
+                            )
                         }
-                    )
+                    }
+                    Screen.CreateEntry -> {
+                        val userId = session.authenticatedUserId
+                        if (userId == null) {
+                            LaunchedEffect(Unit) {
+                                currentScreen = Screen.Landing
+                            }
+                        } else {
+                            CreateEntryPage(
+                                client = client,
+                                userId = userId,
+                                onNavigateBack = {
+                                    currentScreen = Screen.Entries
+                                }
+                            )
+                        }
+                    }
+                    is Screen.UpdateEntry -> {
+                        UpdateEntryPage(
+                            client = client,
+                            entryDto = (currentScreen as Screen.UpdateEntry).entryDto, // Replace with actual entry ID
+                            onNavigateBack = {
+                                currentScreen = Screen.Entries
+                            }
+                        )
+                    }
+                    is Screen.EntryDetails -> {
+                        EntryDetailsPage(
+                            client = client,
+                            entryId = (currentScreen as Screen.EntryDetails).entryId,
+                            onNavigateBack = {
+                                currentScreen = Screen.Entries
+                            }
+                        )
+                    }
                 }
-            }
-            is Screen.UpdateEntry -> {
-                UpdateEntryPage(
-                    client = client,
-                    entryDto = (currentScreen as Screen.UpdateEntry).entryDto, // Replace with actual entry ID
-                    onNavigateBack = {
-                        currentScreen = Screen.Entries
-                    }
-                )
-            }
-            is Screen.EntryDetails -> {
-                EntryDetailsPage(
-                    client = client,
-                    entryId = (currentScreen as Screen.EntryDetails).entryId,
-                    onNavigateBack = {
-                        currentScreen = Screen.Entries
-                    }
-                )
             }
         }
     }
