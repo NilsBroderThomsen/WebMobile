@@ -108,7 +108,8 @@ fun EntryListPage(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(onClick = onNavigateBack) {
                     Text("Back")
@@ -120,7 +121,10 @@ fun EntryListPage(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     label = { Text("Search entries") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 48.dp),
+                    singleLine = true
                 )
                 FilledTonalButton(
                     onClick = {
