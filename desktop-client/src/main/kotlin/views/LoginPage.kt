@@ -51,11 +51,11 @@ fun LoginPage(
 
     fun applyValidation(validation: LoginValidation) {
         usernameError = when {
-            validation.missingUsername -> "Username erforderlich"
+            validation.missingUsername -> "Username is required"
             else -> null
         }
         passwordError = when {
-            validation.missingPassword -> "Passwort erforderlich"
+            validation.missingPassword -> "Password is required"
             else -> null
         }
     }
@@ -118,12 +118,12 @@ fun LoginPage(
                             }
 
                             is LoginResult.Success -> {
-                                statusMessage = "Login erfolgreich. Willkommen, ${username.trim()}!"
+                                statusMessage = "Login successful. Welcome, ${username.trim()}!"
                                 onNavigateToEntries()
                             }
 
                             is LoginResult.Failure -> {
-                                statusMessage = result.message ?: "Login fehlgeschlagen."
+                                statusMessage = result.message ?: "Login failed."
                             }
                         }
                     } finally {

@@ -70,7 +70,7 @@ class RegisterModel(private val client: MoodTrackerClient) {
             )
             RegisterResult.Success(user = user, loginResponse = loginResponse)
         } catch (ex: Exception) {
-            RegisterResult.Failure(ex.message ?: "Registrierung fehlgeschlagen.")
+            RegisterResult.Failure(ex.message ?: "Registration failed.")
         }
     }
 }

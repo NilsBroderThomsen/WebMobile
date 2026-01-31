@@ -45,7 +45,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         val bodyText = response.bodyAsText()
         val errorMessage = runCatching {
             json.decodeFromString<ErrorResponse>(bodyText).message
-        }.getOrNull() ?: "Registrierung fehlgeschlagen (${response.status.value})"
+        }.getOrNull() ?: "Registration failed (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
 
@@ -65,7 +65,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         val bodyText = response.bodyAsText()
         val errorMessage = runCatching {
             json.decodeFromString<ErrorResponse>(bodyText).message
-        }.getOrNull() ?: "Login fehlgeschlagen (${response.status.value})"
+        }.getOrNull() ?: "Login failed (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
 
@@ -75,10 +75,10 @@ class MoodTrackerClient(private val baseUrl: String) {
     }
 
     suspend fun getEntries(userId: Long): List<EntryDto> {
-        delay(1250)     // Simuliere Netzwerkverzögerung
+        delay(1250)     // Simulate network latency
 
         if (authToken == null) {
-            throw IllegalStateException("Login erforderlich.")
+            throw IllegalStateException("Login required.")
         }
         val url = "$baseUrl/api/users/$userId/entries"
         try {
@@ -92,19 +92,19 @@ class MoodTrackerClient(private val baseUrl: String) {
             val bodyText = response.bodyAsText()
             val errorMessage = runCatching {
                 json.decodeFromString<ErrorResponse>(bodyText).message
-            }.getOrNull() ?: "Abrufen der Einträge fehlgeschlagen (${response.status.value})"
+            }.getOrNull() ?: "Failed to fetch entries (${response.status.value})"
 
             throw IllegalStateException(errorMessage)
         } catch (ex: Exception) {
             if (ex is IllegalStateException) {
                 throw ex
             }
-            throw IllegalStateException("Keine Verbindung zum Server möglich.")
+            throw IllegalStateException("Unable to connect to the server.")
         }
     }
 
     suspend fun getEntryDetails(entryId: Long): EntryDto {
-        delay(1250)     // Simuliere Netzwerkverzögerung
+        delay(1250)     // Simulate network latency
 
         val url = "$baseUrl/api/entries/$entryId"
         try {
@@ -116,14 +116,14 @@ class MoodTrackerClient(private val baseUrl: String) {
             val bodyText = response.bodyAsText()
             val errorMessage = runCatching {
                 json.decodeFromString<ErrorResponse>(bodyText).message
-            }.getOrNull() ?: "Abrufen der Eintragsdetails fehlgeschlagen (${response.status.value})"
+            }.getOrNull() ?: "Failed to fetch entry details (${response.status.value})"
 
             throw IllegalStateException(errorMessage)
         } catch (ex: Exception) {
             if (ex is IllegalStateException) {
                 throw ex
             }
-            throw IllegalStateException("Keine Verbindung zum Server möglich.")
+            throw IllegalStateException("Unable to connect to the server.")
         }
     }
 
@@ -140,7 +140,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         val bodyText = response.bodyAsText()
         val errorMessage = runCatching {
             json.decodeFromString<ErrorResponse>(bodyText).message
-        }.getOrNull() ?: "Registrierung fehlgeschlagen (${response.status.value})"
+        }.getOrNull() ?: "Failed to create entry (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
 
@@ -157,7 +157,7 @@ class MoodTrackerClient(private val baseUrl: String) {
         val bodyText = response.bodyAsText()
         val errorMessage = runCatching {
             json.decodeFromString<ErrorResponse>(bodyText).message
-        }.getOrNull() ?: "Aktualisierung des Eintrags fehlgeschlagen (${response.status.value})"
+        }.getOrNull() ?: "Failed to update entry (${response.status.value})"
         throw IllegalStateException(errorMessage)
     }
 
@@ -172,13 +172,13 @@ class MoodTrackerClient(private val baseUrl: String) {
             val bodyText = response.bodyAsText()
             val errorMessage = runCatching {
                 json.decodeFromString<ErrorResponse>(bodyText).message
-            }.getOrNull() ?: "Löschen des Eintrags fehlgeschlagen (${response.status.value})"
+            }.getOrNull() ?: "Failed to delete entry (${response.status.value})"
             throw IllegalStateException(errorMessage)
         } catch (ex: Exception) {
             if (ex is IllegalStateException) {
                 throw ex
             }
-            throw IllegalStateException("Keine Verbindung zum Server möglich.")
+            throw IllegalStateException("Unable to connect to the server.")
         }
     }
 

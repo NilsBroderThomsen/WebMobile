@@ -54,20 +54,20 @@ fun RegisterPage(
 
     fun applyValidation(validation: RegisterValidation) {
         usernameError = when {
-            validation.missingUsername -> "Username erforderlich"
-            validation.invalidUsername -> "Username zu kurz oder ungültig"
+            validation.missingUsername -> "Username is required"
+            validation.invalidUsername -> "Username is too short or invalid"
             else -> null
         }
 
         emailError = when {
-            validation.missingEmail -> "E-Mail erforderlich"
-            validation.invalidEmail -> "Ungültige E-Mail-Adresse"
+            validation.missingEmail -> "Email is required"
+            validation.invalidEmail -> "Invalid email address"
             else -> null
         }
 
         passwordError = when {
-            validation.missingPassword -> "Passwort erforderlich"
-            validation.invalidPassword -> "Passwort muss mindestens 8 Zeichen haben"
+            validation.missingPassword -> "Password is required"
+            validation.invalidPassword -> "Password must be at least 8 characters"
             else -> null
         }
     }
@@ -146,13 +146,13 @@ fun RegisterPage(
 
                             is RegisterResult.Success -> {
                                 statusMessage =
-                                    "Registrierung erfolgreich. Willkommen, ${result.user.username}!"
+                                    "Registration successful. Welcome, ${result.user.username}!"
                                 onNavigateToEntries()
                             }
 
                             is RegisterResult.Failure -> {
                                 statusMessage =
-                                    result.message ?: "Registrierung fehlgeschlagen."
+                                    result.message ?: "Registration failed."
                             }
                         }
                     } finally {

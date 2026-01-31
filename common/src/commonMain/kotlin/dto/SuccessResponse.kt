@@ -2,7 +2,7 @@ package dto
 
 import kotlinx.serialization.*
 
-// DTO für Success-Responses
+// DTO for success responses
 @Serializable
 data class SuccessResponse(
         val message: String,

@@ -3,7 +3,7 @@ package dto
 import kotlinx.serialization.*
 import kotlin.time.Clock
 
-// DTO für Error-Responses
+// DTO for error responses
 @Serializable
 data class ErrorResponse(
     val error: String,

@@ -212,7 +212,7 @@ fun CreateEntryPage(
                                     try {
                                         when (val result = createEntryModel.createEntry(userId, input)) {
                                             is CreateEntryResult.Success -> {
-                                                statusMessage = "Eintrag wurde erstellt."
+                                                statusMessage = "Entry created."
                                                 title = ""
                                                 content = ""
                                                 moodRatingInput = ""
@@ -221,12 +221,12 @@ fun CreateEntryPage(
 
                                             is CreateEntryResult.ValidationError -> {
                                                 applyValidation(result.validation)
-                                                generalError = "Bitte Eingaben prüfen."
+                                                generalError = "Please check your input."
                                             }
 
                                             is CreateEntryResult.Failure -> {
                                                 generalError =
-                                                    result.message ?: "Eintrag konnte nicht erstellt werden."
+                                                    result.message ?: "Unable to create entry."
                                             }
                                         }
                                     } finally {

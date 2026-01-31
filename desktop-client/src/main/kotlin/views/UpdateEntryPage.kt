@@ -213,18 +213,18 @@ fun UpdateEntryPage(
                                     try {
                                         when (val result = updateEntryModel.updateEntry(entryDto.id, input)) {
                                             is UpdateEntryResult.Success -> {
-                                                statusMessage = "Eintrag erfolgreich aktualisiert."
+                                                statusMessage = "Entry updated successfully."
                                                 onNavigateBack()
                                             }
 
                                             is UpdateEntryResult.ValidationError -> {
                                                 applyValidation(result.validation)
-                                                generalError = "Bitte Eingaben prüfen."
+                                                generalError = "Please check your input."
                                             }
 
                                             is UpdateEntryResult.Failure -> {
                                                 generalError =
-                                                    result.message ?: "Fehler beim Aktualisieren des Eintrags."
+                                                    result.message ?: "Unable to update entry."
                                             }
                                         }
                                     } finally {

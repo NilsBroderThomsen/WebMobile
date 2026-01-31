@@ -90,7 +90,7 @@ class CreateEntryModel(private val client: MoodTrackerClient) {
                     )
                     CreateEntryResult.Success(entry)
                 } catch (ex: Exception) {
-                    CreateEntryResult.Failure(ex.message ?: "Eintrag konnte nicht erstellt werden.")
+                    CreateEntryResult.Failure(ex.message ?: "Unable to create entry.")
                 }
         }
     }

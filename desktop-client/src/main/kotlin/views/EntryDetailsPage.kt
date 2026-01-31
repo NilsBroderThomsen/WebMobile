@@ -50,7 +50,7 @@ fun EntryDetailsPage(
         try {
             entryDetails = client.getEntryDetails(entryId)
         } catch (ex: Exception) {
-            errorMessage = ex.message ?: "Eintrag konnte nicht geladen werden."
+            errorMessage = ex.message ?: "Unable to load entry."
         } finally {
             isLoading = false
         }
