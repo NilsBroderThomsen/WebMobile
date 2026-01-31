@@ -24,13 +24,11 @@ class EntryDetailActivity : AppCompatActivity() {
     private lateinit var moodView: TextView
     private lateinit var createdAtView: TextView
     private lateinit var updatedAtView: TextView
-    private lateinit var tagsView: TextView
     private lateinit var titleSkeleton: View
     private lateinit var moodSkeleton: View
     private lateinit var contentSkeleton: View
     private lateinit var createdAtSkeleton: View
     private lateinit var updatedAtSkeleton: View
-    private lateinit var tagsSkeleton: View
     private val skeletonViews = mutableListOf<View>()
     private var skeletonAnimator: ValueAnimator? = null
 
@@ -44,7 +42,6 @@ class EntryDetailActivity : AppCompatActivity() {
         val createdAt = intent.getStringExtra(EXTRA_CREATED_AT)
         val updatedAt = intent.getStringExtra(EXTRA_UPDATED_AT)
         val moodRating = intent.getIntExtra(EXTRA_MOOD_RATING, MOOD_UNKNOWN)
-        val tags = intent.getStringArrayListExtra(EXTRA_TAGS)
 
         if (entryId == INVALID_ID || title.isNullOrBlank() || content.isNullOrBlank() || createdAt.isNullOrBlank()) {
             Toast.makeText(this, getString(R.string.entry_detail_missing), Toast.LENGTH_LONG).show()
@@ -57,13 +54,11 @@ class EntryDetailActivity : AppCompatActivity() {
         moodView = findViewById(R.id.entryDetailMood)
         createdAtView = findViewById(R.id.entryDetailCreatedAt)
         updatedAtView = findViewById(R.id.entryDetailUpdatedAt)
-        tagsView = findViewById(R.id.entryDetailTags)
         titleSkeleton = findViewById(R.id.entryDetailTitleSkeleton)
         moodSkeleton = findViewById(R.id.entryDetailMoodSkeleton)
         contentSkeleton = findViewById(R.id.entryDetailContentSkeleton)
         createdAtSkeleton = findViewById(R.id.entryDetailCreatedAtSkeleton)
         updatedAtSkeleton = findViewById(R.id.entryDetailUpdatedAtSkeleton)
-        tagsSkeleton = findViewById(R.id.entryDetailTagsSkeleton)
         skeletonViews.clear()
         skeletonViews.addAll(
             listOf(
@@ -71,8 +66,7 @@ class EntryDetailActivity : AppCompatActivity() {
                 moodSkeleton,
                 contentSkeleton,
                 createdAtSkeleton,
-                updatedAtSkeleton,
-                tagsSkeleton
+                updatedAtSkeleton
             )
         )
 
@@ -134,11 +128,6 @@ class EntryDetailActivity : AppCompatActivity() {
         createdAtView.text = createdAt.toDisplayTimestamp()
         updatedAtView.text = updatedAt?.toDisplayTimestamp()
             ?: getString(R.string.entry_detail_not_updated)
-        tagsView.text = if (tags.isNullOrEmpty()) {
-            getString(R.string.entry_detail_no_tags)
-        } else {
-            tags.joinToString(", ")
-        }
     }
 
     override fun onResume() {
@@ -163,11 +152,6 @@ class EntryDetailActivity : AppCompatActivity() {
                 )
                 createdAtView.text = entry.createdAt.toDisplayTimestamp()
                 updatedAtView.text = entry.updatedAt?.toDisplayTimestamp() ?: getString(R.string.entry_detail_not_updated)
-                tagsView.text = if (entry.tags.isEmpty()) {
-                    getString(R.string.entry_detail_no_tags)
-                } else {
-                    entry.tags.joinToString(", ")
-                }
             } catch (ex: Exception) {
                 Toast.makeText(
                     this@EntryDetailActivity,
@@ -187,7 +171,6 @@ class EntryDetailActivity : AppCompatActivity() {
             contentView.visibility = View.INVISIBLE
             createdAtView.visibility = View.INVISIBLE
             updatedAtView.visibility = View.INVISIBLE
-            tagsView.visibility = View.INVISIBLE
             skeletonViews.forEach { it.visibility = View.VISIBLE }
             if (skeletonAnimator == null) {
                 skeletonAnimator = ValueAnimator.ofFloat(0.4f, 1f).apply {
@@ -207,7 +190,6 @@ class EntryDetailActivity : AppCompatActivity() {
             contentView.visibility = View.VISIBLE
             createdAtView.visibility = View.VISIBLE
             updatedAtView.visibility = View.VISIBLE
-            tagsView.visibility = View.VISIBLE
             skeletonAnimator?.cancel()
             skeletonViews.forEach {
                 it.visibility = View.GONE
@@ -223,7 +205,6 @@ class EntryDetailActivity : AppCompatActivity() {
         private const val EXTRA_MOOD_RATING = "extra_entry_mood_rating"
         private const val EXTRA_CREATED_AT = "extra_entry_created_at"
         private const val EXTRA_UPDATED_AT = "extra_entry_updated_at"
-        private const val EXTRA_TAGS = "extra_entry_tags"
         private const val MOOD_UNKNOWN = -1
         private const val INVALID_ID = -1L
 
@@ -235,7 +216,6 @@ class EntryDetailActivity : AppCompatActivity() {
                 putExtra(EXTRA_MOOD_RATING, entry.moodRating ?: MOOD_UNKNOWN)
                 putExtra(EXTRA_CREATED_AT, entry.createdAt)
                 putExtra(EXTRA_UPDATED_AT, entry.updatedAt)
-                putStringArrayListExtra(EXTRA_TAGS, ArrayList(entry.tags))
             }
         }
     }

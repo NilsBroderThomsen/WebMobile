@@ -10,6 +10,5 @@ data class EntryDto(
     val content: String,
     val moodRating: Int?,
     val createdAt: String,
-    val updatedAt: String?,
-    val tags: Set<String>
+    val updatedAt: String?
 )

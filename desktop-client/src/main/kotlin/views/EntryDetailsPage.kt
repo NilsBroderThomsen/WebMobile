@@ -157,17 +157,6 @@ fun EntryDetailsPage(
                             )
                         }
 
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "Tags",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            val tagText = entry.tags.joinToString().ifBlank { "—" }
-                            Text(
-                                text = tagText,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
                     }
                 }
             }
