@@ -42,6 +42,7 @@ import api.MoodTrackerClient
 import dto.EntryDto
 import extension.EntrySortOrder
 import extension.filterByMoodRange
+import extension.filterBySearchQuery
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -66,6 +67,7 @@ fun EntryListPage(
     var minMoodInput by remember { mutableStateOf("") }
     var maxMoodInput by remember { mutableStateOf("") }
     var dialogSortAscending by remember { mutableStateOf(true) }
+    var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -114,7 +116,12 @@ fun EntryListPage(
                 Button(onClick = onCreateEntry) {
                     Text("Create new entry")
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search entries") },
+                    modifier = Modifier.weight(1f)
+                )
                 FilledTonalButton(
                     onClick = {
                         minMoodInput = minMoodFilter?.toString().orEmpty()
@@ -136,8 +143,10 @@ fun EntryListPage(
             }
 
             val sortOrder = if (isAscending) EntrySortOrder.ASC else EntrySortOrder.DESC
-            val sortedEntries = remember(entries, sortOrder, minMoodFilter, maxMoodFilter) {
-                entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
+            val sortedEntries = remember(entries, sortOrder, minMoodFilter, maxMoodFilter, searchQuery) {
+                entries
+                    .filterByMoodRange(minMoodFilter, maxMoodFilter)
+                    .filterBySearchQuery(searchQuery)
                     .sortedByCreatedAt(sortOrder)
             }
 

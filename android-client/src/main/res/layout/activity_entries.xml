@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toTopOf="@id/entriesCreateBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/entriesListDivider" />
+        app:layout_constraintTop_toBottomOf="@id/entriesSearchLayout" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/entriesEmpty"
@@ -31,7 +31,7 @@
         app:layout_constraintBottom_toTopOf="@id/entriesCreateBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/entriesListDivider" />
+        app:layout_constraintTop_toBottomOf="@id/entriesSearchLayout" />
 
     <ListView
         android:id="@+id/entriesList"
@@ -44,7 +44,7 @@
         app:layout_constraintBottom_toTopOf="@id/entriesCreateBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/entriesListDivider" />
+        app:layout_constraintTop_toBottomOf="@id/entriesSearchLayout" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/entriesLogoutButton"
@@ -89,6 +89,26 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/entriesToolbarBarrier" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/entriesSearchLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/entriesListDivider">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/entriesSearchInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/entries_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/entriesCreateBar"

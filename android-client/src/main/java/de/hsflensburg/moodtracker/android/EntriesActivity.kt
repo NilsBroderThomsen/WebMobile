@@ -12,6 +12,7 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -19,6 +20,7 @@ import com.google.android.material.textfield.TextInputLayout
 import dto.EntryDto
 import extension.EntrySortOrder
 import extension.filterByMoodRange
+import extension.filterBySearchQuery
 import extension.displayMood
 import extension.sortedByCreatedAt
 import extension.toDisplayTimestamp
@@ -31,11 +33,13 @@ class EntriesActivity : AppCompatActivity() {
     private var isAscending = true
     private var minMoodFilter: Int? = null
     private var maxMoodFilter: Int? = null
+    private var searchQuery: String = ""
     private var userId: Long = -1L
     private lateinit var listView: ListView
     private lateinit var loadingListView: ListView
     private lateinit var emptyView: TextView
     private lateinit var sortToggle: Button
+    private lateinit var searchInput: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +56,7 @@ class EntriesActivity : AppCompatActivity() {
         loadingListView = findViewById(R.id.entriesLoadingContainer)
         emptyView = findViewById(R.id.entriesEmpty)
         sortToggle = findViewById(R.id.entriesSortToggle)
+        searchInput = findViewById(R.id.entriesSearchInput)
         val createButton = findViewById<Button>(R.id.entriesCreateButton)
         val logoutButton = findViewById<Button>(R.id.entriesLogoutButton)
         val skeletonRows = List(6) { it }
@@ -72,6 +77,11 @@ class EntriesActivity : AppCompatActivity() {
 
         sortToggle.setOnClickListener {
             showFilterDialog()
+        }
+
+        searchInput.addTextChangedListener { text ->
+            searchQuery = text?.toString().orEmpty()
+            applyFiltersAndRender()
         }
     }
 
@@ -127,7 +137,9 @@ class EntriesActivity : AppCompatActivity() {
     }
 
     private fun filterEntries(entries: List<EntryDto>): List<EntryDto> {
-        return entries.filterByMoodRange(minMoodFilter, maxMoodFilter)
+        return entries
+            .filterByMoodRange(minMoodFilter, maxMoodFilter)
+            .filterBySearchQuery(searchQuery)
     }
 
     private fun renderEntries(listView: ListView, entries: List<EntryDto>, ascending: Boolean) {
